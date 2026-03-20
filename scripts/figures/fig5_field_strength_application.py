@@ -11,7 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
-from mapper import load_data, save_figure, configure_matplotlib, LMIC_SCORE_COLORS
+from mapper import load_data, save_figure, configure_matplotlib, panel_title, LMIC_SCORE_COLORS
 
 np.random.seed(42)
 
@@ -50,10 +50,8 @@ def create_fig5():
                 ax_a.text(j + 0.5, i + 0.5, "\u00b7", ha="center", va="center",
                           fontsize=16, color="#ddd")
 
-    ax_a.set_title("A.  Application Area by Field Strength", fontsize=12,
-                    fontweight="bold", loc="left", pad=12)
-    ax_a.text(0, 1.03, "Distribution of studies across MRI applications and field strengths",
-              transform=ax_a.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    panel_title(ax_a, "A.  Application Area by Field Strength",
+                "Distribution of studies across MRI applications and field strengths")
     ax_a.set_xlabel("Field Strength", fontsize=10)
     ax_a.set_ylabel("")
     ax_a.tick_params(length=0)
@@ -91,10 +89,8 @@ def create_fig5():
     ax_b.set_yticks(y_pos)
     ax_b.set_yticklabels(app_stats.index, fontsize=9.5, fontweight="bold")
     ax_b.set_xlabel("Number of Papers", fontsize=10)
-    ax_b.set_title("B.  Application Areas by LMIC Relevance", fontsize=12,
-                    fontweight="bold", loc="left", pad=12)
-    ax_b.text(0, 1.03, "Bar color = median LMIC score  |  LF = % mentioning low-field",
-              transform=ax_b.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    panel_title(ax_b, "B.  Application Areas by LMIC Relevance",
+                "Bar color = median LMIC score  |  LF = % mentioning low-field")
     ax_b.spines["top"].set_visible(False)
     ax_b.spines["right"].set_visible(False)
     ax_b.tick_params(length=0)

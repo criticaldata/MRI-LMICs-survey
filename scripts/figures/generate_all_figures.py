@@ -57,6 +57,7 @@ tables = [
     (tables_dir / "table2_ai_architectures.py", "Table 2: AI Architectures"),
     (tables_dir / "table3_performance_metrics.py", "Table 3: Performance Metrics"),
     (tables_dir / "table4_lmic_applicability.py", "Table 4: LMIC Applicability"),
+    (tables_dir / "table_merged_performance_lmic.py", "Table 2 (Main): Merged Performance & LMIC"),
 ]
 
 table_ok = sum(run_script(path, desc) for path, desc in tables)
@@ -67,7 +68,8 @@ print("GENERATING FIGURES")
 print("=" * 70)
 
 figures = [
-    (scripts_dir / "fig1_year_distribution.py", "Figure 1: Year Distribution"),
+    (scripts_dir / "fig1_prisma_flow.py", "Figure 1A: PRISMA Flow Diagram"),
+    (scripts_dir / "fig1_year_distribution.py", "Figure 1B: Year Distribution"),
     (scripts_dir / "fig2_architecture_distribution.py", "Figure 2: Architecture Distribution"),
     (scripts_dir / "fig3_lmic_relevance.py", "Figure 3: LMIC Relevance"),
     (scripts_dir / "fig4_performance_comparison.py", "Figure 4: Performance Comparison"),
