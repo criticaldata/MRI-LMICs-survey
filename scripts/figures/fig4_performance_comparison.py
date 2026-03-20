@@ -13,7 +13,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
-from mapper import load_data, save_figure, configure_matplotlib
+from mapper import load_data, save_figure, configure_matplotlib, panel_title
 
 np.random.seed(42)
 
@@ -69,9 +69,7 @@ def _style_box_panel(ax, data, x_col, y_col, palette, ylabel, title, subtitle):
 
     ax.set_xlabel("")
     ax.set_ylabel(ylabel, fontsize=10)
-    ax.set_title(title, fontsize=12, fontweight="bold", loc="left", pad=12)
-    ax.text(0, 1.04, subtitle,
-            transform=ax.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    panel_title(ax, title, subtitle)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.tick_params(length=0)
@@ -84,8 +82,8 @@ def create_fig4():
     configure_matplotlib()
     df = load_data()
 
-    fig = plt.figure(figsize=(15, 11))
-    gs = gridspec.GridSpec(2, 2, hspace=0.4, wspace=0.3)
+    fig = plt.figure(figsize=(15, 12))
+    gs = gridspec.GridSpec(2, 2, hspace=0.5, wspace=0.3)
 
     # Panel A: PSNR by Architecture
     ax_a = fig.add_subplot(gs[0, 0])
@@ -112,10 +110,8 @@ def create_fig4():
 
     ax_c.set_xlabel("PSNR (dB)", fontsize=10)
     ax_c.set_ylabel("SSIM", fontsize=10)
-    ax_c.set_title("C.  PSNR vs SSIM by Architecture", fontsize=12,
-                    fontweight="bold", loc="left", pad=12)
-    ax_c.text(0, 1.04, f"{len(df_both)} papers reporting both metrics",
-              transform=ax_c.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    panel_title(ax_c, "C.  PSNR vs SSIM by Architecture",
+                f"{len(df_both)} papers reporting both metrics")
     ax_c.legend(fontsize=7.5, loc="lower right", frameon=True,
                 fancybox=True, edgecolor="#ddd")
     ax_c.spines["top"].set_visible(False)

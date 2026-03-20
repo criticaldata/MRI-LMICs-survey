@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from mapper import load_data, save_figure, configure_matplotlib
+from mapper import load_data, save_figure, configure_matplotlib, panel_title
 
 np.random.seed(42)
 
@@ -38,8 +38,8 @@ def create_fig3():
     df = load_data()
     scored = df.dropna(subset=["LMIC_Score"])
 
-    fig = plt.figure(figsize=(15, 11))
-    gs = gridspec.GridSpec(2, 2, hspace=0.35, wspace=0.3)
+    fig = plt.figure(figsize=(15, 12))
+    gs = gridspec.GridSpec(2, 2, hspace=0.45, wspace=0.3)
 
     # ========================
     # Panel A: LMIC Score Distribution (horizontal bars, ranked style)
@@ -69,10 +69,8 @@ def create_fig3():
     ax_a.set_yticks(y_pos)
     ax_a.set_yticklabels(labels, fontsize=9, fontweight="bold")
     ax_a.set_xlabel("Number of Papers", fontsize=10)
-    ax_a.set_title("A.  LMIC Relevance Score Distribution", fontsize=12,
-                    fontweight="bold", loc="left", pad=12)
-    ax_a.text(0, 1.04, f"{len(scored)} papers scored on 1\u20135 scale",
-              transform=ax_a.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    panel_title(ax_a, "A.  LMIC Relevance Score Distribution",
+                f"{len(scored)} papers scored on 1\u20135 scale")
     ax_a.spines["top"].set_visible(False)
     ax_a.spines["right"].set_visible(False)
     ax_a.tick_params(length=0)
@@ -114,10 +112,8 @@ def create_fig3():
     ax_b.set_xticklabels(["1", "2", "3", "4", "5"], fontsize=10, fontweight="bold")
     ax_b.set_xlabel("LMIC Relevance Score", fontsize=10)
     ax_b.set_ylabel("% of Papers", fontsize=10)
-    ax_b.set_title("B.  Accessibility Indicators by LMIC Score", fontsize=12,
-                    fontweight="bold", loc="left", pad=12)
-    ax_b.text(0, 1.04, "Percentage of papers meeting each criterion within score group",
-              transform=ax_b.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    panel_title(ax_b, "B.  Accessibility Indicators by LMIC Score",
+                "Percentage of papers meeting each criterion within score group")
     ax_b.legend(fontsize=8, ncol=2, loc="upper left", frameon=True,
                 fancybox=True, edgecolor="#ddd")
     ax_b.spines["top"].set_visible(False)
@@ -160,10 +156,8 @@ def create_fig3():
     ax_c.set_xticklabels(["1", "2", "3", "4", "5"], fontsize=10, fontweight="bold")
     ax_c.set_xlabel("LMIC Relevance Score", fontsize=10)
     ax_c.set_ylabel("Number of Papers", fontsize=10)
-    ax_c.set_title("C.  Field Strength Distribution by LMIC Score", fontsize=12,
-                    fontweight="bold", loc="left", pad=12)
-    ax_c.text(0, 1.04, "Low-field papers concentrate in high LMIC-relevance scores",
-              transform=ax_c.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    panel_title(ax_c, "C.  Field Strength Distribution by LMIC Score",
+                "Low-field papers concentrate in high LMIC-relevance scores")
     ax_c.legend(fontsize=8, loc="upper left", frameon=True,
                 fancybox=True, edgecolor="#ddd")
     ax_c.spines["top"].set_visible(False)
@@ -201,10 +195,8 @@ def create_fig3():
     ax_d.set_yticklabels(labels, fontsize=9, fontweight="bold")
     ax_d.invert_yaxis()
     ax_d.set_xlabel("Number of Papers", fontsize=10)
-    ax_d.set_title("D.  Translational Readiness Overview", fontsize=12,
-                    fontweight="bold", loc="left", pad=12)
-    ax_d.text(0, 1.04, "Key indicators for LMIC deployment feasibility",
-              transform=ax_d.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    panel_title(ax_d, "D.  Translational Readiness Overview",
+                "Key indicators for LMIC deployment feasibility")
     ax_d.spines["top"].set_visible(False)
     ax_d.spines["right"].set_visible(False)
     ax_d.tick_params(length=0)

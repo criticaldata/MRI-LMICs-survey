@@ -312,6 +312,27 @@ def _parse_first_numeric(value):
 # Figure saving utilities
 # ---------------------------------------------------------------------------
 
+def panel_title(ax, title, subtitle="", fontsize=12):
+    """Set a panel title with an optional gray italic subtitle below it.
+
+    Uses ax.set_title with a two-line string so that tight_layout/bbox_inches
+    accounts for both lines and nothing overlaps.
+    """
+    if subtitle:
+        full = f"{title}\n{subtitle}"
+        ax.set_title(full, fontsize=fontsize, fontweight="bold", loc="left", pad=8,
+                     linespacing=1.6)
+        # Re-style: make subtitle line gray + italic via the Text object
+        title_obj = ax.title
+        # matplotlib doesn't support per-line styling in set_title,
+        # so we place the subtitle as a separate text just below.
+        ax.set_title(title, fontsize=fontsize, fontweight="bold", loc="left", pad=18)
+        ax.text(0, 1.01, subtitle, transform=ax.transAxes,
+                fontsize=fontsize - 2.5, color="#7f8c8d", style="italic", va="top")
+    else:
+        ax.set_title(title, fontsize=fontsize, fontweight="bold", loc="left", pad=8)
+
+
 def save_figure(fig, filename, output_dir=None, dpi=300):
     """Save a matplotlib figure as PNG and PDF."""
     if output_dir is None:

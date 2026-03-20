@@ -11,7 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
-from mapper import load_data, save_figure, configure_matplotlib
+from mapper import load_data, save_figure, configure_matplotlib, panel_title
 
 np.random.seed(42)
 
@@ -66,10 +66,8 @@ def create_fig2():
     ax_a.set_yticklabels(archs, fontsize=10, fontweight="bold")
     ax_a.invert_yaxis()
     ax_a.set_xlabel("Number of Papers", fontsize=10)
-    ax_a.set_title("A.  Architecture Distribution", fontsize=12,
-                    fontweight="bold", loc="left", pad=12)
-    ax_a.text(0, 1.03, f"{len(df)} studies | {len(archs)} architecture types",
-              transform=ax_a.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    panel_title(ax_a, "A.  Architecture Distribution",
+                f"{len(df)} studies | {len(archs)} architecture types")
 
     ax_a.spines["top"].set_visible(False)
     ax_a.spines["right"].set_visible(False)
@@ -107,10 +105,8 @@ def create_fig2():
                 ax_b.text(j + 0.5, i + 0.5, "·", ha="center", va="center",
                           fontsize=14, color="#ddd")
 
-    ax_b.set_title("B.  Architecture by Application Area", fontsize=12,
-                    fontweight="bold", loc="left", pad=12)
-    ax_b.text(0, 1.03, "Cell values show number of papers at each intersection",
-              transform=ax_b.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    panel_title(ax_b, "B.  Architecture by Application Area",
+                "Cell values show number of papers at each intersection")
     ax_b.set_xlabel("Application Area", fontsize=10)
     ax_b.set_ylabel("")
     ax_b.tick_params(axis="both", length=0)
