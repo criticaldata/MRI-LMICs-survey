@@ -1,19 +1,19 @@
 Section,Row,Column,Value
 Dataset Type Counts,,,
-Dataset Type Counts,Public benchmark,Count,20
-Dataset Type Counts,Public benchmark,Percentage,35.7%
-Dataset Type Counts,Mixed,Count,15
-Dataset Type Counts,Mixed,Percentage,26.8%
+Dataset Type Counts,Public benchmark,Count,18
+Dataset Type Counts,Public benchmark,Percentage,35.3%
+Dataset Type Counts,Mixed,Count,14
+Dataset Type Counts,Mixed,Percentage,27.5%
 Dataset Type Counts,Clinical,Count,11
-Dataset Type Counts,Clinical,Percentage,19.6%
+Dataset Type Counts,Clinical,Percentage,21.6%
 Dataset Type Counts,Synthetic,Count,4
-Dataset Type Counts,Synthetic,Percentage,7.1%
-Dataset Type Counts,Other,Count,4
-Dataset Type Counts,Other,Percentage,7.1%
+Dataset Type Counts,Synthetic,Percentage,7.8%
+Dataset Type Counts,Other,Count,2
+Dataset Type Counts,Other,Percentage,3.9%
 Dataset Type Counts,Not reported,Count,1
-Dataset Type Counts,Not reported,Percentage,1.8%
+Dataset Type Counts,Not reported,Percentage,2.0%
 Dataset Type Counts,Private,Count,1
-Dataset Type Counts,Private,Percentage,1.8%
+Dataset Type Counts,Private,Percentage,2.0%
 Dataset x Architecture,,,
 Dataset x Architecture,Clinical,CNN,8
 Dataset x Architecture,Clinical,Diffusion,0
@@ -24,7 +24,7 @@ Dataset x Architecture,Clinical,Other,0
 Dataset x Architecture,Clinical,Transformer,0
 Dataset x Architecture,Clinical,U-Net,0
 Dataset x Architecture,Clinical,All,11
-Dataset x Architecture,Mixed,CNN,8
+Dataset x Architecture,Mixed,CNN,7
 Dataset x Architecture,Mixed,Diffusion,0
 Dataset x Architecture,Mixed,GAN,1
 Dataset x Architecture,Mixed,Hybrid,2
@@ -32,7 +32,7 @@ Dataset x Architecture,Mixed,Non-AI,0
 Dataset x Architecture,Mixed,Other,1
 Dataset x Architecture,Mixed,Transformer,0
 Dataset x Architecture,Mixed,U-Net,3
-Dataset x Architecture,Mixed,All,15
+Dataset x Architecture,Mixed,All,14
 Dataset x Architecture,Not reported,CNN,0
 Dataset x Architecture,Not reported,Diffusion,0
 Dataset x Architecture,Not reported,GAN,0
@@ -47,10 +47,10 @@ Dataset x Architecture,Other,Diffusion,0
 Dataset x Architecture,Other,GAN,0
 Dataset x Architecture,Other,Hybrid,0
 Dataset x Architecture,Other,Non-AI,0
-Dataset x Architecture,Other,Other,3
+Dataset x Architecture,Other,Other,1
 Dataset x Architecture,Other,Transformer,0
 Dataset x Architecture,Other,U-Net,1
-Dataset x Architecture,Other,All,4
+Dataset x Architecture,Other,All,2
 Dataset x Architecture,Private,CNN,0
 Dataset x Architecture,Private,Diffusion,0
 Dataset x Architecture,Private,GAN,0
@@ -63,12 +63,12 @@ Dataset x Architecture,Private,All,1
 Dataset x Architecture,Public benchmark,CNN,7
 Dataset x Architecture,Public benchmark,Diffusion,1
 Dataset x Architecture,Public benchmark,GAN,1
-Dataset x Architecture,Public benchmark,Hybrid,5
+Dataset x Architecture,Public benchmark,Hybrid,3
 Dataset x Architecture,Public benchmark,Non-AI,0
 Dataset x Architecture,Public benchmark,Other,0
 Dataset x Architecture,Public benchmark,Transformer,1
 Dataset x Architecture,Public benchmark,U-Net,5
-Dataset x Architecture,Public benchmark,All,20
+Dataset x Architecture,Public benchmark,All,18
 Dataset x Architecture,Synthetic,CNN,3
 Dataset x Architecture,Synthetic,Diffusion,0
 Dataset x Architecture,Synthetic,GAN,0
@@ -78,15 +78,15 @@ Dataset x Architecture,Synthetic,Other,0
 Dataset x Architecture,Synthetic,Transformer,0
 Dataset x Architecture,Synthetic,U-Net,1
 Dataset x Architecture,Synthetic,All,4
-Dataset x Architecture,All,CNN,26
+Dataset x Architecture,All,CNN,25
 Dataset x Architecture,All,Diffusion,1
 Dataset x Architecture,All,GAN,4
-Dataset x Architecture,All,Hybrid,8
+Dataset x Architecture,All,Hybrid,6
 Dataset x Architecture,All,Non-AI,1
-Dataset x Architecture,All,Other,4
+Dataset x Architecture,All,Other,2
 Dataset x Architecture,All,Transformer,1
 Dataset x Architecture,All,U-Net,11
-Dataset x Architecture,All,All,56
+Dataset x Architecture,All,All,51
 Dataset x Application,,,
 Dataset x Application,Clinical,Abdominal,1
 Dataset x Application,Clinical,Brain,4
@@ -94,7 +94,6 @@ Dataset x Application,Clinical,Cardiac,1
 Dataset x Application,Clinical,Flow,0
 Dataset x Application,Clinical,General,1
 Dataset x Application,Clinical,Musculoskeletal,1
-Dataset x Application,Clinical,Non-MRI,0
 Dataset x Application,Clinical,Other,1
 Dataset x Application,Clinical,Pediatric,1
 Dataset x Application,Clinical,Prostate,1
@@ -105,40 +104,36 @@ Dataset x Application,Mixed,Cardiac,1
 Dataset x Application,Mixed,Flow,2
 Dataset x Application,Mixed,General,3
 Dataset x Application,Mixed,Musculoskeletal,1
-Dataset x Application,Mixed,Non-MRI,1
 Dataset x Application,Mixed,Other,0
 Dataset x Application,Mixed,Pediatric,0
 Dataset x Application,Mixed,Prostate,0
-Dataset x Application,Mixed,All,15
+Dataset x Application,Mixed,All,14
 Dataset x Application,Not reported,Abdominal,0
 Dataset x Application,Not reported,Brain,1
 Dataset x Application,Not reported,Cardiac,0
 Dataset x Application,Not reported,Flow,0
 Dataset x Application,Not reported,General,0
 Dataset x Application,Not reported,Musculoskeletal,0
-Dataset x Application,Not reported,Non-MRI,0
 Dataset x Application,Not reported,Other,0
 Dataset x Application,Not reported,Pediatric,0
 Dataset x Application,Not reported,Prostate,0
 Dataset x Application,Not reported,All,1
 Dataset x Application,Other,Abdominal,0
-Dataset x Application,Other,Brain,1
+Dataset x Application,Other,Brain,0
 Dataset x Application,Other,Cardiac,0
 Dataset x Application,Other,Flow,0
 Dataset x Application,Other,General,0
 Dataset x Application,Other,Musculoskeletal,1
-Dataset x Application,Other,Non-MRI,0
-Dataset x Application,Other,Other,2
+Dataset x Application,Other,Other,1
 Dataset x Application,Other,Pediatric,0
 Dataset x Application,Other,Prostate,0
-Dataset x Application,Other,All,4
+Dataset x Application,Other,All,2
 Dataset x Application,Private,Abdominal,0
 Dataset x Application,Private,Brain,0
 Dataset x Application,Private,Cardiac,0
 Dataset x Application,Private,Flow,0
 Dataset x Application,Private,General,0
 Dataset x Application,Private,Musculoskeletal,1
-Dataset x Application,Private,Non-MRI,0
 Dataset x Application,Private,Other,0
 Dataset x Application,Private,Pediatric,0
 Dataset x Application,Private,Prostate,0
@@ -149,30 +144,27 @@ Dataset x Application,Public benchmark,Cardiac,2
 Dataset x Application,Public benchmark,Flow,0
 Dataset x Application,Public benchmark,General,1
 Dataset x Application,Public benchmark,Musculoskeletal,2
-Dataset x Application,Public benchmark,Non-MRI,2
 Dataset x Application,Public benchmark,Other,0
 Dataset x Application,Public benchmark,Pediatric,0
 Dataset x Application,Public benchmark,Prostate,0
-Dataset x Application,Public benchmark,All,20
+Dataset x Application,Public benchmark,All,18
 Dataset x Application,Synthetic,Abdominal,0
 Dataset x Application,Synthetic,Brain,2
 Dataset x Application,Synthetic,Cardiac,0
 Dataset x Application,Synthetic,Flow,1
 Dataset x Application,Synthetic,General,0
 Dataset x Application,Synthetic,Musculoskeletal,1
-Dataset x Application,Synthetic,Non-MRI,0
 Dataset x Application,Synthetic,Other,0
 Dataset x Application,Synthetic,Pediatric,0
 Dataset x Application,Synthetic,Prostate,0
 Dataset x Application,Synthetic,All,4
 Dataset x Application,All,Abdominal,2
-Dataset x Application,All,Brain,27
+Dataset x Application,All,Brain,26
 Dataset x Application,All,Cardiac,4
 Dataset x Application,All,Flow,3
 Dataset x Application,All,General,5
 Dataset x Application,All,Musculoskeletal,7
-Dataset x Application,All,Non-MRI,3
-Dataset x Application,All,Other,3
+Dataset x Application,All,Other,2
 Dataset x Application,All,Pediatric,1
 Dataset x Application,All,Prostate,1
-Dataset x Application,All,All,56
+Dataset x Application,All,All,51

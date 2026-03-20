@@ -20,7 +20,7 @@ def test_csv_exists():
 
 def test_data_has_56_papers():
     df = load_data()
-    assert len(df) == 56, f"Expected 56 papers, got {len(df)}"
+    assert len(df) == 51, f"Expected 51 papers, got {len(df)}"
 
 
 def test_required_columns():
