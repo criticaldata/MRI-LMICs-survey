@@ -1,0 +1,9 @@
+Architecture Type,n Papers,% of Total,Median PSNR,Median SSIM,Representative Models
+CNN,26,46.4%,35.8 dB (n=10),0.952 (n=8),"DenseNet121, DenseNet161, InceptionResNetV2, InceptionV3, NASNetMobile, Xception; deep learning based AIR Recon DL (DLRecon), a deep convolution neural network; CNN- UNET; sub-pixel CNN (+22 more)"
+U-Net,11,19.6%,30.1 dB (n=4),0.896 (n=5),CNN-based 3D brain tumor segmentation network with U-Net-like encoder-decoder...; Two conventional U-Net variants for segmentation; CNN-based classifiers for d...; 3D U-Net with perceptual loss; A modified U-Net architecture was employed for both stage1 and 2. The archite... (+7 more)
+Hybrid,8,14.3%,29.3 dB (n=2),0.793 (n=1),"Saliency-based deep learning (SbDL) using AlexNet and Inception V3 with DRLBP...; Multi-path convolutional neural network (CNN) with Multi-class Support Vector...; Pre-trained EfficientNet and ResNet50 feature extractors with PLS-based featu...; SRCNN, VDSR, SRGAN, ESRGAN, EDSR (+4 more)"
+GAN,4,7.1%,36.1 dB (n=3),0.920 (n=3),"LowGAN (Stage 1: three 2D pix2pix networks; Stage 2: 3D patch-based U-Net); FA-GAN with Local Fusion Feature Block , Global Feature Fusion Block, channel...; LowGAN (three parallel pix2pix layers with U-Net generator and wavelet-Fourie...; WGAN-GP with modified encoder-decoder generator (originally from CT denoising..."
+Other,4,7.1%,29.3 dB (n=1),0.927 (n=1),U-net
+Diffusion,1,1.8%,24.6 dB (n=1),0.785 (n=1),DDPM with optimized U-Net
+Non-AI,1,1.8%,N/R,N/R,Combines spatial frequencies from two orthogonal ULF images; replaces the inn...
+Transformer,1,1.8%,N/R,N/R,SMIR: Swin Transformer-based MRI Reconstruction. Two modules: (1) Multi-level...

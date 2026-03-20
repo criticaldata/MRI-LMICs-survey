@@ -1,0 +1,62 @@
+Characteristic,n,%
+Total papers included,56,
+Publication year range,2020–2025,
+  2020,6,10.7%
+  2021,12,21.4%
+  2022,10,17.9%
+  2023,15,26.8%
+  2024,11,19.6%
+  2025,2,3.6%
+,,
+MRI Application Area,n,%
+  Brain,27,48.2%
+  Musculoskeletal,7,12.5%
+  General,5,8.9%
+  Cardiac,4,7.1%
+  Flow,3,5.4%
+  Non-MRI,3,5.4%
+  Other,3,5.4%
+  Abdominal,2,3.6%
+  Prostate,1,1.8%
+  Pediatric,1,1.8%
+,,
+Field Strength,n,%
+  Not specified,22,39.3%
+  Standard-field,17,30.4%
+  Low-field,10,17.9%
+  Mixed,6,10.7%
+  High-field,1,1.8%
+,,
+Primary Focus,n,%
+  Pure SR,17,30.4%
+  SR + Denoising,9,16.1%
+  SR + Classification,7,12.5%
+  SR + Segmentation,6,10.7%
+  SR + Diagnosis,5,8.9%
+  Other,5,8.9%
+  SR + Other,4,7.1%
+  Review/Survey,3,5.4%
+,,
+AI Architecture,n,%
+  CNN,26,46.4%
+  U-Net,11,19.6%
+  Hybrid,8,14.3%
+  GAN,4,7.1%
+  Other,4,7.1%
+  Diffusion,1,1.8%
+  Non-AI,1,1.8%
+  Transformer,1,1.8%
+,,
+Dataset Type,n,%
+  Public benchmark,20,35.7%
+  Mixed,15,26.8%
+  Clinical,11,19.6%
+  Synthetic,4,7.1%
+  Other,4,7.1%
+  Not reported,1,1.8%
+  Private,1,1.8%
+,,
+Clinical validation reported,21,37.5%
+Code publicly available,9,16.1%
+Low-field MRI mentioned,15,26.8%
+Resource constraints addressed,41,73.2%

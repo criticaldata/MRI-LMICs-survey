@@ -1,0 +1,7 @@
+Architecture,n (Score 4-5),% of High-LMIC
+CNN,10,52.6%
+U-Net,4,21.1%
+GAN,2,10.5%
+Hybrid,1,5.3%
+Other,1,5.3%
+Non-AI,1,5.3%
