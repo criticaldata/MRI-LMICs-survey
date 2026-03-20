@@ -1,0 +1,26 @@
+[project]
+name = "mri-lmics-survey"
+version = "1.0.0"
+description = "Analysis and figures for: Deep Learning Super-Resolution for MRI — Technical Advances and Translational Potential for Low-Resource Settings"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.2.0",
+    "numpy>=1.26.0",
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+    "openpyxl>=3.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
