@@ -20,8 +20,9 @@ def create_fig5():
     configure_matplotlib()
     df = load_data()
 
-    fig = plt.figure(figsize=(15, 7))
+    fig = plt.figure(figsize=(15, 8))
     gs = gridspec.GridSpec(1, 2, width_ratios=[1.3, 1], wspace=0.3)
+    fig.subplots_adjust(top=0.88)
 
     # ========================
     # Panel A: Application x Field Strength heatmap
