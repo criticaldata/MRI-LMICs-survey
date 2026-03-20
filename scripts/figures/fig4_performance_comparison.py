@@ -1,118 +1,145 @@
 """
 Figure 4: Performance Metrics Comparison
 
-Scatter and box plots comparing PSNR/SSIM across architectures and field strengths.
+Multi-panel figure with clean box+strip plots and scatter:
+  A. PSNR by Architecture
+  B. SSIM by Architecture
+  C. PSNR vs SSIM scatter (colored by architecture)
+  D. PSNR by Field Strength
 """
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import seaborn as sns
-from mapper import load_data, save_figure, configure_matplotlib, ARCHITECTURE_COLORS, FIELD_STRENGTH_COLORS
+from mapper import load_data, save_figure, configure_matplotlib
 
 np.random.seed(42)
+
+PALETTE = {
+    "CNN":         "#2E86AB",
+    "U-Net":       "#A23B72",
+    "Hybrid":      "#F18F01",
+    "GAN":         "#C73E1D",
+    "Other":       "#7f8c8d",
+    "Diffusion":   "#44BBA4",
+    "Non-AI":      "#95a5a6",
+    "Transformer": "#6C5B7B",
+}
+
+FS_PALETTE = {
+    "Low-field":      "#E74C3C",
+    "Standard-field": "#2E86AB",
+    "Mixed":          "#9B59B6",
+    "High-field":     "#2ECC71",
+    "Not specified":  "#BDC3C7",
+}
+
+
+def _style_box_panel(ax, data, x_col, y_col, palette, ylabel, title, subtitle):
+    """Style a box+strip panel consistently."""
+    valid = data.dropna(subset=[y_col])
+    counts = valid[x_col].value_counts()
+    valid_cats = counts[counts >= 2].index.tolist()
+    valid = valid[valid[x_col].isin(valid_cats)]
+
+    if len(valid) == 0:
+        ax.text(0.5, 0.5, "Insufficient data", ha="center", va="center",
+                transform=ax.transAxes, fontsize=11, color="#95a5a6")
+        ax.set_title(title, fontsize=12, fontweight="bold", loc="left", pad=12)
+        return
+
+    order = valid.groupby(x_col)[y_col].median().sort_values(ascending=False).index
+    pal = {k: palette.get(k, "#95a5a6") for k in order}
+
+    bp = sns.boxplot(data=valid, x=x_col, y=y_col, order=order, palette=pal,
+                     ax=ax, width=0.5, fliersize=0, linewidth=1,
+                     boxprops=dict(alpha=0.7), medianprops=dict(color="white", linewidth=2))
+    sns.stripplot(data=valid, x=x_col, y=y_col, order=order,
+                  color="#2C3E50", alpha=0.6, size=6, ax=ax, jitter=0.15,
+                  edgecolor="white", linewidth=0.5)
+
+    # Add n= labels below each box
+    for i, cat in enumerate(order):
+        n = counts.get(cat, 0)
+        med = valid[valid[x_col] == cat][y_col].median()
+        ax.text(i, ax.get_ylim()[0] + (ax.get_ylim()[1] - ax.get_ylim()[0]) * 0.02,
+                f"n={n}", ha="center", fontsize=7, color="#7f8c8d")
+
+    ax.set_xlabel("")
+    ax.set_ylabel(ylabel, fontsize=10)
+    ax.set_title(title, fontsize=12, fontweight="bold", loc="left", pad=12)
+    ax.text(0, 1.04, subtitle,
+            transform=ax.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.tick_params(length=0)
+    ax.grid(axis="y", linestyle="--", alpha=0.2)
+    plt.sca(ax)
+    plt.xticks(rotation=30, ha="right", fontsize=9)
 
 
 def create_fig4():
     configure_matplotlib()
     df = load_data()
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    fig = plt.figure(figsize=(15, 11))
+    gs = gridspec.GridSpec(2, 2, hspace=0.4, wspace=0.3)
 
-    # --- Panel A: PSNR by Architecture (box + strip) ---
-    ax = axes[0, 0]
-    df_psnr = df.dropna(subset=["PSNR_Numeric"])
-    # Only show architectures with >= 2 data points
-    arch_counts = df_psnr["Architecture_Norm"].value_counts()
-    valid_archs = arch_counts[arch_counts >= 2].index.tolist()
-    df_psnr_filt = df_psnr[df_psnr["Architecture_Norm"].isin(valid_archs)]
+    # Panel A: PSNR by Architecture
+    ax_a = fig.add_subplot(gs[0, 0])
+    _style_box_panel(ax_a, df, "Architecture_Norm", "PSNR_Numeric", PALETTE,
+                     "PSNR (dB)", "A.  PSNR by Architecture",
+                     "Higher PSNR indicates better reconstruction quality")
 
-    if len(df_psnr_filt) > 0:
-        order = df_psnr_filt.groupby("Architecture_Norm")["PSNR_Numeric"].median().sort_values(ascending=False).index
-        palette = {a: ARCHITECTURE_COLORS.get(a, "#95a5a6") for a in order}
-        sns.boxplot(data=df_psnr_filt, x="Architecture_Norm", y="PSNR_Numeric",
-                    order=order, palette=palette, ax=ax, width=0.5, fliersize=0)
-        sns.stripplot(data=df_psnr_filt, x="Architecture_Norm", y="PSNR_Numeric",
-                      order=order, color="black", alpha=0.5, size=5, ax=ax, jitter=True)
-    ax.set_xlabel("Architecture")
-    ax.set_ylabel("PSNR (dB)")
-    ax.set_title("A. PSNR by Architecture")
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    plt.sca(ax)
-    plt.xticks(rotation=30, ha="right")
+    # Panel B: SSIM by Architecture
+    ax_b = fig.add_subplot(gs[0, 1])
+    _style_box_panel(ax_b, df, "Architecture_Norm", "SSIM_Numeric", PALETTE,
+                     "SSIM", "B.  SSIM by Architecture",
+                     "SSIM ranges from 0 (no similarity) to 1 (identical)")
 
-    # --- Panel B: SSIM by Architecture ---
-    ax = axes[0, 1]
-    df_ssim = df.dropna(subset=["SSIM_Numeric"])
-    arch_counts_ssim = df_ssim["Architecture_Norm"].value_counts()
-    valid_archs_ssim = arch_counts_ssim[arch_counts_ssim >= 2].index.tolist()
-    df_ssim_filt = df_ssim[df_ssim["Architecture_Norm"].isin(valid_archs_ssim)]
-
-    if len(df_ssim_filt) > 0:
-        order_s = df_ssim_filt.groupby("Architecture_Norm")["SSIM_Numeric"].median().sort_values(ascending=False).index
-        palette_s = {a: ARCHITECTURE_COLORS.get(a, "#95a5a6") for a in order_s}
-        sns.boxplot(data=df_ssim_filt, x="Architecture_Norm", y="SSIM_Numeric",
-                    order=order_s, palette=palette_s, ax=ax, width=0.5, fliersize=0)
-        sns.stripplot(data=df_ssim_filt, x="Architecture_Norm", y="SSIM_Numeric",
-                      order=order_s, color="black", alpha=0.5, size=5, ax=ax, jitter=True)
-    ax.set_xlabel("Architecture")
-    ax.set_ylabel("SSIM")
-    ax.set_title("B. SSIM by Architecture")
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    plt.sca(ax)
-    plt.xticks(rotation=30, ha="right")
-
-    # --- Panel C: PSNR vs SSIM scatter colored by architecture ---
-    ax = axes[1, 0]
+    # Panel C: PSNR vs SSIM scatter
+    ax_c = fig.add_subplot(gs[1, 0])
     df_both = df.dropna(subset=["PSNR_Numeric", "SSIM_Numeric"])
+
     if len(df_both) > 0:
         for arch in df_both["Architecture_Norm"].unique():
             subset = df_both[df_both["Architecture_Norm"] == arch]
-            ax.scatter(subset["PSNR_Numeric"], subset["SSIM_Numeric"],
-                       c=ARCHITECTURE_COLORS.get(arch, "#95a5a6"),
-                       label=arch, s=60, alpha=0.7, edgecolors="white", linewidth=0.5)
-    ax.set_xlabel("PSNR (dB)")
-    ax.set_ylabel("SSIM")
-    ax.set_title("C. PSNR vs SSIM by Architecture")
-    ax.legend(fontsize=7, loc="lower right")
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
+            ax_c.scatter(subset["PSNR_Numeric"], subset["SSIM_Numeric"],
+                         c=PALETTE.get(arch, "#95a5a6"), label=f"{arch} (n={len(subset)})",
+                         s=80, alpha=0.75, edgecolors="white", linewidth=0.8, zorder=3)
 
-    # --- Panel D: PSNR by Field Strength ---
-    ax = axes[1, 1]
-    df_psnr_fs = df.dropna(subset=["PSNR_Numeric"])
-    fs_counts = df_psnr_fs["Field_Strength_Norm"].value_counts()
-    valid_fs = fs_counts[fs_counts >= 2].index.tolist()
-    df_psnr_fs = df_psnr_fs[df_psnr_fs["Field_Strength_Norm"].isin(valid_fs)]
+    ax_c.set_xlabel("PSNR (dB)", fontsize=10)
+    ax_c.set_ylabel("SSIM", fontsize=10)
+    ax_c.set_title("C.  PSNR vs SSIM by Architecture", fontsize=12,
+                    fontweight="bold", loc="left", pad=12)
+    ax_c.text(0, 1.04, f"{len(df_both)} papers reporting both metrics",
+              transform=ax_c.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    ax_c.legend(fontsize=7.5, loc="lower right", frameon=True,
+                fancybox=True, edgecolor="#ddd")
+    ax_c.spines["top"].set_visible(False)
+    ax_c.spines["right"].set_visible(False)
+    ax_c.tick_params(length=0)
+    ax_c.grid(linestyle="--", alpha=0.15)
 
-    if len(df_psnr_fs) > 0:
-        order_fs = df_psnr_fs.groupby("Field_Strength_Norm")["PSNR_Numeric"].median().sort_values(ascending=False).index
-        palette_fs = {f: FIELD_STRENGTH_COLORS.get(f, "#95a5a6") for f in order_fs}
-        sns.boxplot(data=df_psnr_fs, x="Field_Strength_Norm", y="PSNR_Numeric",
-                    order=order_fs, palette=palette_fs, ax=ax, width=0.5, fliersize=0)
-        sns.stripplot(data=df_psnr_fs, x="Field_Strength_Norm", y="PSNR_Numeric",
-                      order=order_fs, color="black", alpha=0.5, size=5, ax=ax, jitter=True)
-    ax.set_xlabel("Field Strength")
-    ax.set_ylabel("PSNR (dB)")
-    ax.set_title("D. PSNR by Field Strength")
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    plt.sca(ax)
-    plt.xticks(rotation=30, ha="right")
+    # Panel D: PSNR by Field Strength
+    ax_d = fig.add_subplot(gs[1, 1])
+    _style_box_panel(ax_d, df, "Field_Strength_Norm", "PSNR_Numeric", FS_PALETTE,
+                     "PSNR (dB)", "D.  PSNR by Field Strength",
+                     "Comparison across MRI field strength categories")
 
     plt.tight_layout()
     save_figure(fig, "fig4_performance_comparison")
 
-    # Summary
     print("\n=== Figure 4 Summary ===")
     print(f"  Papers with PSNR: {df['PSNR_Numeric'].notna().sum()}")
     print(f"  Papers with SSIM: {df['SSIM_Numeric'].notna().sum()}")
     print(f"  Papers with both: {len(df_both)}")
-    if len(df_both) > 0:
-        print(f"  Overall median PSNR: {df['PSNR_Numeric'].median():.2f} dB")
-        print(f"  Overall median SSIM: {df['SSIM_Numeric'].median():.4f}")
+    if df["PSNR_Numeric"].notna().any():
+        print(f"  Median PSNR: {df['PSNR_Numeric'].median():.2f} dB")
+    if df["SSIM_Numeric"].notna().any():
+        print(f"  Median SSIM: {df['SSIM_Numeric'].median():.4f}")
 
     return fig
 

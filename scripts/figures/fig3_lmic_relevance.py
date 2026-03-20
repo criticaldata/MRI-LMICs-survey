@@ -1,108 +1,227 @@
 """
-Figure 3: LMIC Relevance Analysis
+Figure 3: LMIC Relevance & Translational Gap Analysis
 
-Multi-panel figure showing LMIC relevance score distribution and its
-relationship to key accessibility indicators.
+The paper's signature figure. Multi-panel:
+  A. LMIC score distribution (styled horizontal bars)
+  B. Accessibility indicators by LMIC score (grouped bars)
+  C. Low-field mention by LMIC score
+  D. Translational readiness summary
 """
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
-from mapper import load_data, save_figure, configure_matplotlib, LMIC_SCORE_COLORS
+import matplotlib.gridspec as gridspec
+from mapper import load_data, save_figure, configure_matplotlib
 
 np.random.seed(42)
+
+SCORE_PALETTE = {
+    1: "#E74C3C",
+    2: "#E67E22",
+    3: "#F1C40F",
+    4: "#2ECC71",
+    5: "#1ABC9C",
+}
+
+SCORE_LABELS = {
+    1: "Minimal",
+    2: "Low",
+    3: "Moderate",
+    4: "High",
+    5: "Direct LMIC\napplication",
+}
 
 
 def create_fig3():
     configure_matplotlib()
     df = load_data()
+    scored = df.dropna(subset=["LMIC_Score"])
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    fig = plt.figure(figsize=(15, 11))
+    gs = gridspec.GridSpec(2, 2, hspace=0.35, wspace=0.3)
 
-    # --- Panel A: LMIC Score Distribution ---
-    ax = axes[0, 0]
-    score_counts = df["LMIC_Score"].value_counts().sort_index()
-    colors = [LMIC_SCORE_COLORS.get(int(s), "#95a5a6") for s in score_counts.index]
-    bars = ax.bar(score_counts.index.astype(int), score_counts.values, color=colors,
-                  edgecolor="white", width=0.7)
-    for bar, val in zip(bars, score_counts.values):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.3,
-                str(val), ha="center", fontsize=10, fontweight="bold")
+    # ========================
+    # Panel A: LMIC Score Distribution (horizontal bars, ranked style)
+    # ========================
+    ax_a = fig.add_subplot(gs[0, 0])
 
-    ax.set_xlabel("LMIC Relevance Score")
-    ax.set_ylabel("Number of Papers")
-    ax.set_title("A. LMIC Relevance Score Distribution")
-    ax.set_xticks([1, 2, 3, 4, 5])
-    ax.set_xticklabels(["1\nMinimal", "2\nLow", "3\nModerate", "4\nHigh", "5\nDirect"])
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
+    scores = [5, 4, 3, 2, 1]
+    score_counts = [len(scored[scored["LMIC_Score"] == s]) for s in scores]
+    colors = [SCORE_PALETTE[s] for s in scores]
+    labels = [f"Score {s}\n{SCORE_LABELS[s]}" for s in scores]
 
-    # --- Panel B: Low-field mention by LMIC score ---
-    ax = axes[0, 1]
-    ct = pd.crosstab(df["LMIC_Score"], df["Low_Field_Norm"])
-    ct = ct.reindex(columns=["Yes", "No"], fill_value=0)
-    ct.plot(kind="bar", stacked=True, ax=ax, color=["#27ae60", "#e74c3c"],
-            edgecolor="white", width=0.7)
-    ax.set_xlabel("LMIC Relevance Score")
-    ax.set_ylabel("Number of Papers")
-    ax.set_title("B. Low-Field MRI Mention by LMIC Score")
-    ax.legend(title="Low-Field\nMentioned")
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    plt.sca(ax)
-    plt.xticks(rotation=0)
+    y_pos = np.arange(len(scores))
+    bars = ax_a.barh(y_pos, score_counts, height=0.6, color=colors,
+                     edgecolor="white", linewidth=1)
 
-    # --- Panel C: Resource constraints by LMIC score ---
-    ax = axes[1, 0]
-    ct2 = pd.crosstab(df["LMIC_Score"], df["Resource_Constraints_Norm"])
-    ct2 = ct2.reindex(columns=["Yes", "No"], fill_value=0)
-    ct2.plot(kind="bar", stacked=True, ax=ax, color=["#2980b9", "#c0392b"],
-             edgecolor="white", width=0.7)
-    ax.set_xlabel("LMIC Relevance Score")
-    ax.set_ylabel("Number of Papers")
-    ax.set_title("C. Resource Constraints Addressed by LMIC Score")
-    ax.legend(title="Resource\nAddressed")
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    plt.sca(ax)
-    plt.xticks(rotation=0)
+    for i, (bar, count) in enumerate(zip(bars, score_counts)):
+        pct = count / len(scored) * 100
+        if count >= 4:
+            ax_a.text(count - 0.3, i, f"{count}  ({pct:.0f}%)",
+                      ha="right", va="center", fontsize=10,
+                      fontweight="bold", color="white")
+        else:
+            ax_a.text(count + 0.3, i, f"{count} ({pct:.0f}%)",
+                      ha="left", va="center", fontsize=10,
+                      fontweight="bold", color="#2C3E50")
 
-    # --- Panel D: Code availability and clinical validation by LMIC score ---
-    ax = axes[1, 1]
-    scores = sorted(df["LMIC_Score"].dropna().unique())
-    code_pcts = []
-    valid_pcts = []
-    for s in scores:
-        subset = df[df["LMIC_Score"] == s]
-        n_sub = len(subset)
-        code_pcts.append((subset["Code_Available_Norm"] == "Yes").sum() / n_sub * 100 if n_sub > 0 else 0)
-        valid_pcts.append((subset["Clinical_Validation_Norm"] != "None").sum() / n_sub * 100 if n_sub > 0 else 0)
+    ax_a.set_yticks(y_pos)
+    ax_a.set_yticklabels(labels, fontsize=9, fontweight="bold")
+    ax_a.set_xlabel("Number of Papers", fontsize=10)
+    ax_a.set_title("A.  LMIC Relevance Score Distribution", fontsize=12,
+                    fontweight="bold", loc="left", pad=12)
+    ax_a.text(0, 1.04, f"{len(scored)} papers scored on 1\u20135 scale",
+              transform=ax_a.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    ax_a.spines["top"].set_visible(False)
+    ax_a.spines["right"].set_visible(False)
+    ax_a.tick_params(length=0)
+    ax_a.grid(axis="x", linestyle="--", alpha=0.2)
 
-    x = np.arange(len(scores))
-    width = 0.35
-    ax.bar(x - width / 2, code_pcts, width, label="Code Available", color="#3498db", edgecolor="white")
-    ax.bar(x + width / 2, valid_pcts, width, label="Clinical Validation", color="#e67e22", edgecolor="white")
-    ax.set_xlabel("LMIC Relevance Score")
-    ax.set_ylabel("% of Papers")
-    ax.set_title("D. Code Availability & Clinical Validation by LMIC Score")
-    ax.set_xticks(x)
-    ax.set_xticklabels([int(s) for s in scores])
-    ax.legend()
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
+    # ========================
+    # Panel B: Accessibility Indicators by LMIC Score (grouped bars)
+    # ========================
+    ax_b = fig.add_subplot(gs[0, 1])
+
+    indicators = {
+        "Low-field\nMentioned": "Low_Field_Norm",
+        "Resource\nAddressed": "Resource_Constraints_Norm",
+        "Code\nAvailable": "Code_Available_Norm",
+        "Clinical\nValidation": "Clinical_Validation_Norm",
+    }
+    indicator_colors = ["#2E86AB", "#A23B72", "#F18F01", "#44BBA4"]
+
+    x = np.arange(5)  # scores 1-5
+    bar_w = 0.18
+    offsets = np.arange(len(indicators)) - (len(indicators) - 1) / 2
+
+    for idx, (label, col) in enumerate(indicators.items()):
+        pcts = []
+        for s in [1, 2, 3, 4, 5]:
+            subset = scored[scored["LMIC_Score"] == s]
+            n_sub = len(subset)
+            if n_sub == 0:
+                pcts.append(0)
+            elif col == "Clinical_Validation_Norm":
+                pcts.append((subset[col] != "None").sum() / n_sub * 100)
+            else:
+                pcts.append((subset[col] == "Yes").sum() / n_sub * 100)
+        ax_b.bar(x + offsets[idx] * bar_w, pcts, width=bar_w,
+                 label=label, color=indicator_colors[idx],
+                 edgecolor="white", linewidth=0.5)
+
+    ax_b.set_xticks(x)
+    ax_b.set_xticklabels(["1", "2", "3", "4", "5"], fontsize=10, fontweight="bold")
+    ax_b.set_xlabel("LMIC Relevance Score", fontsize=10)
+    ax_b.set_ylabel("% of Papers", fontsize=10)
+    ax_b.set_title("B.  Accessibility Indicators by LMIC Score", fontsize=12,
+                    fontweight="bold", loc="left", pad=12)
+    ax_b.text(0, 1.04, "Percentage of papers meeting each criterion within score group",
+              transform=ax_b.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    ax_b.legend(fontsize=8, ncol=2, loc="upper left", frameon=True,
+                fancybox=True, edgecolor="#ddd")
+    ax_b.spines["top"].set_visible(False)
+    ax_b.spines["right"].set_visible(False)
+    ax_b.tick_params(length=0)
+    ax_b.set_ylim(0, 115)
+    ax_b.grid(axis="y", linestyle="--", alpha=0.2)
+
+    # ========================
+    # Panel C: Field Strength by LMIC Score (stacked bars)
+    # ========================
+    ax_c = fig.add_subplot(gs[1, 0])
+
+    fs_colors = {
+        "Low-field": "#E74C3C",
+        "Standard-field": "#3498DB",
+        "Mixed": "#9B59B6",
+        "High-field": "#2ECC71",
+        "Not specified": "#BDC3C7",
+    }
+
+    fs_order = ["Low-field", "Standard-field", "Mixed", "High-field", "Not specified"]
+    ct_fs = pd.crosstab(scored["LMIC_Score"], scored["Field_Strength_Norm"])
+    ct_fs = ct_fs.reindex(index=[1, 2, 3, 4, 5], fill_value=0)
+    ct_fs = ct_fs.reindex(columns=[c for c in fs_order if c in ct_fs.columns], fill_value=0)
+
+    bottom = np.zeros(5)
+    x = np.arange(5)
+    for fs in ct_fs.columns:
+        vals = ct_fs[fs].values
+        ax_c.bar(x, vals, bottom=bottom, width=0.6, label=fs,
+                 color=fs_colors.get(fs, "#bdc3c7"), edgecolor="white", linewidth=0.8)
+        for i, (v, b) in enumerate(zip(vals, bottom)):
+            if v >= 2:
+                ax_c.text(i, b + v / 2, str(int(v)), ha="center", va="center",
+                          fontsize=8, fontweight="bold", color="white")
+        bottom += vals
+
+    ax_c.set_xticks(x)
+    ax_c.set_xticklabels(["1", "2", "3", "4", "5"], fontsize=10, fontweight="bold")
+    ax_c.set_xlabel("LMIC Relevance Score", fontsize=10)
+    ax_c.set_ylabel("Number of Papers", fontsize=10)
+    ax_c.set_title("C.  Field Strength Distribution by LMIC Score", fontsize=12,
+                    fontweight="bold", loc="left", pad=12)
+    ax_c.text(0, 1.04, "Low-field papers concentrate in high LMIC-relevance scores",
+              transform=ax_c.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    ax_c.legend(fontsize=8, loc="upper left", frameon=True,
+                fancybox=True, edgecolor="#ddd")
+    ax_c.spines["top"].set_visible(False)
+    ax_c.spines["right"].set_visible(False)
+    ax_c.tick_params(length=0)
+    ax_c.grid(axis="y", linestyle="--", alpha=0.2)
+
+    # ========================
+    # Panel D: Translational Readiness Summary (horizontal bar chart)
+    # ========================
+    ax_d = fig.add_subplot(gs[1, 1])
+
+    # Summary indicators for the whole dataset
+    n = len(df)
+    summary = [
+        ("Resource constraints\naddressed", (df["Resource_Constraints_Norm"] == "Yes").sum(), "#2E86AB"),
+        ("Clinical validation\nreported", (df["Clinical_Validation_Norm"] != "None").sum(), "#A23B72"),
+        ("High LMIC relevance\n(Score 4\u20135)", len(df[df["LMIC_Score"] >= 4]), "#2ECC71"),
+        ("Low-field MRI\nmentioned", (df["Low_Field_Norm"] == "Yes").sum(), "#F18F01"),
+        ("Code publicly\navailable", (df["Code_Available_Norm"] == "Yes").sum(), "#C73E1D"),
+    ]
+
+    labels, values, colors = zip(*summary)
+    y_pos = np.arange(len(labels))
+
+    bars = ax_d.barh(y_pos, values, height=0.55, color=colors,
+                     edgecolor="white", linewidth=1)
+
+    for i, (bar, val) in enumerate(zip(bars, values)):
+        pct = val / n * 100
+        ax_d.text(val + 0.5, i, f"{val}/{n} ({pct:.0f}%)",
+                  va="center", fontsize=9, fontweight="bold", color="#2C3E50")
+
+    ax_d.set_yticks(y_pos)
+    ax_d.set_yticklabels(labels, fontsize=9, fontweight="bold")
+    ax_d.invert_yaxis()
+    ax_d.set_xlabel("Number of Papers", fontsize=10)
+    ax_d.set_title("D.  Translational Readiness Overview", fontsize=12,
+                    fontweight="bold", loc="left", pad=12)
+    ax_d.text(0, 1.04, "Key indicators for LMIC deployment feasibility",
+              transform=ax_d.transAxes, fontsize=9, color="#7f8c8d", style="italic")
+    ax_d.spines["top"].set_visible(False)
+    ax_d.spines["right"].set_visible(False)
+    ax_d.tick_params(length=0)
+    ax_d.grid(axis="x", linestyle="--", alpha=0.2)
+    ax_d.set_xlim(0, max(values) + 10)
 
     plt.tight_layout()
     save_figure(fig, "fig3_lmic_relevance")
 
     # Summary
-    scored = df["LMIC_Score"].dropna()
     print("\n=== Figure 3 Summary ===")
     print(f"  Papers scored: {len(scored)}/{len(df)}")
-    print(f"  Median LMIC score: {scored.median():.0f}")
-    print(f"  Score 4-5 (high relevance): {(scored >= 4).sum()} ({(scored >= 4).sum()/len(scored)*100:.1f}%)")
-    print(f"  Low-field mentioned: {(df['Low_Field_Norm'] == 'Yes').sum()} papers")
-    print(f"  Code available: {(df['Code_Available_Norm'] == 'Yes').sum()} papers")
+    print(f"  Median LMIC score: {scored['LMIC_Score'].median():.0f}")
+    print(f"  Score 4\u20135 (high): {(scored['LMIC_Score'] >= 4).sum()} ({(scored['LMIC_Score'] >= 4).sum()/len(scored)*100:.1f}%)")
+    print(f"  Low-field mentioned: {(df['Low_Field_Norm'] == 'Yes').sum()}")
+    print(f"  Code available: {(df['Code_Available_Norm'] == 'Yes').sum()}")
+    print(f"  Clinical validation: {(df['Clinical_Validation_Norm'] != 'None').sum()}")
 
     return fig
 
