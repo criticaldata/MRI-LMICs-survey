@@ -114,7 +114,7 @@ def create_fig3():
     ax_b.set_ylabel("% of Papers", fontsize=10)
     panel_title(ax_b, "B.  Accessibility Indicators by LMIC Score",
                 "Percentage of papers meeting each criterion within score group")
-    ax_b.legend(fontsize=8, ncol=2, loc="upper left", frameon=True,
+    ax_b.legend(fontsize=7, ncol=2, loc="upper right", frameon=True,
                 fancybox=True, edgecolor="#ddd")
     ax_b.spines["top"].set_visible(False)
     ax_b.spines["right"].set_visible(False)
@@ -158,7 +158,7 @@ def create_fig3():
     ax_c.set_ylabel("Number of Papers", fontsize=10)
     panel_title(ax_c, "C.  Field Strength Distribution by LMIC Score",
                 "Low-field papers concentrate in high LMIC-relevance scores")
-    ax_c.legend(fontsize=8, loc="upper left", frameon=True,
+    ax_c.legend(fontsize=7, loc="upper right", frameon=True,
                 fancybox=True, edgecolor="#ddd")
     ax_c.spines["top"].set_visible(False)
     ax_c.spines["right"].set_visible(False)

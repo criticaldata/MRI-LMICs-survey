@@ -315,22 +315,29 @@ def _parse_first_numeric(value):
 def panel_title(ax, title, subtitle="", fontsize=12):
     """Set a panel title with an optional gray italic subtitle below it.
 
-    Uses ax.set_title with a two-line string so that tight_layout/bbox_inches
-    accounts for both lines and nothing overlaps.
+    Renders as a single two-line ax.set_title so that bbox_inches='tight'
+    properly accounts for the vertical space.
     """
     if subtitle:
-        full = f"{title}\n{subtitle}"
-        ax.set_title(full, fontsize=fontsize, fontweight="bold", loc="left", pad=8,
-                     linespacing=1.6)
-        # Re-style: make subtitle line gray + italic via the Text object
-        title_obj = ax.title
-        # matplotlib doesn't support per-line styling in set_title,
-        # so we place the subtitle as a separate text just below.
-        ax.set_title(title, fontsize=fontsize, fontweight="bold", loc="left", pad=18)
-        ax.text(0, 1.01, subtitle, transform=ax.transAxes,
-                fontsize=fontsize - 2.5, color="#7f8c8d", style="italic", va="top")
+        combined = f"$\\bf{{{_escape_latex(title)}}}$\n{subtitle}"
+        ax.set_title(combined, fontsize=fontsize, loc="left", pad=12,
+                     linespacing=2.2, color="#1B2631",
+                     fontdict={"fontsize": fontsize})
+        # Override: make subtitle line smaller + gray
+        # Since matplotlib doesn't support per-line styling easily,
+        # use the simpler approach: bold title via set_title, subtitle via annotation
+        ax.set_title(title, fontsize=fontsize, fontweight="bold", loc="left", pad=28)
+        ax.annotate(subtitle, xy=(0, 1), xycoords="axes fraction",
+                    xytext=(0, 16), textcoords="offset points",
+                    fontsize=max(fontsize - 3, 7), color="#7f8c8d",
+                    style="italic", va="bottom", annotation_clip=False)
     else:
-        ax.set_title(title, fontsize=fontsize, fontweight="bold", loc="left", pad=8)
+        ax.set_title(title, fontsize=fontsize, fontweight="bold", loc="left", pad=12)
+
+
+def _escape_latex(s):
+    """Escape characters for matplotlib mathtext."""
+    return s.replace("_", r"\_").replace("&", r"\&")
 
 
 def save_figure(fig, filename, output_dir=None, dpi=300):
