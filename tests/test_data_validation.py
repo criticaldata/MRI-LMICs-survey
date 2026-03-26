@@ -18,7 +18,7 @@ def test_csv_exists():
     assert csv_path.exists(), f"Data file not found: {csv_path}"
 
 
-def test_data_has_56_papers():
+def test_data_has_51_papers():
     df = load_data()
     assert len(df) == 51, f"Expected 51 papers, got {len(df)}"
 

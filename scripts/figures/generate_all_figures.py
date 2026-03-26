@@ -58,6 +58,9 @@ tables = [
     (tables_dir / "table3_performance_metrics.py", "Table 3: Performance Metrics"),
     (tables_dir / "table4_lmic_applicability.py", "Table 4: LMIC Applicability"),
     (tables_dir / "table_merged_performance_lmic.py", "Table 2 (Main): Merged Performance & LMIC"),
+    (tables_dir / "analysis_cross_field_generalization.py", "Analysis: Cross-Field Generalization"),
+    (tables_dir / "analysis_edge_deployment.py", "Analysis: Edge Deployment Candidates"),
+    (tables_dir / "analysis_reviewer_bias.py", "Analysis: Reviewer Bias / IRR Proxy"),
 ]
 
 table_ok = sum(run_script(path, desc) for path, desc in tables)
