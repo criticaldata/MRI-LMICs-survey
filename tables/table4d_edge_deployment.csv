@@ -1,0 +1,6 @@
+Indicator,n,% of Total
+Edge deployment candidates (any criterion),37,72.5%
+  Meets model size threshold (<100 MB),0,0.0%
+  Meets inference time threshold (<5s CPU),7,13.7%
+  Addresses resource constraints,36,70.6%
+Edge candidates with High LMIC (Score 4-5),17,33.3%

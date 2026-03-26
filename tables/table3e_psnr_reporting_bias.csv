@@ -1,0 +1,3 @@
+Group,n,Median_Year,Top_Architecture,Top_Field_Strength,Median_LMIC_Score,Clinical_Validation_pct,Low_Field_pct
+PSNR Reporter,20,2021 (2020–2025),CNN,Not specified,3.0,20.0%,40.0%
+PSNR Non-Reporter,31,2023 (2020–2025),CNN,Not specified,3.0,51.6%,22.6%
