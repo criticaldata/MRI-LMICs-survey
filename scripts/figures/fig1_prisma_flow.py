@@ -127,7 +127,7 @@ def create_prisma():
 
     _draw_box(ax, 0.5, 0.37, 0.55, 0.06,
               "Studies included in narrative review\n"
-              "(n = 56)",
+              "(n = 51)",
               BOX_GREEN, BORDER_GREEN, fontsize=11, bold=True)
 
     _draw_arrow(ax, 0.5, 0.34, 0.5, 0.26)
@@ -138,19 +138,19 @@ def create_prisma():
     box_h = 0.14
 
     _draw_box(ax, 0.2, breakdown_y, box_w, box_h,
-              "Brain MRI: 27\nMusculoskeletal: 7\nCardiac: 4\nOther: 18",
+              "Brain MRI: 26\nMusculoskeletal: 7\nCardiac: 4\nOther: 14",
               BOX_BLUE, BORDER_BLUE, fontsize=8.5)
     ax.text(0.2, breakdown_y + box_h / 2 + 0.015, "By Application",
             ha="center", fontsize=8.5, fontweight="bold", color=BORDER_BLUE)
 
     _draw_box(ax, 0.5, breakdown_y, box_w, box_h,
-              "CNN: 26\nU-Net: 11\nHybrid: 8\nGAN: 4\nOther: 7",
+              "CNN: 25\nU-Net: 12\nHybrid: 6\nGAN: 4\nOther: 4",
               "#FEF9E7", "#F18F01", fontsize=8.5)
     ax.text(0.5, breakdown_y + box_h / 2 + 0.015, "By Architecture",
             ha="center", fontsize=8.5, fontweight="bold", color="#F18F01")
 
     _draw_box(ax, 0.8, breakdown_y, box_w, box_h,
-              "Low-field: 10\nStandard: 17\nMixed: 6\nNot specified: 22\nHigh-field: 1",
+              "Low-field: 10\nStandard: 17\nMixed: 6\nNot specified: 17\nHigh-field: 1",
               "#EAFAF1", "#1E8449", fontsize=8.5)
     ax.text(0.8, breakdown_y + box_h / 2 + 0.015, "By Field Strength",
             ha="center", fontsize=8.5, fontweight="bold", color="#1E8449")
