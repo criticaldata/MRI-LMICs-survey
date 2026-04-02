@@ -1,7 +1,7 @@
 """
 Figure 1 - Panel A: PRISMA-style Study Selection Flow Diagram
 
-Shows the screening and selection process: 183 identified -> 56 included.
+Shows the screening and selection process: 183 identified -> 48 included.
 Uses matplotlib with clean box styling.
 """
 
@@ -110,11 +110,12 @@ def create_prisma():
     _draw_side_arrow(ax, 0.78, 0.56, 0.88, 0.56)
 
     _draw_box(ax, 0.92, 0.50, 0.14, 0.16,
-              "Excluded (n = 48)\n\n"
+              "Excluded (n = 56)\n\n"
               "Not SR-focused: 22\n"
-              "Not MRI: 8\n"
+              "Not MRI: 11\n"
               "Duplicate data: 7\n"
               "No AI/DL method: 6\n"
+              "Review/survey: 5\n"
               "Conference abstract\n"
               "only: 5",
               BOX_RED, BORDER_RED, fontsize=7.5)
@@ -127,7 +128,7 @@ def create_prisma():
 
     _draw_box(ax, 0.5, 0.37, 0.55, 0.06,
               "Studies included in narrative review\n"
-              "(n = 51)",
+              "(n = 48)",
               BOX_GREEN, BORDER_GREEN, fontsize=11, bold=True)
 
     _draw_arrow(ax, 0.5, 0.34, 0.5, 0.26)
@@ -138,19 +139,19 @@ def create_prisma():
     box_h = 0.14
 
     _draw_box(ax, 0.2, breakdown_y, box_w, box_h,
-              "Brain MRI: 26\nMusculoskeletal: 7\nCardiac: 4\nOther: 14",
+              "Brain MRI: 24\nMusculoskeletal: 7\nCardiac: 4\nOther: 13",
               BOX_BLUE, BORDER_BLUE, fontsize=8.5)
     ax.text(0.2, breakdown_y + box_h / 2 + 0.015, "By Application",
             ha="center", fontsize=8.5, fontweight="bold", color=BORDER_BLUE)
 
     _draw_box(ax, 0.5, breakdown_y, box_w, box_h,
-              "CNN: 25\nU-Net: 12\nHybrid: 6\nGAN: 4\nOther: 4",
+              "CNN: 23\nU-Net: 11\nHybrid: 6\nGAN: 4\nOther: 4",
               "#FEF9E7", "#F18F01", fontsize=8.5)
     ax.text(0.5, breakdown_y + box_h / 2 + 0.015, "By Architecture",
             ha="center", fontsize=8.5, fontweight="bold", color="#F18F01")
 
     _draw_box(ax, 0.8, breakdown_y, box_w, box_h,
-              "Low-field: 10\nStandard: 17\nMixed: 6\nNot specified: 17\nHigh-field: 1",
+              "Low-field: 9\nStandard: 16\nMixed: 6\nNot specified: 16\nHigh-field: 1",
               "#EAFAF1", "#1E8449", fontsize=8.5)
     ax.text(0.8, breakdown_y + box_h / 2 + 0.015, "By Field Strength",
             ha="center", fontsize=8.5, fontweight="bold", color="#1E8449")
@@ -171,8 +172,8 @@ def create_prisma():
     save_figure(fig, "fig1a_prisma_flow")
 
     print("\n=== Figure 1A: PRISMA Flow ===")
-    print("  183 identified -> 172 after dedup -> 104 full-text -> 56 included")
-    print("  Excluded: 68 screening + 48 eligibility = 116 total")
+    print("  183 identified -> 172 after dedup -> 104 full-text -> 48 included")
+    print("  Excluded: 68 screening + 56 eligibility = 124 total")
 
     return fig
 

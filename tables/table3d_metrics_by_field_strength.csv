@@ -1,6 +1,6 @@
 Field Strength,n Papers,PSNR Reported,Median PSNR (dB),SSIM Reported,Median SSIM
-Not specified,17,6,34.20,5,0.8524
-Standard-field,17,6,32.66,6,0.9165
-Low-field,10,5,31.11,5,0.8960
+Not specified,16,6,34.20,4,0.8863
+Standard-field,16,6,32.66,5,0.9200
+Low-field,9,5,29.12,4,0.8480
 Mixed,6,3,41.64,3,0.9246
 High-field,1,0,N/R,0,N/R

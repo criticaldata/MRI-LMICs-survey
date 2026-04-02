@@ -23,13 +23,13 @@
   <!-- ════════════════════════════════════════════════ -->
   <rect x="30" y="70" width="250" height="200" rx="14" fill="#EBF5FB" stroke="#2E86AB" stroke-width="2"/>
   <text x="155" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#1A5276">Current State</text>
-  <text x="155" y="114" text-anchor="middle" font-size="10.5" fill="#5D6D7E" font-style="italic">56 studies reviewed (2020–2025)</text>
+  <text x="155" y="114" text-anchor="middle" font-size="10.5" fill="#5D6D7E" font-style="italic">48 studies reviewed (2020–2025)</text>
 
-  <circle cx="52" cy="140" r="3.5" fill="#2E86AB"/><text x="66" y="144" font-size="11" fill="#2C3E50">46% use CNNs</text>
-  <circle cx="52" cy="162" r="3.5" fill="#2E86AB"/><text x="66" y="166" font-size="11" fill="#2C3E50">48% focus on brain MRI</text>
-  <circle cx="52" cy="184" r="3.5" fill="#2E86AB"/><text x="66" y="188" font-size="11" fill="#2C3E50">Median PSNR: 34.1 dB</text>
-  <circle cx="52" cy="206" r="3.5" fill="#2E86AB"/><text x="66" y="210" font-size="11" fill="#2C3E50">Median SSIM: 0.913</text>
-  <circle cx="52" cy="228" r="3.5" fill="#2E86AB"/><text x="66" y="232" font-size="11" fill="#2C3E50">39% field strength unspecified</text>
+  <circle cx="52" cy="140" r="3.5" fill="#2E86AB"/><text x="66" y="144" font-size="11" fill="#2C3E50">48% use CNNs</text>
+  <circle cx="52" cy="162" r="3.5" fill="#2E86AB"/><text x="66" y="166" font-size="11" fill="#2C3E50">50% focus on brain MRI</text>
+  <circle cx="52" cy="184" r="3.5" fill="#2E86AB"/><text x="66" y="188" font-size="11" fill="#2C3E50">Median PSNR: 32.6 dB</text>
+  <circle cx="52" cy="206" r="3.5" fill="#2E86AB"/><text x="66" y="210" font-size="11" fill="#2C3E50">Median SSIM: 0.917</text>
+  <circle cx="52" cy="228" r="3.5" fill="#2E86AB"/><text x="66" y="232" font-size="11" fill="#2C3E50">33% field strength unspecified</text>
   <circle cx="52" cy="250" r="3.5" fill="#2E86AB"/><text x="66" y="254" font-size="11" fill="#2C3E50">Median LMIC score: 3/5</text>
 
   <!-- ════════════════════════════════════════════════ -->
@@ -39,10 +39,10 @@
   <text x="450" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#922B21">Key Barriers</text>
   <text x="450" y="114" text-anchor="middle" font-size="10.5" fill="#5D6D7E" font-style="italic">Gaps identified in this review</text>
 
-  <circle cx="347" cy="140" r="3.5" fill="#C73E1D"/><text x="361" y="144" font-size="11" fill="#2C3E50">Only 27% mention low-field MRI</text>
-  <circle cx="347" cy="162" r="3.5" fill="#C73E1D"/><text x="361" y="166" font-size="11" fill="#2C3E50">Only 16% share code publicly</text>
-  <circle cx="347" cy="184" r="3.5" fill="#C73E1D"/><text x="361" y="188" font-size="11" fill="#2C3E50">38% lack clinical validation</text>
-  <circle cx="347" cy="206" r="3.5" fill="#C73E1D"/><text x="361" y="210" font-size="11" fill="#2C3E50">7% directly target LMICs (Score 5)</text>
+  <circle cx="347" cy="140" r="3.5" fill="#C73E1D"/><text x="361" y="144" font-size="11" fill="#2C3E50">Only 29% mention low-field MRI</text>
+  <circle cx="347" cy="162" r="3.5" fill="#C73E1D"/><text x="361" y="166" font-size="11" fill="#2C3E50">Only 13% share code publicly</text>
+  <circle cx="347" cy="184" r="3.5" fill="#C73E1D"/><text x="361" y="188" font-size="11" fill="#2C3E50">60% lack clinical validation</text>
+  <circle cx="347" cy="206" r="3.5" fill="#C73E1D"/><text x="361" y="210" font-size="11" fill="#2C3E50">8% directly target LMICs (Score 5)</text>
   <circle cx="347" cy="228" r="3.5" fill="#C73E1D"/><text x="361" y="232" font-size="11" fill="#2C3E50">Sparse standardized benchmarks</text>
   <circle cx="347" cy="250" r="3.5" fill="#C73E1D"/><text x="361" y="254" font-size="11" fill="#2C3E50">Limited anatomical diversity</text>
 
@@ -54,8 +54,8 @@
   <text x="745" y="114" text-anchor="middle" font-size="10.5" fill="#5D6D7E" font-style="italic">Opportunities for translation</text>
 
   <circle cx="642" cy="140" r="3.5" fill="#1E8449"/><text x="656" y="144" font-size="11" fill="#2C3E50">Portable MRI (Hyperfine, 64mT)</text>
-  <circle cx="642" cy="162" r="3.5" fill="#1E8449"/><text x="656" y="166" font-size="11" fill="#2C3E50">73% address resource constraints</text>
-  <circle cx="642" cy="184" r="3.5" fill="#1E8449"/><text x="656" y="188" font-size="11" fill="#2C3E50">34% have high LMIC relevance</text>
+  <circle cx="642" cy="162" r="3.5" fill="#1E8449"/><text x="656" y="166" font-size="11" fill="#2C3E50">69% address resource constraints</text>
+  <circle cx="642" cy="184" r="3.5" fill="#1E8449"/><text x="656" y="188" font-size="11" fill="#2C3E50">40% have high LMIC relevance</text>
   <circle cx="642" cy="206" r="3.5" fill="#1E8449"/><text x="656" y="210" font-size="11" fill="#2C3E50">Transfer learning from 3T to LF</text>
   <circle cx="642" cy="228" r="3.5" fill="#1E8449"/><text x="656" y="232" font-size="11" fill="#2C3E50">Lightweight architectures emerging</text>
   <circle cx="642" cy="250" r="3.5" fill="#1E8449"/><text x="656" y="254" font-size="11" fill="#2C3E50">Growing open-source ecosystem</text>

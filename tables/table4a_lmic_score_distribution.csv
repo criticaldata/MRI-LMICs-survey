@@ -1,7 +1,6 @@
 LMIC Score,n Papers,% of Total,Low-Field,Resource Addressed,Code Available,Clinically Validated
-Score 5 (Direct LMIC application),4,7.8%,4,4,1,3
-Score 4 (High relevance),15,29.4%,8,13,2,6
-Score 3 (Moderate relevance),21,41.2%,3,16,4,8
-Score 2 (Low relevance),9,17.6%,0,1,0,3
-Score 1 (Minimal relevance),1,2.0%,0,1,0,0
-Not scored,1,2.0%,,,,
+Score 5 (Direct LMIC application),4,8.3%,4,4,1,3
+Score 4 (High relevance),15,31.2%,8,13,2,6
+Score 3 (Moderate relevance),19,39.6%,2,14,3,7
+Score 2 (Low relevance),9,18.8%,0,1,0,3
+Score 1 (Minimal relevance),1,2.1%,0,1,0,0

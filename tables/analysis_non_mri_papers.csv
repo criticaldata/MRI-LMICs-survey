@@ -1,4 +1,1 @@
 Paper_ID,Title,Year,MRI_Application_Area,Application_Norm,Architecture_Norm,Recommendation
-13.0,A comprehensive review on deep learning based remote sensing image super-resolution methods,2022,Not MRI (Remote Sensing),Non-MRI,Hybrid,Exclude – not MRI modality
-15.0,Spectral super-resolution meets deep learning: Achievements and challenges,2023,Not MRI (Hyperspectral Imaging),Non-MRI,Hybrid,Exclude – not MRI modality
-29.0,Image Quality Enhancement Using a Deep Neural Network for Plane Wave Medical Ultrasound Imaging,2021,General(Non MRI modality-ultrasound,Non-MRI,CNN,Exclude – not MRI modality
