@@ -1,61 +1,60 @@
 Characteristic,n,%
-Total papers included,51,
+Total papers included,48,
 Publication year range,2020–2025,
-  2020,6,11.8%
-  2021,11,21.6%
-  2022,8,15.7%
-  2023,13,25.5%
-  2024,11,21.6%
-  2025,2,3.9%
+  2020,6,12.5%
+  2021,11,22.9%
+  2022,7,14.6%
+  2023,12,25.0%
+  2024,10,20.8%
+  2025,2,4.2%
 ,,
 MRI Application Area,n,%
-  Brain,26,51.0%
-  Musculoskeletal,7,13.7%
-  General,5,9.8%
-  Cardiac,4,7.8%
-  Flow,3,5.9%
-  Abdominal,2,3.9%
-  Other,2,3.9%
-  Prostate,1,2.0%
-  Pediatric,1,2.0%
+  Brain,24,50.0%
+  Musculoskeletal,7,14.6%
+  General,5,10.4%
+  Cardiac,4,8.3%
+  Flow,3,6.2%
+  Abdominal,2,4.2%
+  Other,1,2.1%
+  Prostate,1,2.1%
+  Pediatric,1,2.1%
 ,,
 Field Strength,n,%
-  Not specified,17,33.3%
-  Standard-field,17,33.3%
-  Low-field,10,19.6%
-  Mixed,6,11.8%
-  High-field,1,2.0%
+  Not specified,16,33.3%
+  Standard-field,16,33.3%
+  Low-field,9,18.8%
+  Mixed,6,12.5%
+  High-field,1,2.1%
 ,,
 Primary Focus,n,%
-  Pure SR,15,29.4%
-  SR + Denoising,8,15.7%
-  SR + Classification,7,13.7%
-  SR + Segmentation,6,11.8%
-  SR + Diagnosis,5,9.8%
-  Other,5,9.8%
-  SR + Other,4,7.8%
-  Review/Survey,1,2.0%
+  Pure SR,13,27.1%
+  SR + Denoising,8,16.7%
+  SR + Classification,7,14.6%
+  SR + Segmentation,6,12.5%
+  SR + Diagnosis,5,10.4%
+  Other,5,10.4%
+  SR + Other,4,8.3%
 ,,
 AI Architecture,n,%
-  CNN,25,49.0%
-  U-Net,12,23.5%
-  Hybrid,6,11.8%
-  GAN,4,7.8%
-  Diffusion,1,2.0%
-  Other,1,2.0%
-  Non-AI,1,2.0%
-  Transformer,1,2.0%
+  CNN,23,47.9%
+  U-Net,11,22.9%
+  Hybrid,6,12.5%
+  GAN,4,8.3%
+  Diffusion,1,2.1%
+  Other,1,2.1%
+  Non-AI,1,2.1%
+  Transformer,1,2.1%
 ,,
 Dataset Type,n,%
-  Public benchmark,18,35.3%
-  Mixed,14,27.5%
-  Clinical,11,21.6%
-  Synthetic,4,7.8%
-  Other,2,3.9%
-  Not reported,1,2.0%
-  Private,1,2.0%
+  Public benchmark,17,35.4%
+  Mixed,13,27.1%
+  Clinical,11,22.9%
+  Synthetic,4,8.3%
+  Not reported,1,2.1%
+  Other,1,2.1%
+  Private,1,2.1%
 ,,
-Clinical validation reported,20,39.2%
-Code publicly available,7,13.7%
-Low-field MRI mentioned,15,29.4%
-Resource constraints addressed,36,70.6%
+Clinical validation reported,19,39.6%
+Code publicly available,6,12.5%
+Low-field MRI mentioned,14,29.2%
+Resource constraints addressed,33,68.8%

@@ -91,7 +91,7 @@ def create_merged_table():
         "Low-field": (df["Low_Field_Norm"] == "Yes").sum(),
         "Code Avail.": (df["Code_Available_Norm"] == "Yes").sum(),
         "Clinical Valid.": (df["Clinical_Validation_Norm"] != "None").sum(),
-        "Top Applications": f"Brain (27), MSK (7), General (5)",
+        "Top Applications": f"Brain (24), MSK (7), General (5)",
     }
 
     # Save

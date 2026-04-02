@@ -240,6 +240,14 @@ CLINICAL_VALIDATION_MAP = {
 # Data loading and cleaning
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+N_PRIMARY_SR = 48   # primary SR studies after all exclusions
+N_ALL = 183         # initial records identified in database search
+
+
 def get_project_root():
     """Return the project root directory."""
     return Path(__file__).parent.parent.parent
@@ -252,7 +260,7 @@ def load_data(data_path=None):
     numeric metrics (PSNR, SSIM).
     """
     if data_path is None:
-        data_path = get_project_root() / "data" / "mri_sr_extraction.csv"
+        data_path = get_project_root() / "data" / "data-clean.csv"
 
     df = pd.read_csv(data_path)
 

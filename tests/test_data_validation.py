@@ -14,13 +14,13 @@ from mapper import load_data, get_project_root
 
 
 def test_csv_exists():
-    csv_path = get_project_root() / "data" / "mri_sr_extraction.csv"
+    csv_path = get_project_root() / "data" / "data-clean.csv"
     assert csv_path.exists(), f"Data file not found: {csv_path}"
 
 
-def test_data_has_51_papers():
+def test_data_has_48_papers():
     df = load_data()
-    assert len(df) == 51, f"Expected 51 papers, got {len(df)}"
+    assert len(df) == 48, f"Expected 48 papers, got {len(df)}"
 
 
 def test_required_columns():

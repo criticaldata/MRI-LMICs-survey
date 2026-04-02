@@ -1,7 +1,7 @@
 """
 Table 1: Study Characteristics Overview
 
-Generates a summary table of all 56 included studies, covering year range,
+Generates a summary table of all 48 included studies, covering year range,
 MRI application areas, field strength types, AI architectures, and dataset types.
 """
 

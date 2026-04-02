@@ -19,34 +19,31 @@ Paper_ID,Title,Year,QA_PSNR,QA_SSIM,QA_OtherMetrics,Reporting_Quality,QA_ClinVal
 18,"Cerebrovascular super-resolution 4D Flow MRI - Sequential combination of resolution enhancement by deep learning and physics-informed image processing to non-invasively quantify intracranial velocity, flow, and relative pressure",2023,0,0,1,1,1,0,1,2,1,0,1,2,5
 19,Deep Learning based Early Detection of Alzheimer’s Disease using Image Enhancement Filters,2023,0,0,1,1,0,0,0,0,0,0,1,1,2
 20,Deep Learning-based Method for Denoising and Image Enhancement in Low-Field MRI,2024,1,1,1,3,0,0,0,0,0,1,1,2,5
-21,Deep Transfer Learning-Based Multi-Modal Digital Twins for Enhancement and Diagnostic Analysis of Brain MRI Image,2023,1,1,1,3,0,0,0,0,0,1,1,2,5
+21,Deep Transfer Learning-Based Multi-Modal Digital Twins for Enhancement and Diagnostic Analysis of Brain MRI Image,2023,1,0,1,2,0,0,0,0,0,1,1,2,4
 22,Digital Image Enhancement using Conventional Neural Network,2023,1,1,0,2,0,0,1,1,1,0,1,2,5
-23,Deep learning‑based single image super‑resolution for low‑field MR brain images,2022,1,1,0,2,0,0,0,0,0,1,1,2,4
-24,MRI super-resolution using similarity distance and multi-scale receptive field based feature fusion GAN and pre-trained slice interpolation network,2021,0,0,1,1,0,0,0,0,0,1,1,2,3
-25,Pushing the limits of low-cost ultra-low-field MRI by dual-acquisition deep learning 3D superresolution,2023,0,0,1,1,1,0,1,2,0,0,1,1,4
-26,Joint B0B0​ and Image Reconstruction in Low-Field MRI by Physics-Informed Deep-Learning,2024,0,0,1,1,0,0,0,0,0,0,1,1,2
-27,Multi-Contrast Super-Resolution MRI Through a Progressive Network,2020,1,1,1,3,0,0,1,1,0,0,1,1,5
-28,FA-GAN: Fused attentive generative adversarial networks for MRI image super-resolution,2021,1,1,0,2,0,0,1,1,0,0,1,1,4
-29,"Cerebrovascular super-resolution 4D Flow MRI – Sequential combination of resolution enhancement by deep learning and physics-informed image processing to non-invasively quantify intracranial velocity, flow, and relative pressure",2023,0,0,1,1,1,0,1,2,1,0,1,2,5
-30,Deep learning myocardial infarction segmentation framework from cardiac magnetic resonance images,2024,1,1,1,3,1,0,0,1,0,1,1,2,6
-31,ShuffleUNet: Super resolution of diffusion-weighted MRIs using deep learning,2021,0,1,0,1,1,0,0,1,0,1,1,2,4
-32,Transfer learning in deep neural network based under-sampled MR image reconstruction,2021,1,1,0,2,1,0,1,2,0,0,1,1,5
-33,MRI at low field: A review of software solutions for improving SNR,2024,0,0,0,0,0,0,0,0,0,0,0,0,0
-34,Enhancement of Image Quality in Low-Field Knee MR Imaging Using Deep Learning,2024,0,0,1,1,1,1,0,2,0,0,1,1,4
-35,Multisequence 3-T Image Synthesis from 64-mT Low-Field-Strength MRI Using Generative Adversarial Networks in Multiple Sclerosis,2025,1,1,1,3,1,0,1,2,1,0,1,2,7
-36,Evaluation of epilepsy lesion visualisation enhancement in low-field MRI using image quality transfer: a preliminary investigation of clinical potential for applications in developing countries,2024,0,0,0,0,1,1,1,3,1,0,1,2,5
-37,Deep learning-based single image super-resolution for low-field MR brain images,2022,1,1,1,3,0,0,1,1,0,0,1,1,5
-38,Deep learning for fast low-field MRI acquisitions,2022,1,1,1,3,1,1,0,2,0,0,1,1,6
-39,Deep Learning Super-Resolution Reconstruction for Fast and Motion-Robust T2-weighted Prostate MRI,2023,0,0,1,1,1,1,1,3,0,0,1,1,5
-40,Super resolution using sparse sampling at portable ultra-low field MR,2024,0,0,1,1,1,0,1,2,0,0,1,1,4
-41,Bridging the gap: improving correspondence between low-field and high-field magnetic resonance images in young people,2024,0,0,1,1,1,0,1,2,0,0,1,1,4
-42,MRI Super-Resolution With Ensemble Learning and Complementary Priors,2020,1,1,0,2,0,0,0,0,0,1,1,2,4
-43,SRflow: Deep learning based super-resolution of 4D-flow MRI data,2022,0,0,1,1,0,0,1,1,0,0,1,1,3
-44,SMORE: A Self-Supervised Anti-Aliasing and Super-Resolution Algorithm for MRI Using Deep Learning,2021,1,1,1,3,0,0,1,1,0,0,1,1,5
-45,SMIR: A Transformer-Based Model for MRI super-resolution reconstruction,2021,0,0,1,1,0,0,0,0,0,1,1,2,3
-46,Autoencoder-Inspired Convolutional Network-Based Super-Resolution Method in MRI,2021,1,1,1,3,0,0,1,1,0,0,1,1,5
-47,A mass correlation based deep learning approach using deep Convolutional neural network to classify the brain tumor,2023,0,0,1,1,0,0,0,0,0,1,1,2,3
-48,Accuracy Enhancement in Detecting Pituitary Tumors using Deep Learning,2023,0,0,1,1,0,0,0,0,0,1,1,2,3
-49,A deep convolutional neural network based computer aided diagnosis system for the prediction of Alzheimer's disease in MRI images,2021,1,0,1,2,0,0,0,0,0,1,1,2,4
-50,A Novel Deep Learning Approach for Brain Tumors Classification Using MRI Images,2023,0,0,1,1,0,0,0,0,0,1,1,2,3
-51,Automatic myocardial segmentation in dynamic contrast enhanced perfusion MRI using Monte Carlo dropout in an encoder-decoder convolutional neural network,2020,0,0,1,1,0,0,1,1,0,0,1,1,3
+23,MRI super-resolution using similarity distance and multi-scale receptive field based feature fusion GAN and pre-trained slice interpolation network,2021,0,0,1,1,0,0,0,0,0,1,1,2,3
+24,Pushing the limits of low-cost ultra-low-field MRI by dual-acquisition deep learning 3D superresolution,2023,0,0,1,1,1,0,1,2,0,0,1,1,4
+25,Joint B0B0​ and Image Reconstruction in Low-Field MRI by Physics-Informed Deep-Learning,2024,1,0,1,2,0,0,0,0,0,0,1,1,3
+26,Multi-Contrast Super-Resolution MRI Through a Progressive Network,2020,1,1,1,3,0,0,1,1,0,0,1,1,5
+27,FA-GAN: Fused attentive generative adversarial networks for MRI image super-resolution,2021,1,1,0,2,0,0,1,1,0,0,1,1,4
+28,Deep learning myocardial infarction segmentation framework from cardiac magnetic resonance images,2024,1,0,1,2,1,0,0,1,0,1,1,2,5
+29,ShuffleUNet: Super resolution of diffusion-weighted MRIs using deep learning,2021,0,1,0,1,1,0,0,1,0,1,1,2,4
+30,Transfer learning in deep neural network based under-sampled MR image reconstruction,2021,1,1,0,2,1,0,1,2,0,0,1,1,5
+31,Enhancement of Image Quality in Low-Field Knee MR Imaging Using Deep Learning,2024,0,0,1,1,1,1,0,2,0,0,1,1,4
+32,Multisequence 3-T Image Synthesis from 64-mT Low-Field-Strength MRI Using Generative Adversarial Networks in Multiple Sclerosis,2025,1,1,1,3,1,0,1,2,1,0,1,2,7
+33,Evaluation of epilepsy lesion visualisation enhancement in low-field MRI using image quality transfer: a preliminary investigation of clinical potential for applications in developing countries,2024,0,0,0,0,1,1,1,3,1,0,1,2,5
+34,Deep learning-based single image super-resolution for low-field MR brain images,2022,1,1,1,3,0,0,1,1,0,0,1,1,5
+35,Deep learning for fast low-field MRI acquisitions,2022,1,1,1,3,1,1,0,2,0,0,1,1,6
+36,Deep Learning Super-Resolution Reconstruction for Fast and Motion-Robust T2-weighted Prostate MRI,2023,0,0,1,1,1,1,1,3,0,0,1,1,5
+37,Super resolution using sparse sampling at portable ultra-low field MR,2024,0,0,1,1,1,0,1,2,0,0,1,1,4
+38,Bridging the gap: improving correspondence between low-field and high-field magnetic resonance images in young people,2024,0,0,1,1,1,0,1,2,0,0,1,1,4
+39,MRI Super-Resolution With Ensemble Learning and Complementary Priors,2020,1,1,0,2,0,0,0,0,0,1,1,2,4
+40,SRflow: Deep learning based super-resolution of 4D-flow MRI data,2022,0,0,1,1,0,0,1,1,0,0,1,1,3
+41,SMORE: A Self-Supervised Anti-Aliasing and Super-Resolution Algorithm for MRI Using Deep Learning,2021,1,1,1,3,0,0,1,1,0,0,1,1,5
+42,SMIR: A Transformer-Based Model for MRI super-resolution reconstruction,2021,0,0,1,1,0,0,0,0,0,1,1,2,3
+43,Autoencoder-Inspired Convolutional Network-Based Super-Resolution Method in MRI,2021,1,1,1,3,0,0,1,1,0,0,1,1,5
+44,A mass correlation based deep learning approach using deep Convolutional neural network to classify the brain tumor,2023,0,0,1,1,0,0,0,0,0,1,1,2,3
+45,Accuracy Enhancement in Detecting Pituitary Tumors using Deep Learning,2023,0,0,1,1,0,0,0,0,0,1,1,2,3
+46,A deep convolutional neural network based computer aided diagnosis system for the prediction of Alzheimer's disease in MRI images,2021,1,0,1,2,0,0,0,0,0,1,1,2,4
+47,A Novel Deep Learning Approach for Brain Tumors Classification Using MRI Images,2023,0,0,1,1,0,0,0,0,0,1,1,2,3
+48,Automatic myocardial segmentation in dynamic contrast enhanced perfusion MRI using Monte Carlo dropout in an encoder-decoder convolutional neural network,2020,0,0,1,1,0,0,1,1,0,0,1,1,3
