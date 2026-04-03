@@ -1,5 +1,6 @@
 # Data and environments
-data/
+data/.cache/
+data/temporal/
 .venv/
 .env
 .env.local
