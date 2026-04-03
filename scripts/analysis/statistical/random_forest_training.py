@@ -23,6 +23,7 @@ from utils import (normalize_architecture, normalize_dataset_type,
                    normalize_code_available, normalize_low_field_mentioned,
                    has_metric_reported, BASE_DIR, DATA_DIR, RESULTS_DIR, 
                    FIGURES_DIR, PROCESSING_DIR, CSV_PATH, setup_logging, log)
+from scripts.figures.mapper import LMIC_SCORE_MAP
 
 RANDOM_SEED = 42
 
@@ -36,13 +37,10 @@ def load_and_filter_data(log_file):
     df = df.dropna(subset=['Title'], how='all')
     df = df[df['Title'].notna() & (df['Title'].str.strip() != '')]
 
-    review_mask = (
-        df['Primary_Focus'].fillna('').str.lower().str.contains('survey|review') |
-        df['Notes_Questions'].fillna('').str.lower().str.contains('is a review|review - include') |
-        df['MRI_Application_Area'].fillna('').str.lower().str.contains('not mri|n/a')
-    )
-    df_clean = df[~review_mask].copy()
+    df_clean = df.copy()
 
+    # Map string labels to numeric before coercion
+    df_clean['LMIC_Relevance_Score'] = df_clean['LMIC_Relevance_Score'].astype(str).map(LMIC_SCORE_MAP).fillna(df_clean['LMIC_Relevance_Score'])
     df_clean['LMIC_Relevance_Score'] = pd.to_numeric(df_clean['LMIC_Relevance_Score'], errors='coerce')
     df_clean = df_clean.dropna(subset=['LMIC_Relevance_Score'])
     df_clean = df_clean[(df_clean['LMIC_Relevance_Score'] >= 1) & (df_clean['LMIC_Relevance_Score'] <= 5)]
@@ -141,7 +139,7 @@ def save_results(importances, feature_names, metrics, log_file):
 
     return fi_df
 
-def generate_figure(fi_df, log_file):
+def generate_figure(fi_df, metrics, log_file):
     """Generates the horizontal bar chart for Feature Importances."""
     fi_sorted = fi_df.sort_values('Importance', ascending=True)
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -164,7 +162,7 @@ def generate_figure(fi_df, log_file):
         ax.text(val + 0.005, i, f'{val:.3f}', va='center', fontsize=10, fontweight='bold', color='#333333')
 
     ax.set_xlabel('Feature Importance (Mean Decrease in Impurity)', fontsize=12, fontweight='bold')
-    ax.set_title('Random Forest Feature Importance for LMIC Relevance Score\nMRI Super Resolution Narrative Review (n=51 studies)',
+    ax.set_title(f'Random Forest Feature Importance for LMIC Relevance Score\nMRI Super Resolution Narrative Review (n={metrics["n_samples"]} studies)',
                  fontsize=13, fontweight='bold', pad=15)
 
     ax.spines['top'].set_visible(False)
@@ -196,7 +194,7 @@ def main():
         X, y, feature_names, _ = engineer_features(df_clean, log_file)
         model, importances, metrics = train_and_evaluate(X, y, feature_names, log_file)
         fi_df = save_results(importances, feature_names, metrics, log_file)
-        generate_figure(fi_df, log_file)
+        generate_figure(fi_df, metrics, log_file)
 
         log(log_file, "MODULE 1 COMPLETED SUCCESSFULLY")
 

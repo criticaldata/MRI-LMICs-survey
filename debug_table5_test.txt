@@ -1,0 +1,34 @@
+
+=== Table 5: Statistical Insights ===
+
+Panel A: Random Forest Feature Importance
+                Feature  Importance  Importance_%
+   Is_LowField_Hardware    0.345626     34.562630
+    Low_Field_Mentioned    0.246874     24.687356
+                 Is_CNN    0.088056      8.805636
+Has_Clinical_Validation    0.081785      8.178549
+               Has_PSNR    0.076973      7.697324
+                Is_UNet    0.070652      7.065154
+         Code_Available    0.048143      4.814335
+       Is_Clinical_Data    0.029092      2.909243
+                 Is_GAN    0.012798      1.279772
+         Is_Transformer    0.000000      0.000000
+Traceback (most recent call last):
+  File "C:\Users\intel\OneDrive - yachaytech.edu.ec\Escritorio\MRI super Resolution Narrative review\MRI-LMICs-survey\scripts\tables\table5_statistical_insights.py", line 62, in create_table5
+    print(f"\u2713 Saved: table5a_random_forest_features.csv\n")
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\intel\OneDrive - yachaytech.edu.ec\Escritorio\MRI super Resolution Narrative review\MRI-LMICs-survey\scripts\tables\table5_statistical_insights.py", line 112, in <module>
+    create_table5()
+  File "C:\Users\intel\OneDrive - yachaytech.edu.ec\Escritorio\MRI super Resolution Narrative review\MRI-LMICs-survey\scripts\tables\table5_statistical_insights.py", line 65, in create_table5
+    print(f"\u26a0 Error in Panel A: {e}")
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u26a0' in position 0: character maps to <undefined>

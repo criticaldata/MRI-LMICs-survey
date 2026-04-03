@@ -1,5 +1,5 @@
 """
-Tests para módulos de enriquecimiento de datos (World Bank).
+Tests for data enrichment modules (World Bank).
 """
 
 import sys
@@ -15,16 +15,16 @@ from mapper import load_data
 
 
 def test_cache_directory_exists():
-    """Test que el directorio de caché de datos existe."""
+    """Test that the data cache directory exists."""
     cache_path = Path("data/.cache")
     assert cache_path.exists(), "Cache directory doesn't exist"
 
 
 def test_data_enrichment_schema_integrity():
-    """Test que la carga de datos mantiene el esquema requerido."""
+    """Test that data loading maintains the required schema."""
     df = load_data()
     
-    # Debería haber al menos las columnas originales
+    # Should contain at least the original columns
     required_cols = {
         "Paper_ID", "Year", "LMIC_Score", "Application_Norm"
     }
@@ -36,7 +36,7 @@ def test_country_mapping_stub():
     # Note: Import depends on the sys.path.insert above
     from world_bank_mapper import get_world_bank_group, get_equity_classification
     
-    # Test la lógica de clasificación de equidad
+    # Test the equity classification logic
     assert get_equity_classification("HIC") == "HIC (High-Income / Parachute Risk)"
     assert get_equity_classification("LMIC") == "Global South (Local Research)"
     assert get_equity_classification("UNKNOWN") == "UNKNOWN (Manual Review)"

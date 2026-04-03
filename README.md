@@ -29,7 +29,7 @@ python scripts/tables/table6_geographic_equity.py
 The pipeline now includes advanced analytics for manuscript revision:
 - **Random Forest Feature Importance**: Predicts LMIC relevance.
 - **Mann-Whitney U Tests**: Pairwise comparison of study characteristics.
-- **Fleiss' Kappa**: Inter-rater reliability (11 reviewers).
+- **Fleiss' Kappa**: Inter-rater reliability (2 raters, N=9 subset).
 - **Geographic Equity**: World Bank income classification mapping.
 
 ## Generate Individual Outputs
@@ -57,11 +57,11 @@ python scripts/tables/table6_geographic_equity.py          # Table 6: Geographic
 uv run pytest tests/ -v
 ```
 
-All 20+ tests should pass.
+All **24** tests should pass (`pytest tests/ -v`).
 
 ## Data
 
-Source data: `data/data-clean.csv` (48 primary studies, 11 reviewers).
+Source data: `data/data-clean.csv` (48 primary studies, 2 raters for calibration).
 Corrected dataset (v1.1.0) refined from the original pool.
 
 ## Key Findings (Updated)
@@ -69,9 +69,30 @@ Corrected dataset (v1.1.0) refined from the original pool.
 | Metric | Value |
 |--------|-------|
 | Papers included (Primary Studies) | 48 |
-| Inter-rater Agreement (Fleiss' Kappa) | 0.42 (Moderate) |
-| High LMIC relevance (Score 4–5) | 17 (33.3%) |
+| Inter-rater Agreement (Fleiss' Kappa) | 0.70 (Substantial) |
+| High LMIC relevance (Score 4–5) | 19 (39.6%) |
 | Random Forest Top Predictor | Field Strength Accessibility |
 | Dominant Region | High-Income Countries (HIC) |
 
+## Output Traceability
 
+Mapping of generated outputs tracking exactly which script produces which manuscript component:
+
+| Component | Generator Script | Output Artifact |
+| --------- | ---------------- | --------------- |
+| **Figure 1** (Trends) | `fig1_year_distribution.py` | `figures/main/pdf/Figure_1_Publication_Trends.pdf` |
+| **Figure 2** (Models) | `fig2_architecture_distribution.py`| `figures/main/pdf/Figure_2_Architecture_Landscape.pdf` |
+| **Figure 3** (LMIC) | `fig3_lmic_relevance.py` | `figures/main/pdf/Figure_3_LMIC_Relevance.pdf` |
+| **Figure 4** (Metrics) | `fig4_performance_comparison.py` | `figures/main/pdf/Figure_4_Performance_Metrics.pdf` |
+| **Figure 5** (Fields) | `fig5_field_strength_application.py`| `figures/main/pdf/Figure_5_Field_Strength.pdf` |
+| **Table 1** (Descriptive) | `table1_study_characteristics.py`| `tables/Table 1 - Study Characteristics.csv` |
+| **Table 2** (AI Archs) | `table2_ai_architectures.py` | `tables/Table 2 - AI Architectures.csv` |
+| **Table 3** (Perform.) | `table3_performance_metrics.py` | `tables/Table 3 - Performance Metrics.csv` |
+| **Table 4** (Qualitative) | `table4_lmic_applicability.py`| `tables/Table 4 - LMIC Applicability.csv` |
+| **Table 5** (Stats/RF) | `table5_statistical_insights.py` | `tables/Table 5 - Statistical Insights.csv` |
+| **Table 6** (Geography) | `table6_geographic_equity.py` | `tables/Table 6[A/B/C] - Geographic Equity.csv` |
+
+## Citation
+
+If you use this repository, data, or pipeline in your work, please cite the corresponding manuscript and software. See the robust metadata in `CITATION.cff` or reference:
+*(Manuscript DOI/Zenodo pending publication in NMI)*

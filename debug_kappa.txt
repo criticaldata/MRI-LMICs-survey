@@ -1,0 +1,18 @@
+=== FLEISS KAPPA MATRIX ===
+   Paper_ID  Mateo  Hillary
+0        17      2        2
+1         7      2        2
+2        12      1        1
+3        47      2        1
+4        18      4        1
+5        30      4        4
+6        45      5        5
+7        46      5        5
+8        41      5        5
+N_subjects = 9
+N_raters = 2
+Kappa = 0.6975
+SE = 0.1985
+95%CI = [0.3084, 1.0865]
+Z = 3.5137, p = 0.000442
+Categories used: [np.int64(1), np.int64(2), np.int64(4), np.int64(5)]

@@ -28,14 +28,5 @@ data/.cache/
 # Test artifacts
 .pytest_cache/
 
-# Figures and temporary outputs
-# docs/ <- Removed to allow documentation files
-data/
-docs/*.md
-
-
-figures/supplementary
-figures/main/*.pdf
-figures/main/*.png
-!figures/main/.gitkeep
+# Temporary processing outputs
 06_processing_outputs/

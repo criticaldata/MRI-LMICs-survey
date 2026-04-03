@@ -1,5 +1,5 @@
 """
-Tests para módulos de análisis estadístico.
+Tests for statistical analysis modules.
 """
 
 import sys
@@ -15,14 +15,14 @@ from mapper import load_data
 
 
 def test_data_loads_correctly():
-    """Test que load_data retorna 51 papers."""
+    """Test that load_data returns 48 papers."""
     df = load_data()
-    assert len(df) == 51, f"Expected 51 papers, got {len(df)}"
+    assert len(df) == 48, f"Expected 48 papers, got {len(df)}"
     assert "LMIC_Score" in df.columns
 
 
 def test_random_seed_reproducibility():
-    """Test que np.random.seed(42) produce resultados reproducibles."""
+    """Test that np.random.seed(42) produces reproducible results."""
     np.random.seed(42)
     array1 = np.random.rand(10)
     
@@ -33,7 +33,7 @@ def test_random_seed_reproducibility():
 
 
 def test_random_forest_preparation():
-    """Test que la preparación de features para RF funciona."""
+    """Test that feature preparation for RF works."""
     from random_forest_training import engineer_features
     import io
     
@@ -42,9 +42,9 @@ def test_random_forest_preparation():
     log_file = io.StringIO()
     X, y, features, _ = engineer_features(df, log_file)
     
-    assert X.shape[0] == 51, f"Expected 51 samples, got {X.shape[0]}"
+    assert X.shape[0] == 48, f"Expected 48 samples, got {X.shape[0]}"
     assert len(features) > 0, "No features identified"
-    assert len(y) == 51, "Target vector length mismatch"
+    assert len(y) == 48, "Target vector length mismatch"
 
 
 if __name__ == "__main__":

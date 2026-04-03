@@ -4,6 +4,7 @@ import numpy as np
 # Reproducibility
 np.random.seed(42)
 from scipy.stats import mannwhitneyu, chi2_contingency, fisher_exact
+from statsmodels.stats.multitest import multipletests
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -21,6 +22,7 @@ from utils import (has_metric_reported, normalize_code_available,
                    normalize_low_field_mentioned, normalize_field_strength, 
                    normalize_dataset_type, BASE_DIR, DATA_DIR, RESULTS_DIR, 
                    FIGURES_DIR, PROCESSING_DIR, CSV_PATH, setup_logging, log)
+from scripts.figures.mapper import LMIC_SCORE_MAP
 
 
 def load_and_prepare(log_file):
@@ -31,17 +33,11 @@ def load_and_prepare(log_file):
     df = df.dropna(subset=['Title'], how='all')
     df = df[df['Title'].notna() & (df['Title'].str.strip() != '')]
 
-    review_mask = (
-        df['Primary_Focus'].fillna('').str.lower().str.contains('survey|review') |
-        df['Notes_Questions'].fillna('').str.lower().str.contains('is a review|review - include') |
-        df['MRI_Application_Area'].fillna('').str.lower().str.contains('not mri|n/a')
-    )
-    df = df[~review_mask].copy()
-
     df['Reports_PSNR'] = df['PSNR_Value'].apply(has_metric_reported)
     df['Reports_SSIM'] = df['SSIM_Value'].apply(has_metric_reported)
     df['Reports_Any_Metric'] = ((df['Reports_PSNR'] == 1) | (df['Reports_SSIM'] == 1)).astype(int)
 
+    df['LMIC_Relevance_Score'] = df['LMIC_Relevance_Score'].astype(str).map(LMIC_SCORE_MAP).fillna(df['LMIC_Relevance_Score'])
     df['LMIC_Relevance_Score'] = pd.to_numeric(df['LMIC_Relevance_Score'], errors='coerce')
     df['Code_Binary'] = df['Code_Available'].apply(normalize_code_available)
     df['LowField_Binary'] = df['Low_Field_Mentioned'].apply(normalize_low_field_mentioned)
@@ -296,10 +292,18 @@ def main():
         df = load_and_prepare(log_file)
 
         mw_results = run_mann_whitney(df, log_file)
+        chi_results = run_chi_square(df, log_file)
+
+        # Apply FDR correction across all hypothesis tests
+        all_p_values = list(mw_results['p_value']) + list(chi_results['p_value'])
+        reject, q_values, _, _ = multipletests(all_p_values, alpha=0.05, method='fdr_bh')
+        
+        mw_results['q_value_fdr'] = q_values[:len(mw_results)]
+        chi_results['q_value_fdr'] = q_values[len(mw_results):]
+
         mw_path = os.path.join(RESULTS_DIR, 'module2_mann_whitney_results.csv')
         mw_results.to_csv(mw_path, index=False, encoding='utf-8')
 
-        chi_results = run_chi_square(df, log_file)
         chi_path = os.path.join(RESULTS_DIR, 'module2_chi_square_results.csv')
         chi_results.to_csv(chi_path, index=False, encoding='utf-8')
 

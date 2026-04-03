@@ -1,0 +1,47 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\intel\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\intel\OneDrive - yachaytech.edu.ec\Escritorio\MRI super Resolution Narrative review\MRI-LMICs-survey
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collecting ... collected 24 items
+
+tests/analysis/test_data_enrichment.py::test_cache_directory_exists PASSED [  4%]
+tests/analysis/test_data_enrichment.py::test_data_enrichment_schema_integrity PASSED [  8%]
+tests/analysis/test_data_enrichment.py::test_country_mapping_stub PASSED [ 12%]
+tests/analysis/test_data_validation.py::test_csv_exists PASSED           [ 16%]
+tests/analysis/test_data_validation.py::test_data_has_51_papers FAILED   [ 20%]
+tests/analysis/test_data_validation.py::test_required_columns PASSED     [ 25%]
+tests/analysis/test_data_validation.py::test_normalized_columns_created PASSED [ 29%]
+tests/analysis/test_data_validation.py::test_lmic_scores_in_range PASSED [ 33%]
+tests/analysis/test_data_validation.py::test_ssim_in_valid_range PASSED  [ 37%]
+tests/analysis/test_data_validation.py::test_year_range PASSED           [ 41%]
+tests/analysis/test_data_validation.py::test_all_extractions_complete PASSED [ 45%]
+tests/analysis/test_statistical_analysis.py::test_data_loads_correctly PASSED [ 50%]
+tests/analysis/test_statistical_analysis.py::test_random_seed_reproducibility PASSED [ 54%]
+tests/analysis/test_statistical_analysis.py::test_random_forest_preparation PASSED [ 58%]
+tests/test_data_consistency.py::test_mapper_and_rf_data_consistency PASSED [ 62%]
+tests/test_figure_generation.py::test_all_figure_scripts_exist PASSED    [ 66%]
+tests/test_figure_generation.py::test_all_table_scripts_exist PASSED     [ 70%]
+tests/test_figure_generation.py::test_mapper_importable PASSED           [ 75%]
+tests/test_figure_generation.py::test_table_generation[table1_study_characteristics.py] PASSED [ 79%]
+tests/test_figure_generation.py::test_table_generation[table2_ai_architectures.py] PASSED [ 83%]
+tests/test_figure_generation.py::test_table_generation[table3_performance_metrics.py] PASSED [ 87%]
+tests/test_figure_generation.py::test_table_generation[table4_lmic_applicability.py] PASSED [ 91%]
+tests/test_figure_generation.py::test_figure_generation_smoke[fig1_year_distribution.py] PASSED [ 95%]
+tests/test_figure_generation.py::test_figure_generation_smoke[fig2_architecture_distribution.py] PASSED [100%]
+
+================================== FAILURES ===================================
+___________________________ test_data_has_51_papers ___________________________
+
+    def test_data_has_51_papers():
+        df = load_data()
+>       assert len(df) == 51, f"Expected 51 papers, got {len(df)}"
+E       AssertionError: Expected 51 papers, got 48
+E       assert 48 == 51
+E        +  where 48 = len(    Paper_ID Assigned_Reviewer  ... PSNR_Numeric SSIM_Numeric\n0          1        Reviewer_1  ...          NaN          NaN\n1          2        Reviewer_1  ...          NaN          NaN\n2          3        Reviewer_1  ...          NaN          NaN\n3          4        Reviewer_1  ...          NaN          NaN\n4          5        Reviewer_1  ...          NaN          NaN\n5          6        Reviewer_1  ...          NaN          NaN\n6          7        Reviewer_2  ...          NaN          NaN\n7          8        Reviewer_2  ...          NaN          NaN\n8          9        Reviewer_2  ...          NaN          NaN\n9         10        Reviewer_2  ...          NaN          NaN\n10        11        Reviewer_2  ...          NaN          NaN\n11        12        Reviewer_3  ...      24.6300       0.7847\n12        13        Reviewer_3  ...      37.3100       0.9570\n13        14        Reviewer_3  ...      41.6400       0.9895\n14        15        Reviewer_4  ...      36.2200          NaN\n15        16        Reviewer_4  ...          NaN          NaN\n16        17        Reviewer_4  ...      37.0900       0.9796\n17        18        Reviewer_4  ...          NaN          NaN\n18        19        ...        30        Reviewer_8  ...      29.2600       0.9270\n30        31        Reviewer_8  ...          NaN          NaN\n31        32        Reviewer_8  ...      56.6000       0.8800\n32        33        Reviewer_8  ...          NaN          NaN\n33        34        Reviewer_9  ...      35.3900       0.9875\n34        35        Reviewer_9  ...      29.1210       0.8960\n35        36        Reviewer_9  ...          NaN          NaN\n36        37        Reviewer_9  ...          NaN          NaN\n37        38        Reviewer_9  ...          NaN          NaN\n38        39       Reviewer_10  ...      36.0600       0.9200\n39        40       Reviewer_10  ...          NaN          NaN\n40        41       Reviewer_10  ...      29.0000       0.7500\n41        42       Reviewer_10  ...          NaN          NaN\n42        43       Reviewer_10  ...      26.5300       0.8000\n43        44       Reviewer_11  ...          NaN          NaN\n44        45       Reviewer_11  ...          NaN          NaN\n45        46       Reviewer_11  ...      47.3989          NaN\n46        47       Reviewer_11  ...          NaN          NaN\n47        48       Reviewer_11  ...          NaN          NaN\n\n[48 rows x 44 columns])
+
+tests\analysis\test_data_validation.py:23: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/analysis/test_data_validation.py::test_data_has_51_papers - Asse...
+======================== 1 failed, 23 passed in 20.74s ========================

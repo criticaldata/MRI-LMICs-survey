@@ -77,8 +77,8 @@ def compute_fleiss_kappa(ratings_matrix, log_file):
     else:
         se = 0.0
 
-    ci_lower = kappa - 1.96 * se
-    ci_upper = kappa + 1.96 * se
+    ci_lower = max(-1.0, kappa - 1.96 * se)
+    ci_upper = min(1.0, kappa + 1.96 * se)
 
     if se > 0:
         z_stat = kappa / se

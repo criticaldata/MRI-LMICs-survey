@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software or dataset, please cite it as below."
+authors:
+  - family-names: "Gavilanes Chavez"
+    given-names: "Isaac Mateo"
+    email: "isaac.gavilanes@yachaytech.edu.ec"
+    orcid: "https://orcid.org/0009-0004-0737-2488"
+  - family-names: "Cajas"
+    given-names: "Sebastián"
+    email: "sebasmos@mit.edu"
+    orcid: "https://orcid.org/0000-0003-0579-6178"
+title: "MRI-LMICs-survey: Statistical and Scientometric Analysis Pipeline"
+version: 1.1.0
+date-released: 2026-04-03
+url: "https://github.com/criticaldata/MRI-LMICs-survey"
+repository-code: "https://github.com/criticaldata/MRI-LMICs-survey"
+abstract: |
+  A robust scientometric and statistical analysis pipeline that evaluates geographic equity 
+  and application scope in MRI super-resolution literature. It orchestrates automated extraction 
+  from OpenAlex/World Bank APIs, conducts non-parametric tests (Mann-Whitney U) with FDR corrections, 
+  assesses inter-rater reliability via Fleiss' Kappa, and applies Random Forest exploratory analytics 
+  to contextualize research relevance for Low- and Middle-Income Countries (LMICs).
+keywords:
+  - "scientometrics"
+  - "MRI"
+  - "super-resolution"
+  - "geographic equity"
+  - "global health"
+license: "MIT"
