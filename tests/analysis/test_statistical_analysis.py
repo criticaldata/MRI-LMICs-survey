@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 
 # Add project root and relevant scripts to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "scripts" / "figures"))
-sys.path.insert(0, str(Path(__file__).parent.parent / "scripts" / "analysis" / "statistical"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts" / "figures"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts" / "analysis" / "statistical"))
 
 import pytest
 import numpy as np

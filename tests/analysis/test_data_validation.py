@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 # Allow imports from scripts/figures
-sys.path.insert(0, str(Path(__file__).parent.parent / "scripts" / "figures"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts" / "figures"))
 
 from mapper import load_data, get_project_root
 

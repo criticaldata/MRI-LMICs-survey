@@ -6,8 +6,9 @@ import sys
 from pathlib import Path
 
 # Add project root and figures/data_enrichment to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "scripts" / "figures"))
-sys.path.insert(0, str(Path(__file__).parent.parent / "scripts" / "data_enrichment"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts" / "figures"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts" / "data_enrichment"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts" / "data_enrichment" / "world_bank"))
 
 import pytest
 from mapper import load_data
@@ -32,8 +33,8 @@ def test_data_enrichment_schema_integrity():
 
 
 def test_country_mapping_stub():
-    """Test que el mapeo de países (world_bank_mapper) funciona correctamente."""
-    from world_bank.world_bank_mapper import get_world_bank_group, get_equity_classification
+    # Note: Import depends on the sys.path.insert above
+    from world_bank_mapper import get_world_bank_group, get_equity_classification
     
     # Test la lógica de clasificación de equidad
     assert get_equity_classification("HIC") == "HIC (High-Income / Parachute Risk)"
