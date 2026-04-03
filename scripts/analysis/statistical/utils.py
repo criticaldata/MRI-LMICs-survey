@@ -3,12 +3,13 @@ import sys
 import pandas as pd
 from datetime import datetime
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, '01_data')
-RESULTS_DIR = os.path.join(BASE_DIR, '03_results')
-FIGURES_DIR = os.path.join(BASE_DIR, '04_figures')
+# Project root calculation: scripts/analysis/statistical/utils.py -> root
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+RESULTS_DIR = os.path.join(BASE_DIR, 'tables')
+FIGURES_DIR = os.path.join(BASE_DIR, 'figures')
 PROCESSING_DIR = os.path.join(BASE_DIR, '06_processing_outputs')
-CSV_PATH = os.path.join(DATA_DIR, 'MRI_SR_Extraction_ISAAC_CORRECTED.csv')
+CSV_PATH = os.path.join(DATA_DIR, 'data-clean.csv')
 
 def setup_logging(log_filename, module_title):
     os.makedirs(PROCESSING_DIR, exist_ok=True)

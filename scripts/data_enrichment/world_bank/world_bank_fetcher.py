@@ -4,18 +4,24 @@ import requests
 import pandas as pd
 from dotenv import load_dotenv
 from tqdm import tqdm
+import sys
+
+# Project root calculation: scripts/data_enrichment/world_bank/world_bank_fetcher.py -> root
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+# Add scripts/data_enrichment to path so it can find world_bank.world_bank_mapper if needed, 
+# but here they are in the same folder.
+# We add the folder itself to sys.path to ensure 'import world_bank_mapper' works.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from world_bank_mapper import get_world_bank_group, get_equity_classification
 
 # Load .env variables
-load_dotenv()
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 OPENALEX_MAIL = os.getenv('OPENALEX_MAIL', 'polite_pool@example.com')
 
 # Paths
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ROOT_DIR = os.path.dirname(BASE_DIR)
-DATA_PATH = os.path.join(ROOT_DIR, 'DOCS', 'MRI_SR_Extraction_Template-finished.xlsx - Data_Extraction.csv')
-RESULTS_DIR = os.path.join(BASE_DIR, '03_results')
+DATA_PATH = os.path.join(BASE_DIR, 'data', 'data-clean.csv')
+RESULTS_DIR = os.path.join(BASE_DIR, 'tables')
 OUTPUT_PATH = os.path.join(RESULTS_DIR, 'Author_Equity_Analysis.csv')
 
 def get_doi_from_crossref(title):
@@ -112,10 +118,14 @@ def fetch_openalex_authors(doi):
 
 def main():
     print("===================================================================")
-    print("🚀 INITIALIZING SCIENTOMETRICS PIPELINE (PARACHUTE RESEARCH EXTRACTOR)")
+    print("INITIALIZING SCIENTOMETRICS PIPELINE (PARACHUTE RESEARCH EXTRACTOR)")
     print("===================================================================")
     print(f"Loading data from: {DATA_PATH}")
     
+    if not os.path.exists(DATA_PATH):
+        print(f"ERROR: Data file not found at {DATA_PATH}")
+        return
+
     try:
         df = pd.read_csv(DATA_PATH, encoding='utf-8')
     except UnicodeDecodeError:
@@ -124,14 +134,19 @@ def main():
     print(f"Total Papers Found: {len(df)}")
     
     # We only care about papers with a valid title or URL
-    df = df.dropna(subset=['Title', 'URL'], how='all')
+    # Map 'URL' if the csv has it under a different name
+    if 'URL' not in df.columns:
+        # Check if 'URL' is hidden or named differently (e.g. Paper_URL)
+        pass
+
+    df = df.dropna(subset=['Title'], how='all')
     print(f"Valid DOIs to process: {len(df)}")
     
     results = []
     
     # We use tqdm for a nice terminal progress bar
     for index, row in tqdm(df.iterrows(), total=len(df), desc="Querying OpenAlex API"):
-        study_id = row.iloc[0] # Assuming first col is ID
+        study_id = row.get('Paper_ID', row.iloc[0])
         title = row.get('Title', 'Unknown')
         raw_url = row.get('URL', '')
         
@@ -172,7 +187,7 @@ def main():
                 'Equity_Classification': equity
             })
         
-    print("\n✅ Extraction Complete! Compiling Supplement CSV...")
+    print("\nExtraction Complete! Compiling Supplement CSV...")
     
     # Save the parsed supplementary tracking table
     os.makedirs(RESULTS_DIR, exist_ok=True)
@@ -180,16 +195,17 @@ def main():
     out_df.to_csv(OUTPUT_PATH, index=False, encoding='utf-8')
     
     # Print Quick Analytical Summary to Terminal
-    hic_authors = len(out_df[out_df['WorldBank_Group'] == 'HIC'])
-    lmic_authors = len(out_df[out_df['WorldBank_Group'].isin(['UMIC', 'LMIC', 'LIC'])])
-    
-    print("===================================================================")
-    print("📊 PARACHUTE RESEARCH FAST SUMMARY (ALL AUTHORS):")
-    print(f"Total Authors Processed: {len(out_df)}")
-    print(f"Authors from HIC (High Income): {hic_authors}")
-    print(f"Authors from Global South (UMIC/LMIC/LIC): {lmic_authors}")
-    print(f"Result Saved To: {OUTPUT_PATH}")
-    print("===================================================================")
+    if 'WorldBank_Group' in out_df.columns:
+        hic_authors = len(out_df[out_df['WorldBank_Group'] == 'HIC'])
+        lmic_authors = len(out_df[out_df['WorldBank_Group'].isin(['UMIC', 'LMIC', 'LIC'])])
+        
+        print("===================================================================")
+        print("PARACHUTE RESEARCH FAST SUMMARY (ALL AUTHORS):")
+        print(f"Total Authors Processed: {len(out_df)}")
+        print(f"Authors from HIC (High Income): {hic_authors}")
+        print(f"Authors from Global South (UMIC/LMIC/LIC): {lmic_authors}")
+        print(f"Result Saved To: {OUTPUT_PATH}")
+        print("===================================================================")
 
 if __name__ == '__main__':
     main()
