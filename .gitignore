@@ -30,6 +30,10 @@ data/.cache/
 
 # Figures and temporary outputs
 # docs/ <- Removed to allow documentation files
+data/
+docs/*.md
+
+
 figures/supplementary
 figures/main/*.pdf
 figures/main/*.png

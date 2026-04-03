@@ -32,8 +32,6 @@ The pipeline now includes advanced analytics for manuscript revision:
 - **Fleiss' Kappa**: Inter-rater reliability (11 reviewers).
 - **Geographic Equity**: World Bank income classification mapping.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
-
 ## Generate Individual Outputs
 
 ```bash
@@ -63,21 +61,17 @@ All 20+ tests should pass.
 
 ## Data
 
-Source data: `data/data-clean.csv` (51 primary studies, 11 reviewers).
-Corrected dataset (v1.1.0) refined from the original 56-paper pool.
+Source data: `data/data-clean.csv` (48 primary studies, 11 reviewers).
+Corrected dataset (v1.1.0) refined from the original pool.
 
 ## Key Findings (Updated)
 
 | Metric | Value |
 |--------|-------|
-| Papers included (Primary Studies) | 51 |
+| Papers included (Primary Studies) | 48 |
 | Inter-rater Agreement (Fleiss' Kappa) | 0.42 (Moderate) |
 | High LMIC relevance (Score 4–5) | 17 (33.3%) |
 | Random Forest Top Predictor | Field Strength Accessibility |
 | Dominant Region | High-Income Countries (HIC) |
 
-## More Information
 
-- **Architecture:** See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- **Methodology:** See [docs/STATISTICAL_METHODS.md](docs/STATISTICAL_METHODS.md)
-- **Development:** See [CONTRIBUTING.md](CONTRIBUTING.md)
