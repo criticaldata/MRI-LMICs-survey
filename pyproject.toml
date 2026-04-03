@@ -1,6 +1,6 @@
 [project]
 name = "mri-lmics-survey"
-version = "1.0.0"
+version = "1.1.0"
 description = "Analysis and figures for: Deep Learning Super-Resolution for MRI — Technical Advances and Translational Potential for Low-Resource Settings"
 requires-python = ">=3.11"
 dependencies = [
@@ -9,11 +9,22 @@ dependencies = [
     "matplotlib>=3.8.0",
     "seaborn>=0.13.0",
     "openpyxl>=3.1.0",
+    "scikit-learn>=1.3.0,<2.0.0",
+    "scipy>=1.10.0,<2.0.0",
+    "requests>=2.31.0,<3.0.0",
+    "python-dotenv>=1.0.0,<2.0.0",
+    "joblib>=1.3.0,<2.0.0",
+    "statsmodels>=0.14.0,<1.0.0",
+    "tqdm>=4.66.0,<5.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "isort>=5.12.0",
+    "tqdm>=4.66.0",
 ]
 
 [build-system]
@@ -24,3 +35,17 @@ build-backend = "hatchling.build"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_functions = "test_*"
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+select = ["E", "W", "F", "I", "B", "A"]
+ignore = ["E501", "W503"]
+
+[tool.isort]
+profile = "black"
+line_length = 88

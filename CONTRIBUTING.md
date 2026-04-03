@@ -46,30 +46,36 @@ The project includes comprehensive tests to ensure reproducibility and correctne
 pytest tests/ -v
 
 # Run specific test categories
-pytest tests/test_data_validation.py -v    # Test data integrity
-pytest tests/test_figure_generation.py -v  # Test figure generation (smoke tests)
+pytest tests/analysis/test_data_validation.py -v   # Test data integrity
+pytest tests/test_data_consistency.py -v           # Mapper / RF / Mann–Whitney N alignment
+pytest tests/test_figure_generation.py -v        # Figure generation (smoke tests)
+pytest tests/analysis/test_statistical_analysis.py -v
 ```
 
 ### Test Coverage
 
 The test suite includes:
 
-1. **Data Validation Tests** ([tests/test_data_validation.py](tests/test_data_validation.py))
-   - Verifies `data/mri_sr_extraction.csv` exists
-   - Checks for 56 papers with all required columns
+1. **Data Validation Tests** ([tests/analysis/test_data_validation.py](tests/analysis/test_data_validation.py))
+   - Verifies `data/data-clean.csv` exists
+   - Checks for 48 papers with all required columns
    - Validates normalized columns are created correctly
    - Ensures LMIC scores are in valid range (1–5)
    - Validates SSIM values are in [0, 1]
    - Checks year range (2019–2026)
    - Confirms all extractions are marked complete
 
-2. **Figure Generation Tests** ([tests/test_figure_generation.py](tests/test_figure_generation.py))
-   - Verifies all 5 figure scripts and 4 table scripts exist
+2. **Data consistency** ([tests/test_data_consistency.py](tests/test_data_consistency.py)): mapper vs Random Forest vs Mann–Whitney share the same effective *N* and numeric LMIC score.
+
+3. **Statistical smoke tests** ([tests/analysis/test_statistical_analysis.py](tests/analysis/test_statistical_analysis.py)): `load_data` and `engineer_features` on the canonical CSV.
+
+4. **Figure Generation Tests** ([tests/test_figure_generation.py](tests/test_figure_generation.py))
+   - Verifies all 5 figure scripts and table scripts exist
    - Tests mapper.py is importable
-   - Parametrized smoke tests for all 4 table scripts
+   - Parametrized smoke tests for `TABLE_SCRIPTS` in `test_figure_generation.py` (tables 1–4); run `table5_statistical_insights.py` and `table6_geographic_equity.py` per README for full analytics outputs
    - Smoke tests for first 2 figure scripts
 
-Expected: **17 tests passing** in ~8–10 seconds
+Expected: **24 tests passing** in ~4–6 seconds
 
 ### Adding New Tests
 
@@ -84,7 +90,7 @@ When adding new figure scripts or modifying existing ones:
 ```
 MRI-LMICs-survey/
 ├── data/
-│   └── mri_sr_extraction.csv      # Source data (56 papers, 32 fields)
+│   └── data-clean.csv             # Source data (48 primary studies)
 ├── scripts/
 │   ├── figures/
 │   │   ├── mapper.py              # Centralized mappings, utilities, color schemes
@@ -101,8 +107,12 @@ MRI-LMICs-survey/
 │       └── pdf/                   # Supplementary figures
 ├── tables/                        # Generated CSV tables
 ├── tests/
-│   ├── test_data_validation.py    # Data integrity tests
-│   └── test_figure_generation.py  # Figure generation smoke tests
+│   ├── test_data_consistency.py   # Triple-loader N alignment
+│   ├── test_figure_generation.py  # Figure / table smoke tests
+│   └── analysis/
+│       ├── test_data_validation.py
+│       ├── test_statistical_analysis.py
+│       └── test_data_enrichment.py
 ├── pyproject.toml                 # Project configuration and dependencies
 ├── README.md                      # Quick start guide
 └── CONTRIBUTING.md                # This file
@@ -116,7 +126,7 @@ All figures use `np.random.seed(42)` for reproducible layouts and jittering. To 
 
 1. **Same Python version:** Use Python 3.11 or 3.12
 2. **Same dependencies:** Install using `uv` or the exact versions in [pyproject.toml](pyproject.toml)
-3. **Same data:** Use the provided [data/mri_sr_extraction.csv](data/mri_sr_extraction.csv)
+3. **Same data:** Use the provided [data/data-clean.csv](data/data-clean.csv)
 4. **Run from repository root:** Always run scripts from the repository root directory
 
 ### Verification Steps
@@ -128,7 +138,7 @@ Complete verification workflow:
 python --version  # Should be 3.11+
 
 # 2. Verify data integrity
-pytest tests/test_data_validation.py -v
+pytest tests/analysis/test_data_validation.py -v
 
 # 3. Verify figure generation works
 pytest tests/test_figure_generation.py -v
@@ -240,15 +250,15 @@ All dependencies are managed in [pyproject.toml](pyproject.toml):
 
 ## Data
 
-- **Source:** `data/mri_sr_extraction.csv` (56 papers, 32 extraction fields)
-- **Reviewers:** 11 team members extracted 5–8 papers each
+- **Source:** `data/data-clean.csv` (48 papers, extracted from the original pool)
+- **Reviewers:** 2 raters calibrated using a N=9 paper subset
 - **Scope:** MRI super-resolution papers published 2020–2025
 - **LMIC scoring:** 1–5 scale assessing relevance to low- and middle-income countries
 
 ### Data Validation
 
 The data is validated by automated tests to ensure:
-- All 56 papers are present and marked as extraction complete
+- All 48 primary studies are present and marked as extraction complete
 - Required columns exist (Paper_ID, Title, Year, etc.)
 - LMIC scores are in valid range (1–5)
 - SSIM values are in valid range (0–1)

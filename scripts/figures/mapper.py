@@ -278,6 +278,7 @@ def load_data(data_path=None):
     df["Architecture_Norm"] = df["AI_Architecture"].map(ARCHITECTURE_MAP).fillna("Other")
     df["Dataset_Type_Norm"] = df["Dataset_Type"].map(DATASET_TYPE_MAP).fillna("Other")
     df["LMIC_Score"] = df["LMIC_Relevance_Score"].astype(str).map(LMIC_SCORE_MAP)
+    df["LMIC_Relevance_Score"] = pd.to_numeric(df["LMIC_Score"], errors='coerce')
     df["Low_Field_Norm"] = df["Low_Field_Mentioned"].map(YES_NO_MAP).fillna("No")
     df["Resource_Constraints_Norm"] = df["Resource_Constraints_Addressed"].map(YES_NO_MAP).fillna("Yes")
     df["Code_Available_Norm"] = df["Code_Available"].map(CODE_AVAILABLE_MAP).fillna("No")

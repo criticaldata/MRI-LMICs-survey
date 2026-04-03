@@ -1,0 +1,10 @@
+Application_Norm,count,mean,median,std
+Abdominal,2,3.5,3.5,0.71
+Brain,24,3.5,4.0,0.93
+Cardiac,4,2.25,2.0,0.5
+Flow,3,3.0,3.0,0.0
+General,5,3.4,3.0,0.55
+Musculoskeletal,7,2.86,3.0,1.35
+Other,1,3.0,3.0,
+Pediatric,1,4.0,4.0,
+Prostate,1,3.0,3.0,
