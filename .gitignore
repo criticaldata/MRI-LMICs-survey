@@ -29,7 +29,7 @@ data/.cache/
 .pytest_cache/
 
 # Figures and temporary outputs
-docs/
+# docs/ <- Removed to allow documentation files
 figures/supplementary
 figures/main/*.pdf
 figures/main/*.png
