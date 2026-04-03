@@ -270,7 +270,7 @@ print("=== Suggested Methods Language ===")
 print("=" * 60)
 print(
     f'"While a formal calibration exercise was not performed, reviewer scoring distributions\n'
-    f'were analyzed across all 11 reviewers (n=4-8 papers each). Reviewer-level mean LMIC\n'
+    f'were analyzed across the 2 raters (n=9 calibration papers). Reviewer-level mean LMIC\n'
     f'scores ranged from {reviewer_min_mean:.1f} to {reviewer_max_mean:.1f} '
     f'(grand mean {grand_mean:.1f} ± {grand_std:.1f} SD), indicating systematic\n'
     f'between-reviewer variation. Bias-corrected scores were computed by subtracting each\n'

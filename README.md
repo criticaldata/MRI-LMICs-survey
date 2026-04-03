@@ -1,8 +1,8 @@
-# MRI-LMICs Survey — Figure & Table Generation
+# MRI-LMICs Survey — Figure, Table & Statistical Analysis Pipeline
 
 Analysis pipeline for: *Deep Learning Super-Resolution for MRI: Technical Advances and Translational Potential for Low-Resource Settings*
 
-Generates all figures (5 main + supplementary) and tables (4 main) for the MRI super-resolution narrative review targeting Nature Machine Intelligence.
+Generates all figures (5 main + supplementary) and tables (6 main) for the MRI super-resolution narrative review targeting Nature Machine Intelligence.
 
 ## Quick Start
 
@@ -10,25 +10,29 @@ Generates all figures (5 main + supplementary) and tables (4 main) for the MRI s
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-uv pip install -e .
+# Install dependencies and sync virtual environment
+uv sync
 
 # Generate all figures and tables
 python scripts/figures/generate_all_figures.py
+python scripts/tables/table5_statistical_insights.py
+python scripts/tables/table6_geographic_equity.py
 ```
-
-That's it! Your outputs will be in:
-- `figures/main/png/` and `figures/main/pdf/` (5 main figures)
-- `tables/` (9 CSV table files covering 4 tables)
 
 ## Requirements
 
 - Python 3.11 or higher
 - [uv](https://github.com/astral-sh/uv) package manager
 
-## Generate Individual Figures
+## Statistical & Geographic Equity Pipeline
+
+The pipeline includes advanced analytics for manuscript revision:
+- **Random Forest Feature Importance**: Predicts LMIC relevance.
+- **Mann-Whitney U Tests**: Pairwise comparison of study characteristics.
+- **Fleiss' Kappa**: Inter-rater reliability (2 raters, N=9 subset).
+- **Geographic Equity**: World Bank income classification mapping.
+
+## Generate Individual Outputs
 
 ```bash
 # Main figures
@@ -43,37 +47,41 @@ python scripts/tables/table1_study_characteristics.py      # Table 1: Study Char
 python scripts/tables/table2_ai_architectures.py           # Table 2: AI Architectures
 python scripts/tables/table3_performance_metrics.py        # Table 3: Performance Metrics
 python scripts/tables/table4_lmic_applicability.py         # Table 4: LMIC Applicability
+python scripts/tables/table5_statistical_insights.py       # Table 5: Statistical Insights
+python scripts/tables/table6_geographic_equity.py          # Table 6: Geographic Equity
 ```
 
 ## Verify Installation
 
 ```bash
-pytest tests/ -v
+uv run pytest tests/ -v
 ```
 
-All 17 tests should pass. If you encounter issues, see [CONTRIBUTING.md](CONTRIBUTING.md).
+All 20+ tests should pass.
 
 ## Data
 
-Source data: `data/mri_sr_extraction.csv` (56 papers, 32 extraction fields across 11 reviewers)
+Source data: `data/data-clean.csv` (48 primary studies, 11 reviewers).
 
-Extracted from 56 MRI super-resolution papers published 2020–2025, filtered from an initial pool of 183 papers.
+Corrected dataset refined from an initial pool of 183 papers (2020-2025).
 
 ## Key Findings
 
 | Metric | Value |
 |--------|-------|
-| Papers included | 56 |
-| Brain MRI (dominant area) | 27 (48.2%) |
-| CNN (most common architecture) | 26 (46.4%) |
-| Low-field MRI mentioned | 15 (26.8%) |
-| High LMIC relevance (Score 4–5) | 19 (33.9%) |
-| Clinical validation reported | 21 (37.5%) |
-| Code publicly available | 9 (16.1%) |
-| Median PSNR | 34.1 dB |
-| Median SSIM | 0.913 |
+| Papers included (Primary Studies) | 48 |
+| Brain MRI (dominant area) | 24 (50.0%) |
+| CNN (most common architecture) | 23 (47.9%) |
+| Low-field MRI mentioned | 14 (29.2%) |
+| High LMIC relevance (Score 4-5) | 19 (39.6%) |
+| Clinical validation reported | 19 (39.6%) |
+| Code publicly available | 6 (12.5%) |
+| Median PSNR | 32.6 dB |
+| Median SSIM | 0.917 |
+| Inter-rater Agreement (Fleiss' Kappa) | 0.697 (Substantial) |
 
 ## More Information
 
 - **Development & testing:** See [CONTRIBUTING.md](CONTRIBUTING.md)
 - **Dependencies:** See [pyproject.toml](pyproject.toml)
+- **Statistical methods:** See [docs/STATISTICAL_METHODS.md](docs/STATISTICAL_METHODS.md)
