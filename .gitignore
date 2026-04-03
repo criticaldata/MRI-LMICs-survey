@@ -1,14 +1,36 @@
-data
-__pycache__/
-*.pyc
-*.pyo
-.env
+# Data and environments
+data/
 .venv/
-*.egg-info/
+.env
+.env.local
+temporal/
 dist/
 build/
 .DS_Store
 .claude/
 *.xlsx
-temporal/
-data/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Statistical analysis & ML models
+models/
+*.joblib
+*.pkl
+
+# Data enrichment cache
+data/.cache/
+
+# Test artifacts
+.pytest_cache/
+
+# Figures and temporary outputs
+docs/
+figures/supplementary
+figures/main/*.pdf
+figures/main/*.png
+!figures/main/.gitkeep
+06_processing_outputs/
