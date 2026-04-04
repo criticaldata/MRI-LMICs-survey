@@ -78,7 +78,7 @@ Corrected dataset refined from an initial pool of 183 papers (2020-2025).
 | Code publicly available | 6 (12.5%) |
 | Median PSNR | 32.6 dB |
 | Median SSIM | 0.917 |
-| Inter-rater Agreement (Fleiss' Kappa) | 0.697 (Substantial) |
+| Inter-rater Agreement (Fleiss' Kappa) | 0.728 (Substantial) |
 
 ## More Information
 

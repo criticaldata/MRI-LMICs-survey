@@ -23,7 +23,7 @@ We performed pairwise comparisons to test for "Reporting Bias." Studies that rep
 
 ## 3. Fleiss' Kappa (Inter-Rater Reliability)
 
-To validate the `LMIC_Relevance_Score`, a 2-rater calibration subset (N=9 papers, manually selected) was analyzed.
+To validate the `LMIC_Relevance_Score`, a 2-rater calibration subset (N=10 papers, manually selected) was analyzed.
 
 - **Statistic**: Fleiss' Kappa ($\kappa$). While Fleiss is typically used for multiple raters, it mathematically generalizes Cohen's Kappa for pairwise agreement (which is preferred for n=2). Confidence interval bounds are clamped to $[-1.0, 1.0]$ to account for mathematical distortions in standard error normal-approximations given the extremely small sample size.
 - **Interpretation**: Landis & Koch (1977) scale:
