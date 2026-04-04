@@ -29,7 +29,7 @@ python scripts/tables/table6_geographic_equity.py
 The pipeline includes advanced analytics for manuscript revision:
 - **Random Forest Feature Importance**: Predicts LMIC relevance.
 - **Mann-Whitney U Tests**: Pairwise comparison of study characteristics.
-- **Fleiss' Kappa**: Inter-rater reliability (2 raters, N=9 subset).
+- **Fleiss' Kappa**: Inter-rater reliability (2 raters, N=10 subset).
 - **Geographic Equity**: World Bank income classification mapping.
 
 ## Generate Individual Outputs

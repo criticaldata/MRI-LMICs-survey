@@ -251,7 +251,7 @@ All dependencies are managed in [pyproject.toml](pyproject.toml):
 ## Data
 
 - **Source:** `data/data-clean.csv` (48 papers, extracted from the original pool)
-- **Reviewers:** 2 raters calibrated using a N=9 paper subset
+- **Reviewers:** 2 raters calibrated using a N=10 paper subset
 - **Scope:** MRI super-resolution papers published 2020–2025
 - **LMIC scoring:** 1–5 scale assessing relevance to low- and middle-income countries
 
