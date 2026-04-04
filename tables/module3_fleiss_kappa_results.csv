@@ -1,2 +1,2 @@
 Fleiss_Kappa,Interpretation,P_bar,P_e,SE,CI_95_Lower,CI_95_Upper,Z_statistic,p_value,N_subjects,n_raters,k_categories,Categories
-0.7278911564625851,Substantial,0.8,0.265,0.2214805523,0.2937892739,1.0,3.2864788751,0.001014483828448,10,2,4,"[1, 2, 4, 5]"
+0.7278911564625851,Substantial,0.8,0.265,0.1885225368782452,0.3583869841812245,1.0,3.8610299252056217,0.00011291007199143444,10,2,4,"[np.int64(1), np.int64(2), np.int64(4), np.int64(5)]"

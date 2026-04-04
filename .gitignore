@@ -1,5 +1,6 @@
 data/
 !data/fleiss_kappa_matrix.csv
+!data/data-clean.csv
 __pycache__/
 *.pyc
 *.pyo

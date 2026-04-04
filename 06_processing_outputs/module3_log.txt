@@ -1,0 +1,8 @@
+======================================================================
+MODULE 3: Fleiss' Kappa — Inter-Rater Reliability
+Executed: 2026-04-04 10:02:51
+Python: 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+======================================================================
+
+[10:02:51] REAL MODE: Loading consortium matrix.
+[10:02:52] MODULE 3 COMPLETED SUCCESSFULLY (REAL)
