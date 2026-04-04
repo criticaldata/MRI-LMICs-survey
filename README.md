@@ -13,10 +13,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Install dependencies and sync virtual environment
 uv sync
 
-# Generate all figures and tables
+# Generate all figures and tables (Unified Pipeline)
 python scripts/figures/generate_all_figures.py
-python scripts/tables/table5_statistical_insights.py
-python scripts/tables/table6_geographic_equity.py
+
+# Verified statistics can also be printed via:
+python scripts/tables/abstract_numbers.py
 ```
 
 ## Requirements
@@ -41,6 +42,7 @@ python scripts/figures/fig2_architecture_distribution.py   # Figure 2: AI Archit
 python scripts/figures/fig3_lmic_relevance.py              # Figure 3: LMIC Relevance Analysis
 python scripts/figures/fig4_performance_comparison.py      # Figure 4: Performance Metrics
 python scripts/figures/fig5_field_strength_application.py  # Figure 5: Field Strength & Application
+# Figure 6: Translational Roadmap (Manual PNG, converted to PDF by master script)
 
 # Main tables
 python scripts/tables/table1_study_characteristics.py      # Table 1: Study Characteristics
@@ -57,7 +59,7 @@ python scripts/tables/table6_geographic_equity.py          # Table 6: Geographic
 uv run pytest tests/ -v
 ```
 
-All 20+ tests should pass.
+All tests (consistency, validation, generation) should pass. Verified for N=48 and Kappa=0.728.
 
 ## Data
 
@@ -68,7 +70,7 @@ Corrected dataset refined from an initial pool of 183 papers (2020-2025).
 ## Key Findings
 
 | Metric | Value |
-|--------|-------|
+| :--- | :--- |
 | Papers included (Primary Studies) | 48 |
 | Brain MRI (dominant area) | 24 (50.0%) |
 | CNN (most common architecture) | 23 (47.9%) |

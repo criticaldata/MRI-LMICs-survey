@@ -29,6 +29,7 @@ MRI-LMICs-survey/
 │       └── table6_geographic_equity.py
 ├── tests/
 │   ├── test_data_consistency.py # Enforces mapper / RF / Mann–Whitney N parity
+│   ├── test_manuscript_consistency.py # Verifies N=48, Kappa=0.728, CI Clamping
 │   └── analysis/                # Validation & statistical smoke tests
 ├── CHANGELOG.md
 ├── CITATION.cff

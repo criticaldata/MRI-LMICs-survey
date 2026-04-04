@@ -67,6 +67,8 @@ tables = [
     (tables_dir / "analysis_quality_assessment.py", "Analysis: Quality Assessment"),
     (tables_dir / "analysis_non_mri_papers.py", "Analysis: Non-MRI Papers"),
     (tables_dir / "abstract_numbers.py", "Abstract Numbers Verification"),
+    (tables_dir / "table5_statistical_insights.py", "Table 5: Statistical Insights"),
+    (tables_dir / "table6_geographic_equity.py", "Table 6: Geographic Equity"),
 ]
 
 table_ok = sum(run_script(path, desc) for path, desc in tables)
@@ -109,6 +111,29 @@ for d in ["tables", "figures/main/png", "figures/main/pdf"]:
     if p.exists():
         files = list(p.glob("*"))
         print(f"  {d}/: {len(files)} files")
+
+# --- Figure 6 PDF Conversion (Manual) ---
+print("\n" + "=" * 70)
+print("POST-PROCESSING: FIGURE 6 PDF CONVERSION")
+print("=" * 70)
+try:
+    from PIL import Image
+    png_path = project_root / "figures/main/png/fig6_translational_roadmap.png"
+    pdf_path = project_root / "figures/main/pdf/fig6_translational_roadmap.pdf"
+    
+    if png_path.exists():
+        print(f"Converting {png_path.name} to PDF...")
+        image = Image.open(png_path)
+        if image.mode == 'RGBA':
+            image = image.convert('RGB')
+        image.save(pdf_path, "PDF", resolution=300.0)
+        print(f"✓ Saved: {pdf_path.name}")
+    else:
+        print(f"⚠ Warning: {png_path.name} not found. Skipping conversion.")
+except ImportError:
+    print("⚠ Error: Pillow not installed. Cannot convert PNG to PDF.")
+except Exception as e:
+    print(f"⚠ Error converting Figure 6: {e}")
 
 print("\n" + "=" * 70)
 print("ALL DONE!")
