@@ -1,0 +1,3 @@
+Analysis,Test,Statistic,p_value,Interpretation
+LowField_vs_PSNR_Report,Proportion_Comparison,"{0: 0.4473684210526316, 1: 0.7}",,Low-field report rate: 70.0% vs Standard: 44.7%
+Code_vs_PSNR_Report,Proportion_Comparison,"{0: 0.4634146341463415, 1: 0.7142857142857143}",,With code report rate: 71.4% vs Without: 46.3%

@@ -1,0 +1,7 @@
+======================================================================
+MODULE 2: Mann-Whitney U Test (Report Bias Analysis)
+Executed: 2026-04-05 16:06:30
+Python: 3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:34:53) [Clang 19.1.7 ]
+======================================================================
+
+[16:06:30] MODULE 2 COMPLETED SUCCESSFULLY

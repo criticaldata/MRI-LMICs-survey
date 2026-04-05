@@ -1,0 +1,3 @@
+Variable,Test,Statistic,p_value,Min_Expected_Cell,Significant,Note,q_value_fdr
+Code_Available,Fisher_Exact,2.8947368421052633,0.4158007587003134,3.5,No,OR=2.89,0.5544010116004179
+Low_Field_Mentioned,Chi_Square,1.1368421052631579,0.2863205967930562,5.0,No,"χ²=1.14, df=1",0.5544010116004179

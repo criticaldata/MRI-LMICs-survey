@@ -79,7 +79,7 @@ print("GENERATING FIGURES")
 print("=" * 70)
 
 figures = [
-    (scripts_dir / "fig1_prisma_flow.py", "Figure 1A: PRISMA Flow Diagram"),
+    (scripts_dir / "fig1_prisma_flow.py", "Figure 1: PRISMA Flow Diagram (SVG -> PNG)"),
     (scripts_dir / "fig1_year_distribution.py", "Figure 1B: Year Distribution"),
     (scripts_dir / "fig2_architecture_distribution.py", "Figure 2: Architecture Distribution"),
     (scripts_dir / "fig3_lmic_relevance.py", "Figure 3: LMIC Relevance"),
