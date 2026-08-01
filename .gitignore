@@ -1,5 +1,6 @@
 *.txt
-data/
+data/*
+!data/
 !data/fleiss_kappa_matrix.csv
 !data/data-clean.csv
 __pycache__/
