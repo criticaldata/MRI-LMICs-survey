@@ -1,0 +1,96 @@
+Field,Raw_Value,Normalized_Value,N,Status
+Dataset_Type,,Not reported,1,Missing
+Field_Strength_Type,,Not specified,1,Missing
+AI_Architecture,CNN,CNN,19,Recognized
+AI_Architecture,U-Net,U-Net,6,Recognized
+AI_Architecture,Hybrid,Hybrid,3,Recognized
+AI_Architecture,GAN,GAN,3,Recognized
+AI_Architecture,"CNN, U-Net",U-Net,2,Recognized
+AI_Architecture,U-Net + CNN,U-Net,1,Recognized
+AI_Architecture,DNN + CNN,CNN,1,Recognized
+AI_Architecture,"Diffusion, U-Net",Diffusion,1,Recognized
+AI_Architecture,SRCNN,CNN,1,Recognized
+AI_Architecture,"CNN, GAN, Hybrid",Hybrid,1,Recognized
+AI_Architecture,"CNN, Hybrid",Hybrid,1,Recognized
+AI_Architecture,"CNN, U-Net, Hybrid",Hybrid,1,Recognized
+AI_Architecture,Fusion attention based GAN,GAN,1,Recognized
+AI_Architecture,"unet, u-net-vgg15, segnet, resunet",U-Net,1,Recognized
+AI_Architecture,ShuffleUNet,U-Net,1,Recognized
+AI_Architecture,CNN (U-Net + RED-Net),U-Net,1,Recognized
+AI_Architecture,Deep Learning (DL) framework integrating compressed sensing with convolutional neural networks,CNN,1,Recognized
+AI_Architecture,Non-AI / Fourier-based (Specifically stated as NOT relying on deep learning),Non-AI,1,Recognized
+AI_Architecture,Deep Learning (Convolutional Neural Network),CNN,1,Recognized
+AI_Architecture,Transformer,Transformer,1,Recognized
+Code_Available,No,No,34,Recognized
+Code_Available,Yes,Yes,4,Recognized
+Code_Available,no,No,3,Recognized
+Code_Available,Upon_request,Upon request,2,Recognized
+Code_Available,Not reported,Not reported,1,Recognized
+Code_Available,No (not stated),No,1,Recognized
+Code_Available,yes,Yes,1,Recognized
+Code_Available,Yes ( https://github.com/hongxiangharry/Stochastic-IQT ),Yes,1,Recognized
+Code_Available,No (data available on request; no code repository mentioned),No,1,Recognized
+Dataset_Type,Public_benchmark,Public benchmark,13,Recognized
+Dataset_Type,Mixed,Mixed,9,Recognized
+Dataset_Type,Clinical,Clinical,7,Recognized
+Dataset_Type,Synthetic,Synthetic,4,Recognized
+Dataset_Type,Not reported,Not reported,1,Recognized
+Dataset_Type,Clinical (Single center),Clinical,1,Recognized
+Dataset_Type,"PROSTATEx, Prostate-3T, Prostate Fused-MRI-Pathology, Prostate-diagnosis and Prostate MRI.",Public benchmark,1,Recognized
+Dataset_Type,Repository of Images of the centra nervous system,Public benchmark,1,Recognized
+Dataset_Type,mixed,Mixed,1,Recognized
+Dataset_Type,"Cardiac, brain, knee, multimodal whole heart",Mixed,1,Recognized
+Dataset_Type,public miccai benchmark,Public benchmark,1,Recognized
+Dataset_Type,Public IXI diffusion-weighted MRI of healthy subjects,Public benchmark,1,Recognized
+Dataset_Type,Human brain and cardiac images,Mixed,1,Recognized
+Dataset_Type,"Mixed (Clinical and Public-benchmark (HCP, Leipzig))",Mixed,1,Recognized
+Dataset_Type,Private_proprietary,Private,1,Recognized
+Dataset_Type,Prospective study of adult male patients with suspected prostate cancer,Clinical,1,Recognized
+Dataset_Type,Patients with MS or suspected MS,Clinical,1,Recognized
+Dataset_Type,Community sample of young people (Ages 9–26 years),Clinical,1,Recognized
+Field_Strength_Type,Not_specified,Not specified,15,Recognized
+Field_Strength_Type,Standard-field,Standard-field,11,Recognized
+Field_Strength_Type,Mixed,Mixed,5,Recognized
+Field_Strength_Type,Low-field,Low-field,3,Recognized
+Field_Strength_Type,standard field,Standard-field,1,Recognized
+Field_Strength_Type,High-field,High-field,1,Recognized
+Field_Strength_Type,Low field (64 mT) and Standard field (3 T),Mixed,1,Recognized
+Field_Strength_Type,Low-Field,Low-field,1,Recognized
+Field_Strength_Type,1.5 and 3T MRI,Mixed,1,Recognized
+Field_Strength_Type,1.5T and 3T MRI scanners,Mixed,1,Recognized
+Field_Strength_Type,1.5T and 3T,Mixed,1,Recognized
+Field_Strength_Type,Low-field (0.4T) + High-field reference (3T),Mixed,1,Recognized
+Field_Strength_Type,Mixed (0.36 T and 1.5 T),Mixed,1,Recognized
+Field_Strength_Type,Low_field (0.1T),Low-field,1,Recognized
+Field_Strength_Type,3T MRI,Mixed,1,Recognized
+Field_Strength_Type,Portable Ultra-Low Field (0.064 Tesla),Low-field,1,Recognized
+Field_Strength_Type,Ultra-low-field (64 mT / 0.064 T) vs. High-field (3.0 T),Mixed,1,Recognized
+Primary_Focus,Pure_SR,Pure SR,13,Recognized
+Primary_Focus,SR+Classification,SR + Classification,6,Recognized
+Primary_Focus,SR+Diagnosis,SR + Diagnosis,5,Recognized
+Primary_Focus,Denoising+SR,SR + Denoising,5,Recognized
+Primary_Focus,SR+Segmentation,SR + Segmentation,3,Recognized
+Primary_Focus,Denoising + SR,SR + Denoising,2,Recognized
+Primary_Focus,SR + segmentation,SR + Segmentation,1,Recognized
+Primary_Focus,Segmentation + Classification,Other,1,Recognized
+Primary_Focus,SR + acceleration,SR + Other,1,Recognized
+Primary_Focus,SR +Classification,SR + Classification,1,Recognized
+Primary_Focus,denoising and distortion correction in low‑field MRI,SR + Denoising,1,Recognized
+Primary_Focus,Generate high resolution from low resolution images,Pure SR,1,Recognized
+Primary_Focus,Multi-class semantic segmentation of myocardial infarction and microvascular obstruction,Other,1,Recognized
+Primary_Focus,"Single-image super-resolution for 3D diffusion-weighted brain MRI to recover high-resolution volumes from low-resolution inputs, enabling shorter scan times and reducing motion artefacts",SR + Other,1,Recognized
+Primary_Focus,Assessing generalization and applying Transfer Learning,SR + Other,1,Recognized
+Primary_Focus,SR + Image generation/contrast enhancement,SR + Other,1,Recognized
+Primary_Focus,Reconstruction of undersampled MRI (accelerated acquisition),SR + Other,1,Recognized
+Primary_Focus,Super-resolution (SR) and denoising to reduce acquisition time while maintaining or improving image quality in T2-weighted prostate MRI,SR + Denoising,1,Recognized
+Primary_Focus,Developing a Fourier-based Super Resolution (FouSR) approach to enhance ULF MRI resolution with minimal scan time increase,SR + Other,1,Recognized
+Primary_Focus,Testing super-resolution methods to improve the quality and correspondence of low-field MRI scans with high-field standards in young people,SR + Other,1,Recognized
+Resource_Constraints_Addressed,Yes,Yes,25,Recognized
+Resource_Constraints_Addressed,No,No,15,Recognized
+Resource_Constraints_Addressed,yes,Yes,2,Recognized
+Resource_Constraints_Addressed,"discusses computational efficiency, model size, FPS, and preprocessing impact",Yes,1,Recognized
+Resource_Constraints_Addressed,"Simulates 2× downsampling in each dimension, corresponding to a theoretical 8× acceleration in acquisition, which would reduce scan time and motion artefacts.",Yes,1,Recognized
+Resource_Constraints_Addressed,Yes (explicit focus on low-field as cost-effective),Yes,1,Recognized
+Resource_Constraints_Addressed,Addressed via reduced scan time (accelerated acquisition),Yes,1,Recognized
+Resource_Constraints_Addressed,"Addressed cost-effectiveness, reduced power, and portability for accessible MRI",Yes,1,Recognized
+Resource_Constraints_Addressed,Addressed the potential for scaling MR technology in low-resource and community settings,Yes,1,Recognized

@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 import pytest
 from pathlib import Path
@@ -19,29 +20,18 @@ def test_primary_studies_count():
     n_papers = int(total_row['n'].iloc[0])
     assert n_papers == 48, f"Expected 48 papers, found {n_papers}."
 
-def test_calibration_subset_count():
-    """Verify Fleiss' Kappa results are based on exactly 10 subjects."""
-    kappa_results_path = TABLES_DIR / "module3_fleiss_kappa_results.csv"
-    assert kappa_results_path.exists(), "Kappa results file is missing."
-    
-    df = pd.read_csv(kappa_results_path)
-    n_subjects = int(df['N_subjects'].iloc[0])
-    assert n_subjects == 10, f"Expected 10 subjects in calibration subset, found {n_subjects}."
+def test_historical_calibration_is_archived_not_active():
+    """The 10-study/two-rater exercise cannot appear as final IRR output."""
+    assert not (TABLES_DIR / "module3_fleiss_kappa_results.csv").exists()
+    assert not (DATA_DIR / "fleiss_kappa_matrix.csv").exists()
 
-def test_kappa_value_and_clamping():
-    """Verify Fleiss' Kappa is precisely 0.728 and CI upper is clamped to 1.0."""
-    kappa_results_path = TABLES_DIR / "module3_fleiss_kappa_results.csv"
-    assert kappa_results_path.exists(), "Kappa results file is missing."
-    
-    df = pd.read_csv(kappa_results_path)
-    kappa = float(df['Fleiss_Kappa'].iloc[0])
-    ci_upper = float(df['CI_95_Upper'].iloc[0])
-    
-    # Check Kappa (rounded to 3 decimal places)
-    assert round(kappa, 3) == 0.728, f"Expected Kappa 0.728, found {kappa:.3f}."
-    
-    # Check CI Clamping
-    assert ci_upper == 1.0, f"Expected CI upper limit to be clamped to 1.0, found {ci_upper}."
+
+def test_full_irr_is_explicitly_pending():
+    """Do not present the provisional calibration as the 11-reviewer IRR."""
+    manifest_path = DATA_DIR / "public_release_manifest.json"
+    assert manifest_path.exists(), "Public release manifest is missing."
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["fleiss_kappa_status"] == "pending_until_complete_independent_ratings"
 
 def test_data_integrity():
     """Verify data-clean.csv has exactly 48 rows."""

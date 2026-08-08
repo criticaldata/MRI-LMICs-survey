@@ -1,0 +1,4 @@
+Cohort,n,rho,p_permutation,permutations,seed
+All included studies,48,0.237717629608349,0.10338966103389662,10000,42
+"SR primary strict (Pure SR, SR + Denoising, SR + Other)",30,0.2827144804028201,0.13068693130686931,10000,42
+SR primary pure/denoising,23,0.33640689608725016,0.1136886311368863,10000,42

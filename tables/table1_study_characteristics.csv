@@ -21,9 +21,10 @@ MRI Application Area,n,%
 ,,
 Field Strength,n,%
   Not specified,16,33.3%
-  Standard-field,16,33.3%
-  Low-field,9,18.8%
-  Mixed,6,12.5%
+  Standard-field,12,25.0%
+  Mixed,8,16.7%
+  Low-field,6,12.5%
+  Unknown,5,10.4%
   High-field,1,2.1%
 ,,
 Primary Focus,n,%
@@ -37,11 +38,10 @@ Primary Focus,n,%
 ,,
 AI Architecture,n,%
   CNN,23,47.9%
-  U-Net,11,22.9%
+  U-Net,12,25.0%
   Hybrid,6,12.5%
   GAN,4,8.3%
   Diffusion,1,2.1%
-  Other,1,2.1%
   Non-AI,1,2.1%
   Transformer,1,2.1%
 ,,

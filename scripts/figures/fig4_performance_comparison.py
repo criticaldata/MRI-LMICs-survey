@@ -5,7 +5,7 @@ Multi-panel figure with clean box+strip plots and scatter:
   A. PSNR by Architecture
   B. SSIM by Architecture
   C. PSNR vs SSIM scatter (colored by architecture)
-  D. PSNR by Field Strength
+  D. Translational readiness criteria
 """
 
 import numpy as np
@@ -13,7 +13,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
+import sys
+from pathlib import Path
 from mapper import load_data, save_figure, configure_matplotlib, panel_title
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "analysis"))
+from review_metrics import add_derived_fields
 
 np.random.seed(42)
 
@@ -80,7 +85,7 @@ def _style_box_panel(ax, data, x_col, y_col, palette, ylabel, title, subtitle):
 
 def create_fig4():
     configure_matplotlib()
-    df = load_data()
+    df = add_derived_fields(load_data())
 
     fig = plt.figure(figsize=(15, 12))
     gs = gridspec.GridSpec(2, 2, hspace=0.5, wspace=0.3)
@@ -119,11 +124,37 @@ def create_fig4():
     ax_c.tick_params(length=0)
     ax_c.grid(linestyle="--", alpha=0.15)
 
-    # Panel D: PSNR by Field Strength
+    # Panel D: use the exact five TR criteria defined in Methods.  The former
+    # panel plotted PSNR by field strength, which did not match the manuscript
+    # label or the reviewer-requested TR construct.
     ax_d = fig.add_subplot(gs[1, 1])
-    _style_box_panel(ax_d, df, "Field_Strength_Norm", "PSNR_Numeric", FS_PALETTE,
-                     "PSNR (dB)", "D.  PSNR by Field Strength",
-                     "Comparison across MRI field strength categories")
+    tr_criteria = [
+        ("Low-Field Domain", "TR_LowFieldDomain", "#E74C3C"),
+        ("Open Science", "TR_OpenScience", "#2E86AB"),
+        ("Clinical Evaluation", "TR_ClinicalEvaluation", "#2ECC71"),
+        ("Hardware Awareness", "TR_HardwareAwareness", "#9B59B6"),
+        ("Data Diversity", "TR_DataDiversity", "#F18F01"),
+    ]
+    labels = [item[0] for item in tr_criteria]
+    values = [int(df[item[1]].sum()) for item in tr_criteria]
+    colors = [item[2] for item in tr_criteria]
+    y_pos = np.arange(len(labels))
+    bars = ax_d.barh(y_pos, values, height=0.55, color=colors,
+                     edgecolor="white", linewidth=1)
+    for i, value in enumerate(values):
+        ax_d.text(value + 0.4, i, f"{value}/{len(df)} ({value / len(df) * 100:.0f}%)",
+                  va="center", fontsize=8.5, fontweight="bold", color="#2C3E50")
+    ax_d.set_yticks(y_pos)
+    ax_d.set_yticklabels(labels, fontsize=8.5, fontweight="bold")
+    ax_d.invert_yaxis()
+    ax_d.set_xlabel("Number of Papers", fontsize=10)
+    panel_title(ax_d, "D.  Translational Readiness Criteria",
+                "Exact five-criterion TR definition; n=48 included studies")
+    ax_d.spines["top"].set_visible(False)
+    ax_d.spines["right"].set_visible(False)
+    ax_d.tick_params(length=0)
+    ax_d.grid(axis="x", linestyle="--", alpha=0.2)
+    ax_d.set_xlim(0, max(values) + 10)
 
     plt.tight_layout()
     save_figure(fig, "fig4_performance_comparison")
