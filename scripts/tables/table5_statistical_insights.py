@@ -28,7 +28,7 @@ from mann_whitney_tests import run_mann_whitney, run_chi_square
 # Fleiss' Kappa logic
 from fleiss_kappa_calculation import compute_fleiss_kappa
 
-# Reproducibilidad
+# Reproducibility
 np.random.seed(42)
 
 def create_table5():
@@ -36,7 +36,7 @@ def create_table5():
     
     print("\n=== Table 5: Statistical Insights ===\n")
     
-    # Cargar datos
+    # Load data
     df = load_data()
     
     # Mock log file (to satisfy signatures)

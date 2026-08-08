@@ -2,17 +2,20 @@
 
 This extension integrates advanced statistical analysis and geographic equity assessment into the core MRI super-resolution survey pipeline.
 
+> Historical note: the directory diagram below predates the corrected-review
+> rerun. The current source of truth is `REPRODUCIBLE_REVIEW_ANALYSIS.md`; the
+> 2-rater/10-paper Fleiss kappa is calibration only and is not final IRR.
+
 ## 1. Directory Structure
 
 ```text
 MRI-LMICs-survey/
 ├── data/
-│   ├── data-clean.csv          # REVISED: 48 primary studies (validated)
-│   └── fleiss_kappa_matrix.csv # Calibration set for 2 raters
+│   └── data-clean.csv          # Anonymized public corpus: 48 primary studies
 ├── docs/
 │   ├── ARCHITECTURE.md              # Current file
 │   ├── STATISTICAL_METHODS.md       # RF, MW-U, κ, FDR
-│   └── SCIENTOMETRICS_METHODOLOGY.md # OpenAlex / World Bank / Table 6
+│   └── SCIENTOMETRICS_METHODOLOGY.md # Multi-source adapter and coverage
 ├── scripts/
 │   ├── analysis/
 │   │   └── statistical/        # CORE BUSINESS LOGIC
@@ -29,7 +32,7 @@ MRI-LMICs-survey/
 │       └── table6_geographic_equity.py
 ├── tests/
 │   ├── test_data_consistency.py # Enforces mapper / RF / Mann–Whitney N parity
-│   ├── test_manuscript_consistency.py # Verifies N=48, Kappa=0.728, CI Clamping
+│   ├── test_manuscript_consistency.py # Verifies current corpus and consistency invariants
 │   └── analysis/                # Validation & statistical smoke tests
 ├── CHANGELOG.md
 ├── CITATION.cff
@@ -45,5 +48,8 @@ MRI-LMICs-survey/
 ## 3. Reliability & Reproducibility
 
 - **Seed Control**: All ML models and data splits use `np.random.seed(42)`.
-- **Cross-Validation**: Random Forest uses Leave-One-Out (LOO) CV for the small dataset (n=48 effective).
+- **Cross-Validation**: the current supplementary forest uses repeated 5-fold held-out validation (10 repeats; 50 test splits).
 - **Audit Trails**: Every module execution creates a timestamped log in `06_processing_outputs/`.
+- **Privacy boundary**: reviewer names, assignments, individual ratings, raw
+  provider responses, and credential files are intentionally excluded from the
+  public repository.

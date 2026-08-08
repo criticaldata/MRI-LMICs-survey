@@ -1,13 +1,16 @@
 *.txt
+!requirements-reproducible-review.txt
 data/*
 !data/
-!data/fleiss_kappa_matrix.csv
 !data/data-clean.csv
+!data/public_release_manifest.json
+data/private/
 __pycache__/
 *.pyc
 *.pyo
 .env
 .venv/
+.venv-reproducible/
 *.egg-info/
 dist/
 build/
@@ -15,3 +18,26 @@ build/
 .claude/
 *.xlsx
 temporal/
+node_modules/
+xlsx_builder_tmp/
+*.inspect.ndjson
+
+# Optional multi-source API response cache stays local and is not public-ready.
+analysis/scientometrics/multisource_20260803/raw/
+
+# Private reviewer assignments, ratings, and calibration provenance remain local only.
+analysis/reproducibility/included_studies_assignments_48.csv
+analysis/reproducibility/screening_log_183.csv
+analysis/reproducibility/source_manifest.json
+analysis/reproducibility/verification_*.json
+analysis/reproducibility/reviewer_scoring/
+analysis/reproducibility/provenance/
+
+# Retired local preview from the removed TR reviewer-template worksheet.
+analysis/reproducibility/reviewer_scoring/TR_Criteria.png
+
+# Generated local-only workspaces and raw API evidence. Public result tables
+# are versioned in tables/; the corresponding caches remain local.
+analysis/review_*/
+analysis/scientometrics/
+analysis/reproducibility/public_package/
