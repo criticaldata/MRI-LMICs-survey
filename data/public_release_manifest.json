@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-08-08T21:37:36.637908+00:00",
+  "generated_at_utc": "2026-09-09T04:26:37.758127+00:00",
   "repository": "MRI-LMICs-survey",
   "tracked_public_corpus": {
     "logical_path": "data/data-clean.csv",
@@ -24,5 +24,5 @@
     "query_tokens_detected_after_scrub": []
   },
   "independent_reviewer_ratings_included": false,
-  "fleiss_kappa_status": "pending_until_complete_independent_ratings"
+  "fleiss_kappa_status": "aggregate_summary_published_private_input"
 }

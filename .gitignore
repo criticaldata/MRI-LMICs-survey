@@ -3,6 +3,7 @@
 data/*
 !data/
 !data/data-clean.csv
+!data/tr_criteria_evidence.csv
 !data/public_release_manifest.json
 data/private/
 __pycache__/
@@ -41,3 +42,10 @@ analysis/reproducibility/reviewer_scoring/TR_Criteria.png
 analysis/review_*/
 analysis/scientometrics/
 analysis/reproducibility/public_package/
+
+# Local-only planning and artifact-review notes; never publish these.
+docs/superpowers/
+analysis/OBSOLETE_ARTIFACT_REVIEW_*.md
+analysis/reproducibility/README.md
+scripts/analysis/build_original_extraction_reanalysis_xlsx.mjs
+scripts/analysis/inspect_attached_mateo_xlsx.mjs

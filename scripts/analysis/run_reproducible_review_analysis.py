@@ -48,6 +48,7 @@ def _promote_outputs(analysis: dict, repo: Path, run_date: str) -> dict[str, str
     ]
     promoted_frames = {
         "analysis_translational_readiness.csv": analysis["tr"],
+        "analysis_tr_hardware_verification.csv": analysis["hardware_verification"],
         "analysis_tr_by_architecture.csv": _architecture_application_summary(derived),
         "analysis_quality_assessment.csv": analysis["quality"][quality_cols],
         "analysis_quality_summary.csv": analysis["quality_summary"],
@@ -55,7 +56,6 @@ def _promote_outputs(analysis: dict, repo: Path, run_date: str) -> dict[str, str
         "analysis_lmic_tr_correlation.csv": analysis["correlation"],
         "table_dataset_characterization.csv": analysis["dataset_characterization"],
         "analysis_psnr_ssim_metric_suitability.csv": analysis["metric_suitability"],
-        "analysis_dataset_manual_review_queue.csv": analysis["dataset_manual_review_queue"],
         "analysis_field_pair_ground_truth.csv": analysis["field_ground_truth"],
         "analysis_unknown_audit.csv": analysis["unknown_audit"],
     }

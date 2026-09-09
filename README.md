@@ -9,7 +9,7 @@ The reviewer-correction pipeline regenerates the corrected analyses, promoted ta
 ```powershell
 # Creates the isolated environment if missing; regenerates promoted reviewer-corrected
 # tables and affected figures; then runs all offline verifiers and tests.
-powershell -ExecutionPolicy Bypass -File scripts/analysis/run_full_reproducibility_pipeline.ps1 -RunDate 20260808
+powershell -ExecutionPolicy Bypass -File scripts/analysis/run_full_reproducibility_pipeline.ps1 -RunDate 20260817
 ```
 
 ## Requirements
@@ -23,9 +23,20 @@ The pipeline includes advanced analytics for manuscript revision:
 - **Random Forest Robustness Supplement**: constrained repeated held-out
   validation with regularized benchmarks; exploratory only.
 - **Mann-Whitney U Tests**: Pairwise comparison of study characteristics.
-- **Fleiss' Kappa**: prepared for 11 independent reviewers; pending receipt of
-  the complete ratings.
+- **Fleiss' Kappa**: final aggregate agreement for 48 studies scored by 11
+  reviewers. Individual ratings remain private.
 - **Geographic Equity**: World Bank income classification mapping.
+
+To regenerate the aggregate agreement outputs from the private workbook, run:
+
+```powershell
+python scripts/analysis/statistical/run_fleiss_kappa_from_private_xlsx.py `
+  --input-xlsx <private-reviewer-workbook.xlsx> `
+  --output-dir tables
+```
+
+The command validates the 48-by-11 matrix and writes only aggregate CSV
+outputs; it never copies the private workbook into the repository.
 
 ## Generate Individual Outputs
 
@@ -53,14 +64,17 @@ python scripts/tables/table6_geographic_equity.py          # Table 6: Geographic
 & .\.venv-reproducible\Scripts\python.exe -m pytest -q
 ```
 
-The 2026-08-08 local validation ran 34 tests successfully. The historical
-two-reviewer/10-study calibration is archived under provenance and is not an
-active result. Final Fleiss' kappa remains pending until all 11 independent
-reviewer files are returned and validated.
+The historical two-reviewer/10-study calibration is archived under provenance
+and is not an active result. The current aggregate agreement outputs are
+`tables/analysis_fleiss_kappa_summary.csv` and
+`tables/analysis_fleiss_kappa_item_agreement.csv`.
 
 ## Data
 
 Source data: `data/data-clean.csv` (48 primary studies; anonymized public corpus).
+The separate `data/tr_criteria_evidence.csv` file contains the final
+article-level evidence and binary decisions used to reproduce the TR analysis
+without modifying the canonical source.
 Reviewer identities, reviewer assignments, individual ratings, and historical
 calibration files remain local-only and are not part of this repository.
 
@@ -79,7 +93,8 @@ Corrected dataset refined from an initial pool of 183 papers (2020-2025).
 | Code publicly available | 6 (12.5%) |
 | Median PSNR | 32.6 dB |
 | Median SSIM | 0.917 |
-| Inter-rater Agreement (Fleiss' Kappa) | Pending 11 independent ratings |
+| LMIC Fleiss' Kappa (11 reviewers, 48 studies) | 0.505 |
+| TR Fleiss' Kappa (11 reviewers, 48 studies) | 0.223 |
 
 ## More Information
 
@@ -87,4 +102,4 @@ Corrected dataset refined from an initial pool of 183 papers (2020-2025).
 - **Dependencies:** See [pyproject.toml](pyproject.toml)
 - **Statistical methods:** See [docs/STATISTICAL_METHODS.md](docs/STATISTICAL_METHODS.md)
 - **Current reproducibility and reviewer analyses:** See [docs/REPRODUCIBLE_REVIEW_ANALYSIS.md](docs/REPRODUCIBLE_REVIEW_ANALYSIS.md)
-- **Latest local verification:** See [docs/LOCAL_VALIDATION_REPORT_20260808.md](docs/LOCAL_VALIDATION_REPORT_20260808.md)
+- **Latest local verification:** See [docs/LOCAL_VALIDATION_REPORT_20260908.md](docs/LOCAL_VALIDATION_REPORT_20260908.md)

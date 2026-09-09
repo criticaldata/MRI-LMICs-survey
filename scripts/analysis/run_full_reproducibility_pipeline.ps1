@@ -3,14 +3,16 @@
 Regenerates and verifies the reviewer-corrected MRI-LMICs analysis package.
 
 .DESCRIPTION
-Runs only local scripts and cached evidence. It does not publish data, modify
-GitHub, or calculate final Fleiss' kappa.
+Runs only local scripts and cached evidence. It does not publish data or modify
+GitHub. Final Fleiss' kappa is calculated only when a private reviewer workbook
+is supplied; the workbook itself is never copied into the public repository.
 #>
 
 [CmdletBinding()]
 param(
     [string]$PythonPath,
-    [string]$RunDate = (Get-Date -Format "yyyyMMdd")
+    [string]$RunDate = (Get-Date -Format "yyyyMMdd"),
+    [string]$PrivateRatingsXlsx
 )
 
 $ErrorActionPreference = "Stop"
@@ -45,13 +47,26 @@ Push-Location $repoRoot
 try {
     Invoke-MriPython "scripts/analysis/run_reproducible_review_analysis.py" @("--promote", "--run-date", $RunDate)
     Invoke-MriPython "scripts/analysis/run_tr_weighting_sensitivity.py"
-    Invoke-MriPython "scripts/analysis/extract_ground_truth_from_cached_fulltext.py"
+    Invoke-MriPython "scripts/analysis/extract_metric_ground_truth_from_cached_fulltext.py"
     Invoke-MriPython "scripts/analysis/statistical/run_random_forest_robustness_20260804.py"
     Invoke-MriPython "scripts/tables/analysis_temporal_trends.py"
     Invoke-MriPython "scripts/figures/fig4_performance_comparison.py"
     Invoke-MriPython "scripts/figures/figS1_temporal_trends.py"
     Invoke-MriPython "scripts/analysis/verify_reproducibility.py"
     Invoke-MriPython "scripts/analysis/verify_mri_scientometric_reproducibility.py" @("--public-release")
+
+    if ([string]::IsNullOrWhiteSpace($PrivateRatingsXlsx)) {
+        Write-Host "Skipping final Fleiss' kappa: no private reviewer workbook supplied."
+    }
+    else {
+        if (-not (Test-Path -LiteralPath $PrivateRatingsXlsx)) {
+            throw "Private reviewer workbook not found: $PrivateRatingsXlsx"
+        }
+        Invoke-MriPython "scripts/analysis/statistical/run_fleiss_kappa_from_private_xlsx.py" @(
+            "--input-xlsx", $PrivateRatingsXlsx,
+            "--output-dir", "tables"
+        )
+    }
 
     Write-Host "Running: -m pytest -q"
     & $PythonPath -m pytest -q

@@ -75,7 +75,8 @@ The test suite includes:
    - Parametrized smoke tests for `TABLE_SCRIPTS` in `test_figure_generation.py` (tables 1–4); run `table5_statistical_insights.py` and `table6_geographic_equity.py` per README for full analytics outputs
    - Smoke tests for first 2 figure scripts
 
-Expected: **24 tests passing** in ~4–6 seconds
+Expected: **48 tests passing** in roughly 1–2 minutes on the reproducible
+environment; runtime varies with figure and statistical smoke tests.
 
 ### Adding New Tests
 

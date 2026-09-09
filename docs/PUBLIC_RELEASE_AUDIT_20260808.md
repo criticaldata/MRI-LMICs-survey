@@ -1,4 +1,7 @@
-# Public Release Audit — 2026-08-08
+# Public Release Audit - 2026-08-08
+
+> Historical pre-agreement audit. The current public release boundary and
+> aggregate agreement results are documented in `LOCAL_VALIDATION_REPORT_20260908.md`.
 
 ## Scope
 

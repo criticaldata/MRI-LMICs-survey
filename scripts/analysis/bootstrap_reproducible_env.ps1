@@ -11,11 +11,15 @@ environment directory manually only when intentionally rebuilding it.
 [CmdletBinding()]
 param(
     [string]$PythonLauncher = "py",
-    [string]$EnvironmentPath = (Join-Path (Resolve-Path (Join-Path $PSScriptRoot "..\..")) ".venv-reproducible")
+    [string]$EnvironmentPath
 )
 
 $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$defaultEnvironmentPath = Join-Path $repoRoot ".venv-reproducible"
+if ([string]::IsNullOrWhiteSpace($EnvironmentPath)) {
+    $EnvironmentPath = $defaultEnvironmentPath
+}
 $requirements = Join-Path $repoRoot "requirements-reproducible-review.txt"
 
 if (Test-Path -LiteralPath $EnvironmentPath) {

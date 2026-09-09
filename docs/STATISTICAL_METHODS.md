@@ -34,12 +34,26 @@ We performed pairwise comparisons to test for "Reporting Bias." Studies that rep
 ## 3. Fleiss' Kappa (Inter-Rater Reliability)
 
 The historical 2-rater, 10-paper calculation is a calibration artifact only.
-It is not the final IRR result and is not used by the corrected pipeline.
+It is not used as the final IRR result. The final analysis uses the same 48
+papers scored independently by all 11 reviewers and reports separate kappa
+values for the two ordinal score scales:
 
-- **Planned statistic**: Fleiss' Kappa ($\kappa$) per scored criterion after all
-  11 reviewers independently score the same 48 `Paper_ID` records. The files
-  are validated for matching IDs before they are combined.
+- **LMIC Relevance Score (1-5):** Fleiss' $\kappa$ = **0.505**.
+- **TR Score (0-5):** Fleiss' $\kappa$ = **0.223**.
+
+The calculation is the standard nominal-category Fleiss statistic, as requested
+for the inter-rater analysis. The aggregate outputs are
+`tables/analysis_fleiss_kappa_summary.csv` and
+`tables/analysis_fleiss_kappa_item_agreement.csv`. The workbook containing
+individual ratings is private and is supplied to the runner externally through
+`scripts/analysis/statistical/run_fleiss_kappa_from_private_xlsx.py`.
+
+For context, the average observed agreement was 0.648 for LMIC and 0.451 for
+TR. The values should not be combined into one kappa or interpreted as clinical
+validity of either score.
+
 - **Interpretation**: Landis & Koch (1977) scale:
+    - 0.21 - 0.40: **Fair Agreement**.
     - 0.41 - 0.60: **Moderate Agreement**.
     - 0.61 - 0.80: **Substantial Agreement**.
 

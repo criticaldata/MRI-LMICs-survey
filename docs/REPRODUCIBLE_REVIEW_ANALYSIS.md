@@ -3,7 +3,7 @@
 ## Scope
 
 The local pipeline now separates source freezing, derived review analyses,
-scientometric metadata, and reviewer agreement. The existing provisional
+scientometric metadata, and reviewer agreement. The historical provisional
 Fleiss κ output is not overwritten or reused in the corrected analyses.
 
 ## Public data boundary
@@ -12,8 +12,8 @@ The tracked `data/data-clean.csv` is the 48-study anonymized public corpus.
 It excludes reviewer names, reviewer assignments, and individual ratings.
 The reviewer-containing internal source is retained only in the ignored local
 path `data/private/`; it is not required to reproduce the public tables and
-figures. Final Fleiss kappa remains pending until complete independent ratings
-are received from all reviewers.
+figures. Final Fleiss kappa is published only as an aggregate summary; the
+private workbook and individual ratings are never tracked.
 
 ## Corrected operational definitions
 
@@ -26,18 +26,20 @@ criteria defined in the revised manuscript:
    `Upon_request` is reported separately and is not public Open Science.
 3. **Clinical Evaluation** — radiologist/clinical-reader assessment or a
    downstream clinical task beyond PSNR/SSIM.
-4. **Hardware Awareness** — a stated hardware or inference-resource
-   specification.
+4. **Hardware Awareness** — explicit minimum hardware requirements for
+   inference. Training hardware, a workstation used for experiments, runtime,
+   model size, or memory consumption alone do not satisfy this criterion.
 5. **Data Diversity** — real-world scanner, motion, portability,
    heterogeneity, or generalization evidence.
 
-The code keeps evidence snippets and manual-review flags. It does not convert
-unrecognized resource, field, dataset, or reviewer values into affirmative
-values.
+The final TR evidence layer is `data/tr_criteria_evidence.csv`. It contains one
+row per included study, final `Yes`/`No` decisions for all five criteria, the
+supporting page/section, and a rubric-based reason. The canonical Master Data
+Sheet remains unchanged and is joined to this evidence layer by `Paper_ID`.
 
 ## Current rerun outputs
 
-The 2026-08-03 rerun is in `analysis/review_20260803/` and includes:
+The promoted 2026-08-18 rerun is in `analysis/review_20260803/` and includes:
 
 - corrected per-paper TR criteria and score;
 - sensitivity restricted to SR-primary cohorts, with strict and
@@ -47,7 +49,23 @@ The 2026-08-03 rerun is in `analysis/review_20260803/` and includes:
   paired/unpaired status, input/target field categories, field-pair direction,
   and ground-truth type;
 - quality-score rerun and a raw-value unknown audit;
-- an analysis manifest declaring Fleiss κ pending.
+- an analysis manifest that keeps private-input agreement calculation separate
+  from the public core run;
+- aggregate final Fleiss κ outputs for the 48-study, 11-reviewer matrix.
+
+The TR outputs also include the flat evidence file
+`analysis_tr_hardware_verification.csv`. It records the final decision,
+article page/section, evidence reason, source document, and rubric version.
+None of the 48 papers explicitly specified minimum hardware requirements for
+inference, so Hardware Awareness is 0/48. Several papers report training GPUs,
+runtime, memory use, or an experimental workstation; those near-matches are
+documented but correctly score `No` under the official definition.
+
+The final article-evidence counts are: Low-Field Domain 4/48, Open Science
+4/48, Clinical Evaluation 21/48, Hardware Awareness 0/48, and Data Diversity
+30/48. Mean TR is 1.2292/5 (median 1). These are reproducible article-level
+decisions and remain separate from the independent 11-author scores used for
+the final inter-rater agreement analysis.
 
 The current frozen source produces a quality mean of 4.1458/9 (sample SD
 1.1848), not the historical repository value 4.125/9 or the manuscript text
@@ -65,14 +83,12 @@ The TR weighting sensitivity is in
 `analysis/review_20260803/tr_weighting_sensitivity_20260804/`. It evaluates
 four prespecified weighting schemes rather than changing the manuscript's
 primary equal-weight definition. The study ranking remains highly concordant
-with the primary score in every scheme (Spearman rho at least 0.946), but the
-LMIC--TR permutation p-value varies across schemes. Therefore the correlation
-is exploratory and must not be described as a confirmed association.
-The analysis now also records 10,000-replicate bootstrap confidence intervals
-and leave-one-out rho values for the primary score. The primary rho remains
-positive when any single study is omitted (0.194--0.298), but its bootstrap
-95% interval crosses zero; this confirms that the association is not robust
-enough for a confirmatory claim.
+with the primary score in every scheme (Spearman rho at least 0.951). In the
+verified evidence rerun, the LMIC--TR rho ranges from 0.349 to 0.418 and all
+10,000-permutation p-values are below 0.015; the corresponding bootstrap
+intervals remain above zero. This association must still be described as
+exploratory because the two constructs share deployment-related content; it is
+separate from the final 11-author agreement analysis.
 
 The random-forest robustness analysis is in
 `analysis/review_20260803/random_forest_robustness_20260804/`. It uses a
@@ -81,20 +97,21 @@ baseline, a regularized ridge benchmark, a regularized ordinal benchmark,
 held-out permutation importance, and bootstrap confidence intervals. It is a
 supplementary exploratory analysis only; it does not support causal claims.
 
-`ground_truth_auto_extraction_20260804/` records the automatic, conservative
-PSNR/SSIM ground-truth audit. It accepts only exact evidence from the frozen
-extraction or cached Europe PMC full text, and retains `Not reported` when the
-source does not establish pairedness or low-field direction. It is an
-auxiliary analysis and never overwrites the canonical extraction source.
+`ground_truth_metric_audit_20260804/` records the conservative PSNR/SSIM
+ground-truth audit. It accepts only exact evidence from the frozen extraction
+or cached Europe PMC full text, and retains `Not reported` when the source does
+not establish pairedness or low-field direction. It is an auxiliary analysis
+and never overwrites the canonical extraction source.
 
 ## Independent reviewer agreement
 
-The complete IRR requires the same 48 Paper_ID rows to be scored independently
-by all 11 reviewers. The finished extraction workbook contains screening and
-current assignment information, but not that complete independent rating
-matrix. Use the local reviewer workbook template; send separate private copies,
-then merge to a long table (`Paper_ID`, `Reviewer_ID`, score, notes) and derive
-the wide matrix for Fleiss κ only after receipt of all files.
+The final IRR uses the same 48 papers scored independently by all 11 reviewers.
+The private workbook is validated and passed externally to
+`run_fleiss_kappa_from_private_xlsx.py`. The runner writes only
+`analysis_fleiss_kappa_summary.csv` and
+`analysis_fleiss_kappa_item_agreement.csv`; it does not write reviewer names or
+individual ratings. The resulting aggregate values are LMIC κ = 0.505 and TR
+κ = 0.223.
 
 ## Scientometric boundary
 

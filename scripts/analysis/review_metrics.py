@@ -1,9 +1,10 @@
 """Reproducible review metrics for the MRI-LMICs survey.
 
-The functions in this module are intentionally conservative.  They keep the
-source text alongside every derived flag, use the five translational-readiness
-criteria defined in the revised manuscript, and expose unresolved values
-instead of converting them to affirmative evidence.
+The functions in this module are intentionally conservative. They keep the
+source text alongside every derived flag and use the five translational-
+readiness criteria defined in the revised manuscript. Final TR decisions come
+from the frozen article-level evidence table; the text rules remain available
+as validation helpers but do not replace the verified evidence layer.
 
 This module does not calculate Fleiss' kappa.  The existing provisional
 10-paper/2-reviewer calculation is kept separate until independent ratings
@@ -25,6 +26,14 @@ import pandas as pd
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+TR_EVIDENCE_PATH = PROJECT_ROOT / "data" / "tr_criteria_evidence.csv"
+TR_CRITERIA = [
+    "LowFieldDomain",
+    "OpenScience",
+    "ClinicalEvaluation",
+    "HardwareAwareness",
+    "DataDiversity",
+]
 FIGURES_DIR = PROJECT_ROOT / "scripts" / "figures"
 if str(FIGURES_DIR) not in sys.path:
     sys.path.insert(0, str(FIGURES_DIR))
@@ -77,7 +86,7 @@ def _first_evidence(text: str, patterns: list[str]) -> str:
         if match:
             start = max(0, match.start() - 80)
             end = min(len(text), match.end() + 120)
-            return text[start:end]
+            return text[start:end].strip()
     return ""
 
 
@@ -228,7 +237,6 @@ def _field_pair(row: pd.Series) -> dict[str, str]:
         "Input_Field_Category": input_category,
         "Target_Field_Category": target_category,
         "Field_Pair_Category": pair_category,
-        "Field_Manual_Review": "Yes" if "Unknown" in {input_category, target_category} or "unresolved" in pair_category else "No",
         "Field_Evidence": _first_evidence(
             field_text,
             [r"64\s*m?t", r"0\.064\s*t", r"50\s*m?t", r"low[ -]?field", r"3\s*t", r"1\.5\s*t"],
@@ -456,6 +464,12 @@ def _clinical_evaluation(row: pd.Series) -> dict[str, object]:
 
 
 def _hardware_awareness(row: pd.Series) -> dict[str, object]:
+    """Classify hardware awareness using inference/deployment evidence only.
+
+    Training hardware is deliberately excluded. A GPU, CPU, CUDA version, or
+    training runtime is not evidence that the paper specifies the minimum
+    resources needed to run the model in deployment.
+    """
     text = row_text(
         row,
         [
@@ -469,11 +483,53 @@ def _hardware_awareness(row: pd.Series) -> dict[str, object]:
             "Main_Finding_3",
         ],
     ).casefold()
-    positive = _has(text, r"gpu|cpu|nvidia|cuda|a100|v100|rtx|ram|memory|fps|inference time|runtime|computational efficiency|model size|processing time")
+
+    hardware = r"(?:gpu|cpu|nvidia|cuda|a100|v100|rtx|ram|memory|model size|hardware|processor)"
+    # A bare mention of a "deployment pathway" is insufficient. The paper
+    # must link the hardware to inference or to an explicit device-level
+    # deployment statement.
+    inference = r"(?:inference|on[- ]device|edge[- ]device|deployed\s+(?:on|using)|deployment\s+(?:on|using))"
+    requirement = r"(?:minimum|required|requires|requirement|at least|specified|specif(?:y|ied|ies))"
+    training_only = r"(?:train(?:ing)?|trained|training phase|training computation|training hardware|gpu training)"
+
+    def has_pair(first: str, second: str, gap: int = 100) -> bool:
+        return _has(
+            text,
+            rf"(?:{first}).{{0,{gap}}}(?:{second})|(?:{second}).{{0,{gap}}}(?:{first})",
+        )
+
+    inference_hardware = has_pair(inference, hardware)
+    explicit_requirement = (
+        inference_hardware
+        and has_pair(inference, requirement, gap=120)
+        and has_pair(hardware, requirement, gap=120)
+    )
+    training_hardware = has_pair(training_only, hardware, gap=120)
+
+    if explicit_requirement:
+        status = "Yes"
+        reason = "explicit inference/deployment hardware requirement reported"
+    elif inference_hardware:
+        status = "Unclear"
+        reason = "inference/deployment hardware is mentioned, but a minimum requirement is not explicit"
+    elif training_hardware:
+        status = "No"
+        reason = "training hardware is reported without an inference/deployment requirement"
+    else:
+        status = "No"
+        reason = "no explicit inference/deployment hardware requirement found"
+
+    evidence_patterns = [
+        rf"(?:{inference}).{{0,120}}(?:{hardware})",
+        rf"(?:{hardware}).{{0,120}}(?:{inference})",
+        rf"(?:{training_only}).{{0,120}}(?:{hardware})",
+        rf"(?:{hardware}).{{0,120}}(?:{training_only})",
+    ]
     return {
-        "TR_HardwareAwareness": int(positive),
-        "TR_HardwareAwareness_Evidence": _first_evidence(text, [r"gpu", r"cpu", r"nvidia", r"inference", r"fps", r"runtime", r"memory", r"model size"]),
-        "TR_HardwareAwareness_Reason": "hardware or inference-resource specification present" if positive else "no hardware/inference-resource specification found",
+        "TR_HardwareAwareness": int(status == "Yes"),
+        "TR_HardwareAwareness_Status": status,
+        "TR_HardwareAwareness_Evidence": _first_evidence(text, evidence_patterns),
+        "TR_HardwareAwareness_Reason": reason,
     }
 
 
@@ -498,6 +554,50 @@ def _data_diversity(row: pd.Series) -> dict[str, object]:
         "TR_DataDiversity_Evidence": _first_evidence(text, [r"motion", r"portable", r"multi[- ]?center", r"heterogene", r"scanner", r"low[- ]resource", r"generaliz"]),
         "TR_DataDiversity_Reason": "real-world scanner, motion, portability, heterogeneity, or generalization issue addressed" if positive else "no qualifying real-world data-diversity evidence found",
     }
+
+
+def _apply_verified_tr_evidence(result: pd.DataFrame) -> pd.DataFrame:
+    """Overlay final binary TR decisions from the frozen article evidence.
+
+    The evidence table is separate from the canonical Master Data Sheet. This
+    preserves the original extraction while making every TR decision traceable
+    to an article, page/section, and explicit rubric-based reason.
+    """
+
+    evidence = pd.read_csv(TR_EVIDENCE_PATH)
+    if len(evidence) != 48 or evidence["Paper_ID"].nunique() != 48:
+        raise ValueError("TR evidence must contain exactly 48 unique Paper_ID values")
+    expected_ids = set(pd.to_numeric(result["Paper_ID"], errors="raise").astype(int))
+    evidence_ids = set(pd.to_numeric(evidence["Paper_ID"], errors="raise").astype(int))
+    if evidence_ids != expected_ids:
+        raise ValueError("TR evidence Paper_ID values do not match the canonical included studies")
+
+    indexed = evidence.set_index("Paper_ID")
+    output = result.copy()
+    output["DOI"] = output["Paper_ID"].astype(int).map(indexed["DOI"])
+    for criterion in TR_CRITERIA:
+        binary = f"TR_{criterion}"
+        decision = f"TR_{criterion}_Decision"
+        reason = f"TR_{criterion}_Reason"
+        page = f"TR_{criterion}_Evidence_Page"
+        section = f"TR_{criterion}_Evidence_Section"
+        required = [binary, decision, reason, page, section]
+        missing = [column for column in required if column not in indexed.columns]
+        if missing:
+            raise ValueError(f"TR evidence is missing columns: {missing}")
+        mapped_ids = output["Paper_ID"].astype(int)
+        output[binary] = mapped_ids.map(indexed[binary]).astype(int)
+        output[decision] = mapped_ids.map(indexed[decision])
+        output[reason] = mapped_ids.map(indexed[reason])
+        output[page] = mapped_ids.map(indexed[page])
+        output[section] = mapped_ids.map(indexed[section])
+        output[f"TR_{criterion}_Status"] = output[decision]
+        output[f"TR_{criterion}_Evidence"] = output[reason]
+
+    output["TR_Evidence_Document"] = output["Paper_ID"].astype(int).map(indexed["Evidence_Document"])
+    output["TR_Evidence_Source"] = output["Paper_ID"].astype(int).map(indexed["Evidence_Source"])
+    output["TR_Rubric_Version"] = output["Paper_ID"].astype(int).map(indexed["Rubric_Version"])
+    return output
 
 
 def add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
@@ -531,6 +631,7 @@ def add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
         result_type="expand",
     )
     result = pd.concat([result, tr_rows], axis=1)
+    result = _apply_verified_tr_evidence(result)
     tr_cols = [
         "TR_LowFieldDomain",
         "TR_OpenScience",
@@ -539,12 +640,6 @@ def add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
         "TR_DataDiversity",
     ]
     result["TR_Score"] = result[tr_cols].sum(axis=1).astype(int)
-    result["TR_Manual_Review"] = np.where(
-        (result["TR_LowFieldDomain_Status"] == "Unclear")
-        | (result["Field_Manual_Review"] == "Yes"),
-        "Yes",
-        "No",
-    )
     result["SR_Primary_Strict"] = result["Primary_Focus_Norm_Corrected"].isin(
         ["Pure SR", "SR + Denoising", "SR + Other"]
     )
@@ -693,19 +788,23 @@ def _metric_summary(subset: pd.DataFrame, column: str, prefix: str) -> dict[str,
     }
 
 
-def _manual_review_reason(row: pd.Series) -> str:
-    reasons = []
-    if row.get("Input_Field_Category") in {"Unknown", "Not specified"}:
-        reasons.append("input field unresolved")
-    if row.get("Target_Field_Category") in {"Unknown", "Not specified"}:
-        reasons.append("target field unresolved")
-    if "unresolved" in _lower(row.get("Field_Pair_Category")):
-        reasons.append("field direction unresolved")
-    if row.get("Ground_Truth_Type") == "Not reported":
-        reasons.append("ground truth not reported")
-    if row.get("Paired_Unpaired") == "Not reported":
-        reasons.append("paired/unpaired status not reported")
-    return "; ".join(reasons) if reasons else "manual confirmation required"
+def _hardware_verification_table(derived: pd.DataFrame) -> pd.DataFrame:
+    """Return the final article-evidence table for hardware awareness."""
+
+    columns = {
+        "Paper_ID": "Paper_ID",
+        "DOI": "DOI",
+        "Title": "Title",
+        "TR_HardwareAwareness": "TR_HardwareAwareness",
+        "TR_HardwareAwareness_Decision": "Decision",
+        "TR_HardwareAwareness_Evidence_Page": "Evidence_Page",
+        "TR_HardwareAwareness_Evidence_Section": "Evidence_Section",
+        "TR_HardwareAwareness_Reason": "Evidence_Reason",
+        "TR_Evidence_Document": "Evidence_Document",
+        "TR_Evidence_Source": "Evidence_Source",
+        "TR_Rubric_Version": "Rubric_Version",
+    }
+    return derived[list(columns)].rename(columns=columns).copy()
 
 
 def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
@@ -713,6 +812,7 @@ def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
     quality, quality_summary = quality_scores(derived)
     tr_columns = [
         "Paper_ID",
+        "DOI",
         "Title",
         "Year",
         "Architecture_Norm_Corrected",
@@ -724,14 +824,21 @@ def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
         "TR_HardwareAwareness",
         "TR_DataDiversity",
         "TR_Score",
-        "TR_LowFieldDomain_Status",
-        "TR_Manual_Review",
-        "TR_LowFieldDomain_Evidence",
-        "TR_ClinicalEvaluation_Evidence",
-        "TR_HardwareAwareness_Evidence",
-        "TR_DataDiversity_Evidence",
+        "TR_Evidence_Document",
+        "TR_Evidence_Source",
+        "TR_Rubric_Version",
     ]
+    for criterion in TR_CRITERIA:
+        tr_columns.extend(
+            [
+                f"TR_{criterion}_Decision",
+                f"TR_{criterion}_Evidence_Page",
+                f"TR_{criterion}_Evidence_Section",
+                f"TR_{criterion}_Reason",
+            ]
+        )
     tr = derived[[column for column in tr_columns if column in derived.columns]].copy()
+    hardware_verification = _hardware_verification_table(derived)
     tr_summary = pd.DataFrame(
         [
             {"Criterion": column, "N_Yes": int(derived[column].sum()), "Percent": float(derived[column].mean() * 100)}
@@ -804,19 +911,10 @@ def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
         "Ground_Truth_Type",
         "Paired_Unpaired",
         "Field_Evidence",
-        "Field_Manual_Review",
         "Training_Data_Source",
     ]
     dataset_characterization = derived[[column for column in dataset_columns if column in derived.columns]].copy()
     metric_suitability = _metric_suitability_table(derived)
-    dataset_manual_review_queue = dataset_characterization.loc[
-        dataset_characterization["Field_Manual_Review"] == "Yes"
-    ].copy()
-    dataset_manual_review_queue.insert(
-        1,
-        "Manual_Review_Reason",
-        dataset_manual_review_queue.apply(_manual_review_reason, axis=1),
-    )
     field_ground_truth = derived[
         [
             "Paper_ID",
@@ -828,12 +926,12 @@ def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
             "Ground_Truth_Type",
             "Paired_Unpaired",
             "Field_Evidence",
-            "Field_Manual_Review",
         ]
     ].copy()
     return {
         "derived": derived,
         "tr": tr,
+        "hardware_verification": hardware_verification,
         "tr_summary": tr_summary,
         "quality": quality,
         "quality_summary": quality_summary,
@@ -841,7 +939,6 @@ def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
         "correlation": pd.DataFrame(correlation_rows),
         "dataset_characterization": dataset_characterization,
         "metric_suitability": metric_suitability,
-        "dataset_manual_review_queue": dataset_manual_review_queue,
         "field_ground_truth": field_ground_truth,
         "unknown_audit": unknown_audit(derived),
     }
@@ -856,6 +953,7 @@ def write_analysis_outputs(analysis: dict, output_dir: Path, source_path: Path) 
     output_dir.mkdir(parents=True, exist_ok=True)
     file_map = {
         "tr": "analysis_translational_readiness_corrected.csv",
+        "hardware_verification": "analysis_tr_hardware_verification.csv",
         "tr_summary": "analysis_tr_summary_corrected.csv",
         "quality": "analysis_quality_assessment_rerun.csv",
         "quality_summary": "analysis_quality_summary_rerun.csv",
@@ -863,7 +961,6 @@ def write_analysis_outputs(analysis: dict, output_dir: Path, source_path: Path) 
         "correlation": "analysis_lmic_tr_correlation.csv",
         "dataset_characterization": "table_dataset_characterization.csv",
         "metric_suitability": "analysis_psnr_ssim_metric_suitability.csv",
-        "dataset_manual_review_queue": "analysis_dataset_manual_review_queue.csv",
         "field_ground_truth": "analysis_field_pair_ground_truth.csv",
         "unknown_audit": "analysis_unknown_audit.csv",
     }
@@ -881,9 +978,9 @@ def write_analysis_outputs(analysis: dict, output_dir: Path, source_path: Path) 
         "derived_data_sha256": dataframe_sha256(derived),
         "n_included": int(len(derived)),
         "fleiss_kappa": {
-            "status": "pending",
+            "status": "not_run_without_private_input",
             "calculation_performed": False,
-            "reason": "independent ratings from all 11 reviewers are not yet available",
+            "reason": "individual reviewer ratings are intentionally excluded from the public core pipeline; use the private-input agreement runner",
         },
         "tr_definition": [
             "low-field domain: explicit training/fine-tuning evidence at or below 64 mT",
@@ -907,11 +1004,6 @@ def write_analysis_outputs(analysis: dict, output_dir: Path, source_path: Path) 
             "metric_extraction": "first parseable value recorded per paper",
             "interpretation": "descriptive sensitivity summaries; not a pooled meta-analysis",
             "metric_suitability_table": output_files["metric_suitability"],
-        },
-        "manual_dataset_review": {
-            "queue_rows": int(len(analysis["dataset_manual_review_queue"])),
-            "purpose": "manual confirmation of field direction, ground truth, and paired/unpaired status",
-            "unknowns_imputed": False,
         },
         "output_files": output_files,
     }

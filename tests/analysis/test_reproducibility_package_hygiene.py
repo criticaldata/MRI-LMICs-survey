@@ -5,7 +5,7 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def test_active_package_excludes_retired_template_and_calibration_artifacts():
-    """Only the current reviewer template and pending-IRR workflow stay active."""
+    """The public package excludes raw ratings and historical calibration."""
     retired_paths = [
         REPO / "analysis" / "reproducibility" / "build_reviewer_scoring_workbook.mjs",
         REPO / "tables" / "module3_fleiss_kappa_results.csv",
@@ -32,7 +32,7 @@ def test_documented_master_runner_regenerates_and_verifies_complete_package():
     for command in [
         "run_reproducible_review_analysis.py",
         "run_tr_weighting_sensitivity.py",
-        "extract_ground_truth_from_cached_fulltext.py",
+        "extract_metric_ground_truth_from_cached_fulltext.py",
         "run_random_forest_robustness_20260804.py",
         "analysis_temporal_trends.py",
         "fig4_performance_comparison.py",
@@ -46,8 +46,8 @@ def test_documented_master_runner_regenerates_and_verifies_complete_package():
 
     readme = (REPO / "README.md").read_text(encoding="utf-8")
     assert "run_full_reproducibility_pipeline.ps1" in readme
-    assert "34 tests successfully" in readme
-    assert "29 tests" not in readme
+    assert "run_fleiss_kappa_from_private_xlsx.py" in readme
+    assert "aggregate agreement" in readme.casefold()
 
 
 def test_public_scientometric_release_contains_only_results_and_coverage():
@@ -60,7 +60,7 @@ def test_public_scientometric_release_contains_only_results_and_coverage():
 
 def test_ground_truth_extraction_uses_versioned_doi_results_not_private_role_audit():
     """A fresh public clone must not require local scientometric role-audit data."""
-    script = REPO / "scripts" / "analysis" / "extract_ground_truth_from_cached_fulltext.py"
+    script = REPO / "scripts" / "analysis" / "extract_metric_ground_truth_from_cached_fulltext.py"
     text = script.read_text(encoding="utf-8")
     assert "mri_scientometric_results.csv" in text
     assert "PUBLIC_SCIENTOMETRIC_RESULTS" in text

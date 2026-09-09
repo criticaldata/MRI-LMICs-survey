@@ -8,7 +8,6 @@ Generates panels for:
 """
 
 import sys
-import os
 import io
 from pathlib import Path
 
@@ -25,9 +24,6 @@ from mapper import load_data, get_project_root
 from random_forest_training import engineer_features, train_and_evaluate
 # Mann-Whitney logic
 from mann_whitney_tests import run_mann_whitney, run_chi_square
-# Fleiss' Kappa logic
-from fleiss_kappa_calculation import compute_fleiss_kappa
-
 # Reproducibility
 np.random.seed(42)
 
@@ -86,22 +82,19 @@ def create_table5():
     # --- PANEL C: FLEISS KAPPA ---
     print("Panel C: Fleiss' Kappa Inter-Rater Agreement")
     try:
-        # Load the ratings matrix (usually fleiss_kappa_matrix.csv in data/)
-        matrix_path = PROJECT_ROOT / 'data' / 'fleiss_kappa_matrix.csv'
-        
-        if os.path.exists(matrix_path):
-            matrix_df = pd.read_csv(matrix_path)
-            if matrix_df.columns[0].lower() in ['paper', 'id', 'study']:
-                matrix_df = matrix_df.iloc[:, 1:]
-            ratings_matrix = matrix_df.values.astype(float)
-            kappa, details = compute_fleiss_kappa(ratings_matrix, log_file)
-            
-            kappa_df = pd.DataFrame([details])
-            print(f"Fleiss' Kappa: {kappa:.3f} ({details['Interpretation']})")
+        # Read the aggregate output generated from the private reviewer workbook.
+        summary_path = PROJECT_ROOT / "tables" / "analysis_fleiss_kappa_summary.csv"
+
+        if summary_path.exists():
+            kappa_df = pd.read_csv(summary_path)
+            print(kappa_df[["Analysis", "Fleiss_kappa"]].to_string(index=False))
             kappa_df.to_csv(out_dir / "table5c_fleiss_kappa.csv", index=False)
             print(f"✓ Saved: table5c_fleiss_kappa.csv\n")
         else:
-            print("⚠ Calibration matrix missing. Run module 3 standalone for demo mode.")
+            print(
+                "⚠ Aggregate kappa summary missing. Run "
+                "run_fleiss_kappa_from_private_xlsx.py with the private workbook."
+            )
             
     except Exception as e:
         print(f"⚠ Error in Panel C: {e}")

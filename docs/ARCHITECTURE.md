@@ -2,8 +2,7 @@
 
 This extension integrates advanced statistical analysis and geographic equity assessment into the core MRI super-resolution survey pipeline.
 
-> Historical note: the directory diagram below predates the corrected-review
-> rerun. The current source of truth is `REPRODUCIBLE_REVIEW_ANALYSIS.md`; the
+> The current source of truth is `REPRODUCIBLE_REVIEW_ANALYSIS.md`. The
 > 2-rater/10-paper Fleiss kappa is calibration only and is not final IRR.
 
 ## 1. Directory Structure
@@ -21,7 +20,7 @@ MRI-LMICs-survey/
 │   │   └── statistical/        # CORE BUSINESS LOGIC
 │   │       ├── random_forest_training.py
 │   │       ├── mann_whitney_tests.py
-│   │       ├── fleiss_kappa_calculation.py
+│   │       ├── run_fleiss_kappa_from_private_xlsx.py
 │   │       └── utils.py          # Shared normalization logic
 │   ├── data_enrichment/
 │   │   └── world_bank/         # EXTERNAL API INTEGRATION
@@ -52,4 +51,4 @@ MRI-LMICs-survey/
 - **Audit Trails**: Every module execution creates a timestamped log in `06_processing_outputs/`.
 - **Privacy boundary**: reviewer names, assignments, individual ratings, raw
   provider responses, and credential files are intentionally excluded from the
-  public repository.
+  public repository. Only aggregate reviewer agreement results are tracked.

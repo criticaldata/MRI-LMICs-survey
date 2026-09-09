@@ -25,17 +25,19 @@ def main() -> None:
     screening = pd.read_csv(repro / "screening_log_183.csv")
     assignments = pd.read_csv(repro / "included_studies_assignments_48.csv")
     manifest = json.loads((repro / "source_manifest.json").read_text(encoding="utf-8"))
+    public_manifest = json.loads((REPO / "data" / "public_release_manifest.json").read_text(encoding="utf-8"))
     analysis_manifest = json.loads((analysis / "analysis_manifest.json").read_text(encoding="utf-8"))
     quality = pd.read_csv(analysis / "analysis_quality_summary_rerun.csv")
     sensitivity = pd.read_csv(analysis / "analysis_sensitivity_primary_sr.csv")
     dataset_characterization = pd.read_csv(analysis / "table_dataset_characterization.csv")
     metric_suitability = pd.read_csv(analysis / "analysis_psnr_ssim_metric_suitability.csv")
-    manual_review_queue = pd.read_csv(analysis / "analysis_dataset_manual_review_queue.csv")
     temporal_primary = pd.read_csv(REPO / "tables" / "analysis_temporal_trends.csv")
     temporal_preliminary = pd.read_csv(REPO / "tables" / "analysis_temporal_trends_2025_preliminary.csv")
+    fleiss_summary = pd.read_csv(REPO / "tables" / "analysis_fleiss_kappa_summary.csv")
+    fleiss_item_agreement = pd.read_csv(REPO / "tables" / "analysis_fleiss_kappa_item_agreement.csv")
     tr_weighting = pd.read_csv(analysis / "tr_weighting_sensitivity_20260804" / "analysis_tr_weighting_sensitivity.csv")
     tr_primary_leave_one_out = pd.read_csv(analysis / "tr_weighting_sensitivity_20260804" / "analysis_tr_primary_leave_one_out.csv")
-    ground_truth_summary = pd.read_csv(analysis / "ground_truth_auto_extraction_20260804" / "ground_truth_auto_extraction_summary.csv")
+    ground_truth_summary = pd.read_csv(analysis / "ground_truth_metric_audit_20260804" / "ground_truth_metric_audit_summary.csv")
     rf_robustness = pd.read_csv(analysis / "random_forest_robustness_20260804" / "rf_repeated_cv_summary.csv")
 
     require(len(data) == 48, f"data-clean.csv has {len(data)} rows, expected 48")
@@ -43,8 +45,13 @@ def main() -> None:
     require((screening["Status"].str.casefold() == "included").sum() == 48, "included screening count is not 48")
     require((screening["Status"].str.casefold() == "excluded").sum() == 135, "excluded screening count is not 135")
     require(len(assignments) == 48 and assignments["Paper_ID"].nunique() == 48, "assignment mapping is not one-to-one")
-    require(manifest["reviewer_ratings"]["fleiss_kappa_status"] == "pending_until_complete_independent_ratings", "Fleiss kappa status changed unexpectedly")
-    require(analysis_manifest["fleiss_kappa"]["calculation_performed"] is False, "corrected run must not calculate Fleiss kappa")
+    require(public_manifest["fleiss_kappa_status"] == "aggregate_summary_published_private_input", "Fleiss kappa release status is not current")
+    require(analysis_manifest["fleiss_kappa"]["status"] == "not_run_without_private_input", "public core analysis must not require private ratings")
+    require(analysis_manifest["fleiss_kappa"]["calculation_performed"] is False, "public core analysis must not calculate Fleiss kappa")
+    require(fleiss_summary["Analysis"].tolist() == ["LMIC_Relevance_Score", "TR_Score"], "Fleiss summary analyses are incomplete")
+    require((fleiss_summary["Items"] == 48).all() and (fleiss_summary["Raters"] == 11).all(), "Fleiss summary dimensions are invalid")
+    require(fleiss_summary["Fleiss_kappa"].between(-1, 1).all(), "Fleiss kappa values are invalid")
+    require(len(fleiss_item_agreement) == 96, "Fleiss item agreement output should contain 96 rows")
 
     total_quality = quality.loc[quality["Domain"] == "Total Quality"].iloc[0]
     require(abs(float(total_quality["Mean"]) - 4.1458333333) < 1e-6, "quality rerun mean changed unexpectedly")
@@ -92,7 +99,7 @@ def main() -> None:
         ),
         "metric suitability uses an unexpected eligibility value",
     )
-    require(len(manual_review_queue) == 47, "manual dataset-review queue should contain 47 studies")
+    require("Field_Manual_Review" not in dataset_characterization.columns, "retired manual-review label remains in dataset characterization")
     require(temporal_primary["Year"].tolist() == [2020, 2021, 2022, 2023, 2024], "primary temporal scope is not 2020-2024")
     require(
         temporal_preliminary["Year"].tolist() == [2025]
@@ -114,12 +121,11 @@ def main() -> None:
         analysis / "analysis_lmic_tr_correlation.csv",
         analysis / "table_dataset_characterization.csv",
         analysis / "analysis_psnr_ssim_metric_suitability.csv",
-        analysis / "analysis_dataset_manual_review_queue.csv",
         analysis / "analysis_field_pair_ground_truth.csv",
         analysis / "analysis_unknown_audit.csv",
         analysis / "tr_weighting_sensitivity_20260804" / "tr_weighting_study_scores.csv",
         analysis / "tr_weighting_sensitivity_20260804" / "analysis_tr_primary_leave_one_out.csv",
-        analysis / "ground_truth_auto_extraction_20260804" / "ground_truth_auto_extraction_metric_studies.csv",
+        analysis / "ground_truth_metric_audit_20260804" / "ground_truth_metric_audit_metric_studies.csv",
         analysis / "random_forest_robustness_20260804" / "rf_heldout_permutation_summary.csv",
         REPO / "figures" / "main" / "png" / "fig4_performance_comparison.png",
         REPO / "figures" / "main" / "pdf" / "fig4_performance_comparison.pdf",
@@ -142,7 +148,11 @@ def main() -> None:
         "tr_weighting_schemes": int(len(tr_weighting)),
         "ground_truth_metric_studies": int(metric_row),
         "rf_robustness_splits_per_model": 50,
-        "fleiss_kappa": "pending",
+        "fleiss_kappa": {
+            "LMIC_Relevance_Score": float(fleiss_summary.loc[fleiss_summary["Analysis"] == "LMIC_Relevance_Score", "Fleiss_kappa"].iloc[0]),
+            "TR_Score": float(fleiss_summary.loc[fleiss_summary["Analysis"] == "TR_Score", "Fleiss_kappa"].iloc[0]),
+            "raw_ratings_included": False,
+        },
         "status": "PASS",
     }
     output = repro / "verification_20260803.json"

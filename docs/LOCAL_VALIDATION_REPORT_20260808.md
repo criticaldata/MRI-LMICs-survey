@@ -1,5 +1,9 @@
 # Local Validation Report - 2026-08-08
 
+> Historical snapshot generated before the complete reviewer-rating workbook
+> was available. See `LOCAL_VALIDATION_REPORT_20260908.md` for the current
+> validation and aggregate Fleiss' kappa results.
+
 ## Scope
 
 This validation covers the corrected public MRI-LMICs reproducibility package.

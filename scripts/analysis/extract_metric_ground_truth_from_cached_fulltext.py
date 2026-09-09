@@ -21,7 +21,7 @@ from review_metrics import PROJECT_ROOT, build_analysis, load_data
 
 RUN_DIR = PROJECT_ROOT / "analysis" / "scientometrics" / "multisource_20260803"
 RAW_DIR = RUN_DIR / "raw" / "europepmc"
-OUTPUT = PROJECT_ROOT / "analysis" / "review_20260803" / "ground_truth_auto_extraction_20260804"
+OUTPUT = PROJECT_ROOT / "analysis" / "review_20260803" / "ground_truth_metric_audit_20260804"
 PUBLIC_SCIENTOMETRIC_RESULTS = PROJECT_ROOT / "tables" / "mri_scientometric_results.csv"
 
 
@@ -81,12 +81,12 @@ def classify(text: str) -> dict[str, str]:
     else:
         direction, direction_evidence = "Not reported", ""
     return {
-        "Auto_Ground_Truth_Type": ground_truth,
-        "Auto_Paired_Unpaired": pairedness,
-        "Auto_Field_Direction": direction,
+        "Ground_Truth_Type_From_Source": ground_truth,
+        "Paired_Unpaired_From_Source": pairedness,
+        "Field_Direction_From_Source": direction,
         "Ground_Truth_Evidence": gt_evidence,
         "Field_Direction_Evidence": direction_evidence,
-        "Auto_Confidence": "High" if pairedness in {"Paired", "Unpaired", "Paired by construction"} or direction in {"LF-to-HF", "LF-to-LF"} else "Not available",
+        "Evidence_Confidence": "High" if pairedness in {"Paired", "Unpaired", "Paired by construction"} or direction in {"LF-to-HF", "LF-to-LF"} else "Not available",
     }
 
 
@@ -118,16 +118,16 @@ def main() -> None:
         })
     table = pd.DataFrame(rows)
     metric_subset = table[(table["PSNR_Reported"] == "Yes") | (table["SSIM_Reported"] == "Yes")].copy()
-    table.to_csv(OUTPUT / "ground_truth_auto_extraction_all_studies.csv", index=False, encoding="utf-8")
-    metric_subset.to_csv(OUTPUT / "ground_truth_auto_extraction_metric_studies.csv", index=False, encoding="utf-8")
+    table.to_csv(OUTPUT / "ground_truth_metric_audit_all_studies.csv", index=False, encoding="utf-8")
+    metric_subset.to_csv(OUTPUT / "ground_truth_metric_audit_metric_studies.csv", index=False, encoding="utf-8")
     summary = pd.DataFrame([
         {"Measure": "All included studies", "N": len(table)},
         {"Measure": "PSNR or SSIM reported", "N": len(metric_subset)},
         {"Measure": "Cached Europe PMC full text", "N": int((table["EuropePMC_FullText_Cached"] == "Yes").sum())},
-        {"Measure": "Automatic paired/unpaired resolved", "N": int(table["Auto_Paired_Unpaired"].isin(["Paired", "Unpaired", "Paired by construction"]).sum())},
-        {"Measure": "Automatic LF-to-LF or LF-to-HF direction resolved", "N": int(table["Auto_Field_Direction"].isin(["LF-to-LF", "LF-to-HF"]).sum())},
+        {"Measure": "Paired/unpaired resolved from source evidence", "N": int(table["Paired_Unpaired_From_Source"].isin(["Paired", "Unpaired", "Paired by construction"]).sum())},
+        {"Measure": "LF-to-LF or LF-to-HF direction resolved from source evidence", "N": int(table["Field_Direction_From_Source"].isin(["LF-to-LF", "LF-to-HF"]).sum())},
     ])
-    summary.to_csv(OUTPUT / "ground_truth_auto_extraction_summary.csv", index=False, encoding="utf-8")
+    summary.to_csv(OUTPUT / "ground_truth_metric_audit_summary.csv", index=False, encoding="utf-8")
     manifest = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "policy": "Only explicit cached source text is accepted; unresolved values remain Not reported.",
@@ -135,9 +135,9 @@ def main() -> None:
         "source_data_sha256": sha256(source),
         "cached_fulltext_root": str(RAW_DIR),
         "cached_fulltext_files": int(sum(1 for _ in RAW_DIR.glob("paper_*_fulltext.xml"))),
-        "outputs": ["ground_truth_auto_extraction_all_studies.csv", "ground_truth_auto_extraction_metric_studies.csv", "ground_truth_auto_extraction_summary.csv"],
+        "outputs": ["ground_truth_metric_audit_all_studies.csv", "ground_truth_metric_audit_metric_studies.csv", "ground_truth_metric_audit_summary.csv"],
     }
-    (OUTPUT / "ground_truth_auto_extraction_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    (OUTPUT / "ground_truth_metric_audit_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(summary.to_string(index=False))
     print(f"Output: {OUTPUT}")
 

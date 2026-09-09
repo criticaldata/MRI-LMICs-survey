@@ -26,12 +26,12 @@ def test_historical_calibration_is_archived_not_active():
     assert not (DATA_DIR / "fleiss_kappa_matrix.csv").exists()
 
 
-def test_full_irr_is_explicitly_pending():
-    """Do not present the provisional calibration as the 11-reviewer IRR."""
+def test_full_irr_is_aggregate_only():
+    """The final IRR summary is public, while individual ratings stay private."""
     manifest_path = DATA_DIR / "public_release_manifest.json"
     assert manifest_path.exists(), "Public release manifest is missing."
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    assert manifest["fleiss_kappa_status"] == "pending_until_complete_independent_ratings"
+    assert manifest["fleiss_kappa_status"] == "aggregate_summary_published_private_input"
 
 def test_data_integrity():
     """Verify data-clean.csv has exactly 48 rows."""
