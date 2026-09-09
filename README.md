@@ -25,6 +25,12 @@ The pipeline includes advanced analytics for manuscript revision:
 - **Mann-Whitney U Tests**: Pairwise comparison of study characteristics.
 - **Fleiss' Kappa**: final aggregate agreement for 48 studies scored by 11
   reviewers. Individual ratings remain private.
+- **Ordinal weighted agreement**: supplementary multi-rater sensitivity analysis
+  with linear and quadratic category-distance weights. Individual ratings remain
+  private.
+- **Intraclass correlation**: supplementary two-way absolute-agreement ICC for
+  single ratings and the mean of the 11 reviewers. Individual ratings remain
+  private.
 - **Geographic Equity**: World Bank income classification mapping.
 
 To regenerate the aggregate agreement outputs from the private workbook, run:
@@ -37,6 +43,32 @@ python scripts/analysis/statistical/run_fleiss_kappa_from_private_xlsx.py `
 
 The command validates the 48-by-11 matrix and writes only aggregate CSV
 outputs; it never copies the private workbook into the repository.
+
+To regenerate the supplementary ordinal-weighted agreement outputs from the
+same private workbook, run:
+
+```powershell
+python scripts/analysis/statistical/run_weighted_kappa_from_private_xlsx.py `
+  --input-xlsx <private-reviewer-workbook.xlsx> `
+  --output-dir tables `
+  --output-xlsx <private-weighted-results.xlsx>
+```
+
+This calculates generalized weighted Fleiss agreement for 11 reviewers and
+summarizes all 55 pairwise weighted Cohen kappas. The weighted results are
+supplementary and do not replace the prespecified standard Fleiss statistics.
+
+To regenerate the supplementary ICC outputs from the same private workbook, run:
+
+```powershell
+python scripts/analysis/statistical/run_icc_from_private_xlsx.py `
+  --input-xlsx <private-reviewer-workbook.xlsx> `
+  --output-dir tables `
+  --output-xlsx <private-icc-results.xlsx>
+```
+
+The primary ICC is ICC(2,1), two-way random effects with absolute agreement;
+ICC(2,k) is also reported for the mean of all 11 reviewers.
 
 ## Generate Individual Outputs
 
@@ -67,7 +99,10 @@ python scripts/tables/table6_geographic_equity.py          # Table 6: Geographic
 The historical two-reviewer/10-study calibration is archived under provenance
 and is not an active result. The current aggregate agreement outputs are
 `tables/analysis_fleiss_kappa_summary.csv` and
-`tables/analysis_fleiss_kappa_item_agreement.csv`.
+`tables/analysis_fleiss_kappa_item_agreement.csv`. The supplementary ordinal
+weighted outputs are `tables/analysis_weighted_kappa_summary.csv` and
+`tables/analysis_weighted_kappa_item_agreement.csv`; the supplementary ICC
+output is `tables/analysis_icc_summary.csv`.
 
 ## Data
 

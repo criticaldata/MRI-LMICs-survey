@@ -1,0 +1,3 @@
+Analysis,Items,Raters,ICC_Model_Primary,ICC_2_1_absolute_agreement,ICC_2_k_absolute_agreement,ICC_3_1_consistency_diagnostic,ICC_3_k_consistency_diagnostic,MS_Items,MS_Raters,MS_Error
+LMIC_Relevance_Score,48,11,"ICC(2,1): two-way random, absolute agreement, single measurement",0.5534006458183125,0.9316499980463946,0.6042703100110282,0.9438099712051222,18.528529980657645,12.649242424242427,1.0411186331399098
+TR_Score,48,11,"ICC(2,1): two-way random, absolute agreement, single measurement",0.569587722155862,0.9357198073378129,0.6474654377880183,0.9528360049321825,7.320438426821406,6.772727272727272,0.3452611218568666

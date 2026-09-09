@@ -35,6 +35,9 @@ def main() -> None:
     temporal_preliminary = pd.read_csv(REPO / "tables" / "analysis_temporal_trends_2025_preliminary.csv")
     fleiss_summary = pd.read_csv(REPO / "tables" / "analysis_fleiss_kappa_summary.csv")
     fleiss_item_agreement = pd.read_csv(REPO / "tables" / "analysis_fleiss_kappa_item_agreement.csv")
+    weighted_summary = pd.read_csv(REPO / "tables" / "analysis_weighted_kappa_summary.csv")
+    weighted_item_agreement = pd.read_csv(REPO / "tables" / "analysis_weighted_kappa_item_agreement.csv")
+    icc_summary = pd.read_csv(REPO / "tables" / "analysis_icc_summary.csv")
     tr_weighting = pd.read_csv(analysis / "tr_weighting_sensitivity_20260804" / "analysis_tr_weighting_sensitivity.csv")
     tr_primary_leave_one_out = pd.read_csv(analysis / "tr_weighting_sensitivity_20260804" / "analysis_tr_primary_leave_one_out.csv")
     ground_truth_summary = pd.read_csv(analysis / "ground_truth_metric_audit_20260804" / "ground_truth_metric_audit_summary.csv")
@@ -52,6 +55,35 @@ def main() -> None:
     require((fleiss_summary["Items"] == 48).all() and (fleiss_summary["Raters"] == 11).all(), "Fleiss summary dimensions are invalid")
     require(fleiss_summary["Fleiss_kappa"].between(-1, 1).all(), "Fleiss kappa values are invalid")
     require(len(fleiss_item_agreement) == 96, "Fleiss item agreement output should contain 96 rows")
+    require(
+        set(weighted_summary["Analysis"]) == {"LMIC_Relevance_Score", "TR_Score"}
+        and set(weighted_summary["Weighting"]) == {"linear", "quadratic"},
+        "weighted kappa summary analyses are incomplete",
+    )
+    require(
+        (weighted_summary["Items"] == 48).all()
+        and (weighted_summary["Raters"] == 11).all()
+        and weighted_summary["Weighted_Fleiss_kappa"].between(-1, 1).all(),
+        "weighted kappa summary dimensions or values are invalid",
+    )
+    require(len(weighted_item_agreement) == 192, "weighted item agreement output should contain 192 rows")
+    require(
+        not any("Reviewer" in column or "Rating" in column for column in weighted_summary.columns)
+        and not any("Reviewer" in column or "Rating" in column for column in weighted_item_agreement.columns),
+        "weighted kappa outputs expose reviewer-level fields",
+    )
+    require(
+        icc_summary["Analysis"].tolist() == ["LMIC_Relevance_Score", "TR_Score"]
+        and (icc_summary["Items"] == 48).all()
+        and (icc_summary["Raters"] == 11).all(),
+        "ICC summary dimensions are invalid",
+    )
+    require(
+        icc_summary["ICC_2_1_absolute_agreement"].between(-1, 1).all()
+        and icc_summary["ICC_2_k_absolute_agreement"].between(-1, 1).all()
+        and not any("Reviewer" in column or "Rating" in column for column in icc_summary.columns),
+        "ICC output is invalid or exposes reviewer-level fields",
+    )
 
     total_quality = quality.loc[quality["Domain"] == "Total Quality"].iloc[0]
     require(abs(float(total_quality["Mean"]) - 4.1458333333) < 1e-6, "quality rerun mean changed unexpectedly")
@@ -151,6 +183,20 @@ def main() -> None:
         "fleiss_kappa": {
             "LMIC_Relevance_Score": float(fleiss_summary.loc[fleiss_summary["Analysis"] == "LMIC_Relevance_Score", "Fleiss_kappa"].iloc[0]),
             "TR_Score": float(fleiss_summary.loc[fleiss_summary["Analysis"] == "TR_Score", "Fleiss_kappa"].iloc[0]),
+            "raw_ratings_included": False,
+        },
+        "weighted_kappa": {
+            "LMIC_Relevance_Score_linear": float(weighted_summary.loc[(weighted_summary["Analysis"] == "LMIC_Relevance_Score") & (weighted_summary["Weighting"] == "linear"), "Weighted_Fleiss_kappa"].iloc[0]),
+            "LMIC_Relevance_Score_quadratic": float(weighted_summary.loc[(weighted_summary["Analysis"] == "LMIC_Relevance_Score") & (weighted_summary["Weighting"] == "quadratic"), "Weighted_Fleiss_kappa"].iloc[0]),
+            "TR_Score_linear": float(weighted_summary.loc[(weighted_summary["Analysis"] == "TR_Score") & (weighted_summary["Weighting"] == "linear"), "Weighted_Fleiss_kappa"].iloc[0]),
+            "TR_Score_quadratic": float(weighted_summary.loc[(weighted_summary["Analysis"] == "TR_Score") & (weighted_summary["Weighting"] == "quadratic"), "Weighted_Fleiss_kappa"].iloc[0]),
+            "raw_ratings_included": False,
+        },
+        "icc": {
+            "LMIC_Relevance_Score_ICC_2_1": float(icc_summary.loc[icc_summary["Analysis"] == "LMIC_Relevance_Score", "ICC_2_1_absolute_agreement"].iloc[0]),
+            "LMIC_Relevance_Score_ICC_2_k": float(icc_summary.loc[icc_summary["Analysis"] == "LMIC_Relevance_Score", "ICC_2_k_absolute_agreement"].iloc[0]),
+            "TR_Score_ICC_2_1": float(icc_summary.loc[icc_summary["Analysis"] == "TR_Score", "ICC_2_1_absolute_agreement"].iloc[0]),
+            "TR_Score_ICC_2_k": float(icc_summary.loc[icc_summary["Analysis"] == "TR_Score", "ICC_2_k_absolute_agreement"].iloc[0]),
             "raw_ratings_included": False,
         },
         "status": "PASS",
