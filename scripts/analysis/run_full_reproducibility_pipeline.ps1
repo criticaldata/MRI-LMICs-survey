@@ -52,8 +52,6 @@ try {
     Invoke-MriPython "scripts/tables/analysis_temporal_trends.py"
     Invoke-MriPython "scripts/figures/fig4_performance_comparison.py"
     Invoke-MriPython "scripts/figures/figS1_temporal_trends.py"
-    Invoke-MriPython "scripts/analysis/verify_reproducibility.py"
-    Invoke-MriPython "scripts/analysis/verify_mri_scientometric_reproducibility.py" @("--public-release")
 
     if ([string]::IsNullOrWhiteSpace($PrivateRatingsXlsx)) {
         Write-Host "Skipping final Fleiss' kappa: no private reviewer workbook supplied."
@@ -64,9 +62,24 @@ try {
         }
         Invoke-MriPython "scripts/analysis/statistical/run_fleiss_kappa_from_private_xlsx.py" @(
             "--input-xlsx", $PrivateRatingsXlsx,
-            "--output-dir", "tables"
+            "--output-dir", "tables",
+            "--canonical-data", "data/data-clean.csv"
+        )
+        Invoke-MriPython "scripts/analysis/statistical/run_weighted_kappa_from_private_xlsx.py" @(
+            "--input-xlsx", $PrivateRatingsXlsx,
+            "--output-dir", "tables",
+            "--canonical-data", "data/data-clean.csv"
+        )
+        Invoke-MriPython "scripts/analysis/statistical/run_icc_from_private_xlsx.py" @(
+            "--input-xlsx", $PrivateRatingsXlsx,
+            "--output-dir", "tables",
+            "--canonical-data", "data/data-clean.csv"
         )
     }
+
+    Invoke-MriPython "scripts/analysis/build_public_reproducibility_package.py"
+    Invoke-MriPython "scripts/analysis/verify_reproducibility.py"
+    Invoke-MriPython "scripts/analysis/verify_mri_scientometric_reproducibility.py" @("--public-release")
 
     Write-Host "Running: -m pytest -q"
     & $PythonPath -m pytest -q

@@ -21,6 +21,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from canonical_study_ids import build_crosswalk, read_git_csv
+
 
 DEFAULT_REPO = Path(__file__).resolve().parents[2]
 DEFAULT_CANONICAL_XLSX = Path(
@@ -84,7 +86,18 @@ def export_sources(
     require_columns(assignments, ["#", "Title", "Reviewer"], "reviewer assignment")
 
     canonical = canonical.copy()
-    canonical["Paper_ID"] = pd.to_numeric(canonical["Paper_ID"], errors="raise").astype(int)
+    order_path = repo / "data" / "included_study_order.csv"
+    reference = pd.read_csv(order_path) if order_path.exists() else read_git_csv(
+        repo, "origin/main:data/data-clean.csv"
+    )
+    crosswalk = build_crosswalk(canonical, reference)
+    title_to_canonical_id = dict(
+        zip(crosswalk["Current_Title"].map(normalize_title), crosswalk["Paper_ID"])
+    )
+    canonical["Paper_ID"] = canonical["Title"].map(normalize_title).map(title_to_canonical_id)
+    if canonical["Paper_ID"].isna().any():
+        raise ValueError("Canonical extraction contains a title not present in the public study order")
+    canonical["Paper_ID"] = canonical["Paper_ID"].astype(int)
     canonical["Year"] = pd.to_numeric(canonical["Year"], errors="coerce").astype("Int64")
     canonical["_title_key"] = canonical["Title"].map(normalize_title)
     if canonical["_title_key"].duplicated().any():
@@ -153,7 +166,7 @@ def export_sources(
 
     canonical_ids = set(canonical["Paper_ID"].tolist())
     mapped_included_ids = set(included_export["Paper_ID"].tolist())
-    if len(canonical_ids) != 48 or mapped_included_ids != canonical_ids:
+    if canonical_ids != set(range(1, 49)) or mapped_included_ids != canonical_ids:
         raise ValueError("Included screening IDs and canonical IDs are inconsistent")
 
     manifest = {
@@ -181,7 +194,8 @@ def export_sources(
         },
         "canonical_data": {
             "included_studies": int(len(canonical_export)),
-            "paper_ids_preserved_from_source": True,
+            "paper_ids_preserved_from_source": False,
+            "paper_id_alignment": "exact normalized-title match to included_study_order.csv or origin/main",
             "paper_id_values": sorted(int(value) for value in canonical_export["Paper_ID"]),
         },
         "reviewer_ratings": {

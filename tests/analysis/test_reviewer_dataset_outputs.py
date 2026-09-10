@@ -144,7 +144,9 @@ def test_explicit_inference_requirement_satisfies_hardware_awareness():
 
 
 def test_resource_constrained_training_gpu_is_not_inference_hardware():
-    row = load_data().query("Paper_ID == 38").iloc[0]
+    row = load_data().loc[
+        load_data()["Title"].eq("Deep learning for fast low-field MRI acquisitions")
+    ].iloc[0]
 
     result = _hardware_awareness(row)
 
@@ -154,7 +156,9 @@ def test_resource_constrained_training_gpu_is_not_inference_hardware():
 
 
 def test_deployment_pathway_without_inference_hardware_is_not_enough():
-    row = load_data().query("Paper_ID == 31").iloc[0]
+    row = load_data().loc[
+        load_data()["Title"].eq("ShuffleUNet: Super resolution of diffusion-weighted MRIs using deep learning")
+    ].iloc[0]
 
     result = _hardware_awareness(row)
 

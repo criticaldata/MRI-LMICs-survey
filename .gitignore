@@ -5,6 +5,7 @@ data/*
 !data/data-clean.csv
 !data/tr_criteria_evidence.csv
 !data/public_release_manifest.json
+!data/included_study_order.csv
 data/private/
 __pycache__/
 *.pyc

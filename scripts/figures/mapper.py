@@ -342,6 +342,24 @@ def load_data(data_path=None):
 
     df = pd.read_csv(data_path)
 
+    if "Paper_ID" not in df.columns:
+        raise ValueError("Canonical MRI data must contain Paper_ID")
+    df["Paper_ID"] = pd.to_numeric(df["Paper_ID"], errors="raise").astype(int)
+    expected_ids = list(range(1, N_PRIMARY_SR + 1))
+    if len(df) != N_PRIMARY_SR or df["Paper_ID"].tolist() != expected_ids:
+        raise ValueError("Canonical MRI data must contain Paper_ID values 1-48 in order")
+    if "Title" not in df.columns or df["Title"].astype(str).str.strip().eq("").any():
+        raise ValueError("Canonical MRI data must contain a non-empty Title for every study")
+    contract_path = get_project_root() / "data" / "included_study_order.csv"
+    if contract_path.exists():
+        contract = pd.read_csv(contract_path)
+        if len(contract) != N_PRIMARY_SR or contract["Paper_ID"].tolist() != expected_ids:
+            raise ValueError("included_study_order.csv is not a contiguous 1-48 contract")
+        data_titles = df["Title"].astype(str).str.replace(r"\s+", " ", regex=True).str.strip().str.casefold()
+        contract_titles = contract["Title"].astype(str).str.replace(r"\s+", " ", regex=True).str.strip().str.casefold()
+        if data_titles.tolist() != contract_titles.tolist():
+            raise ValueError("Canonical data titles do not match included_study_order.csv")
+
     # Strip whitespace from string columns
     for col in df.select_dtypes(include=["object", "string"]).columns:
         df[col] = df[col].str.strip()

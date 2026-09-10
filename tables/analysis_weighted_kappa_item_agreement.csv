@@ -1,193 +1,193 @@
-Analysis,Weighting,Paper,Observed_weighted_agreement
-LMIC_Relevance_Score,linear,1,0.8181818181818182
-LMIC_Relevance_Score,linear,2,0.5636363636363636
-LMIC_Relevance_Score,linear,3,0.7454545454545455
-LMIC_Relevance_Score,linear,4,1.0
-LMIC_Relevance_Score,linear,5,0.6454545454545455
-LMIC_Relevance_Score,linear,6,0.6727272727272727
-LMIC_Relevance_Score,linear,7,0.9545454545454546
-LMIC_Relevance_Score,linear,8,0.5636363636363636
-LMIC_Relevance_Score,linear,9,0.6818181818181818
-LMIC_Relevance_Score,linear,10,1.0
-LMIC_Relevance_Score,linear,11,0.9545454545454546
-LMIC_Relevance_Score,linear,12,0.4909090909090909
-LMIC_Relevance_Score,linear,13,0.8090909090909091
-LMIC_Relevance_Score,linear,14,0.5454545454545454
-LMIC_Relevance_Score,linear,15,0.5363636363636364
-LMIC_Relevance_Score,linear,16,0.9545454545454546
-LMIC_Relevance_Score,linear,17,1.0
-LMIC_Relevance_Score,linear,18,0.8
-LMIC_Relevance_Score,linear,19,1.0
-LMIC_Relevance_Score,linear,20,0.9545454545454546
-LMIC_Relevance_Score,linear,21,0.6636363636363637
-LMIC_Relevance_Score,linear,22,0.6727272727272727
-LMIC_Relevance_Score,linear,23,0.8636363636363636
-LMIC_Relevance_Score,linear,24,0.9181818181818182
-LMIC_Relevance_Score,linear,25,1.0
-LMIC_Relevance_Score,linear,26,0.7818181818181819
-LMIC_Relevance_Score,linear,27,0.509090909090909
-LMIC_Relevance_Score,linear,28,0.4727272727272727
-LMIC_Relevance_Score,linear,29,0.7363636363636363
-LMIC_Relevance_Score,linear,30,0.8636363636363636
-LMIC_Relevance_Score,linear,31,1.0
-LMIC_Relevance_Score,linear,32,0.9545454545454546
-LMIC_Relevance_Score,linear,33,0.9545454545454546
-LMIC_Relevance_Score,linear,34,0.9545454545454546
-LMIC_Relevance_Score,linear,35,1.0
-LMIC_Relevance_Score,linear,36,0.8272727272727273
-LMIC_Relevance_Score,linear,37,0.9545454545454546
-LMIC_Relevance_Score,linear,38,0.8727272727272727
-LMIC_Relevance_Score,linear,39,0.7272727272727273
-LMIC_Relevance_Score,linear,40,0.6636363636363637
-LMIC_Relevance_Score,linear,41,0.7272727272727273
-LMIC_Relevance_Score,linear,42,0.45454545454545453
-LMIC_Relevance_Score,linear,43,0.7545454545454545
-LMIC_Relevance_Score,linear,44,0.509090909090909
-LMIC_Relevance_Score,linear,45,0.8636363636363636
-LMIC_Relevance_Score,linear,46,0.7090909090909091
-LMIC_Relevance_Score,linear,47,0.8272727272727273
-LMIC_Relevance_Score,linear,48,0.8636363636363636
-LMIC_Relevance_Score,quadratic,1,0.8181818181818182
-LMIC_Relevance_Score,quadratic,2,0.5636363636363636
-LMIC_Relevance_Score,quadratic,3,0.8727272727272727
-LMIC_Relevance_Score,quadratic,4,1.0
-LMIC_Relevance_Score,quadratic,5,0.6795454545454546
-LMIC_Relevance_Score,quadratic,6,0.6727272727272727
-LMIC_Relevance_Score,quadratic,7,0.9886363636363636
-LMIC_Relevance_Score,quadratic,8,0.7
-LMIC_Relevance_Score,quadratic,9,0.825
-LMIC_Relevance_Score,quadratic,10,1.0
-LMIC_Relevance_Score,quadratic,11,0.9886363636363636
-LMIC_Relevance_Score,quadratic,12,0.4909090909090909
-LMIC_Relevance_Score,quadratic,13,0.9159090909090909
-LMIC_Relevance_Score,quadratic,14,0.5795454545454546
-LMIC_Relevance_Score,quadratic,15,0.5977272727272728
-LMIC_Relevance_Score,quadratic,16,0.9886363636363636
-LMIC_Relevance_Score,quadratic,17,1.0
-LMIC_Relevance_Score,quadratic,18,0.8909090909090909
-LMIC_Relevance_Score,quadratic,19,1.0
-LMIC_Relevance_Score,quadratic,20,0.9886363636363636
-LMIC_Relevance_Score,quadratic,21,0.7545454545454545
-LMIC_Relevance_Score,quadratic,22,0.6727272727272727
-LMIC_Relevance_Score,quadratic,23,0.8977272727272727
-LMIC_Relevance_Score,quadratic,24,0.9795454545454545
-LMIC_Relevance_Score,quadratic,25,1.0
-LMIC_Relevance_Score,quadratic,26,0.8909090909090909
-LMIC_Relevance_Score,quadratic,27,0.5431818181818182
-LMIC_Relevance_Score,quadratic,28,0.5636363636363636
-LMIC_Relevance_Score,quadratic,29,0.8795454545454545
-LMIC_Relevance_Score,quadratic,30,0.8977272727272727
-LMIC_Relevance_Score,quadratic,31,1.0
-LMIC_Relevance_Score,quadratic,32,0.9886363636363636
-LMIC_Relevance_Score,quadratic,33,0.9886363636363636
-LMIC_Relevance_Score,quadratic,34,0.9886363636363636
-LMIC_Relevance_Score,quadratic,35,1.0
-LMIC_Relevance_Score,quadratic,36,0.8931818181818182
-LMIC_Relevance_Score,quadratic,37,0.9886363636363636
-LMIC_Relevance_Score,quadratic,38,0.9681818181818181
-LMIC_Relevance_Score,quadratic,39,0.8636363636363636
-LMIC_Relevance_Score,quadratic,40,0.8159090909090909
-LMIC_Relevance_Score,quadratic,41,0.8181818181818182
-LMIC_Relevance_Score,quadratic,42,0.48863636363636365
-LMIC_Relevance_Score,quadratic,43,0.8159090909090909
-LMIC_Relevance_Score,quadratic,44,0.5431818181818182
-LMIC_Relevance_Score,quadratic,45,0.8977272727272727
-LMIC_Relevance_Score,quadratic,46,0.7431818181818182
-LMIC_Relevance_Score,quadratic,47,0.8931818181818182
-LMIC_Relevance_Score,quadratic,48,0.9659090909090909
-TR_Score,linear,1,0.7963636363636363
-TR_Score,linear,2,0.8254545454545456
-TR_Score,linear,3,0.9636363636363636
-TR_Score,linear,4,0.8981818181818183
-TR_Score,linear,5,0.8618181818181819
-TR_Score,linear,6,0.8472727272727272
-TR_Score,linear,7,0.8690909090909092
-TR_Score,linear,8,0.8472727272727273
-TR_Score,linear,9,0.8690909090909092
-TR_Score,linear,10,0.861818181818182
-TR_Score,linear,11,0.8109090909090909
-TR_Score,linear,12,0.9636363636363636
-TR_Score,linear,13,0.8763636363636365
-TR_Score,linear,14,0.9345454545454547
-TR_Score,linear,15,0.9636363636363636
-TR_Score,linear,16,0.8254545454545456
-TR_Score,linear,17,0.8981818181818183
-TR_Score,linear,18,0.8254545454545456
-TR_Score,linear,19,0.8254545454545456
-TR_Score,linear,20,0.7890909090909092
-TR_Score,linear,21,0.9345454545454547
-TR_Score,linear,22,0.9636363636363636
-TR_Score,linear,23,0.9127272727272728
-TR_Score,linear,24,0.8472727272727273
-TR_Score,linear,25,0.7672727272727273
-TR_Score,linear,26,0.8981818181818183
-TR_Score,linear,27,0.9345454545454547
-TR_Score,linear,28,0.8981818181818183
-TR_Score,linear,29,0.8981818181818183
-TR_Score,linear,30,0.8545454545454545
-TR_Score,linear,31,0.8618181818181819
-TR_Score,linear,32,0.8618181818181818
-TR_Score,linear,33,0.8618181818181819
-TR_Score,linear,34,0.8618181818181819
-TR_Score,linear,35,0.8327272727272726
-TR_Score,linear,36,0.8618181818181819
-TR_Score,linear,37,0.8472727272727272
-TR_Score,linear,38,0.8981818181818183
-TR_Score,linear,39,0.9345454545454547
-TR_Score,linear,40,0.7600000000000001
-TR_Score,linear,41,0.8909090909090909
-TR_Score,linear,42,0.8909090909090909
-TR_Score,linear,43,0.8909090909090909
-TR_Score,linear,44,0.8254545454545456
-TR_Score,linear,45,0.8254545454545456
-TR_Score,linear,46,0.810909090909091
-TR_Score,linear,47,0.8909090909090909
-TR_Score,linear,48,0.6872727272727274
-TR_Score,quadratic,1,0.9359999999999999
-TR_Score,quadratic,2,0.9476363636363637
-TR_Score,quadratic,3,0.9927272727272726
-TR_Score,quadratic,4,0.9796363636363635
-TR_Score,quadratic,5,0.9665454545454546
-TR_Score,quadratic,6,0.9607272727272727
-TR_Score,quadratic,7,0.9679999999999999
-TR_Score,quadratic,8,0.9607272727272728
-TR_Score,quadratic,9,0.9679999999999999
-TR_Score,quadratic,10,0.9621818181818179
-TR_Score,quadratic,11,0.9141818181818182
-TR_Score,quadratic,12,0.9927272727272726
-TR_Score,quadratic,13,0.9709090909090908
-TR_Score,quadratic,14,0.986909090909091
-TR_Score,quadratic,15,0.9927272727272726
-TR_Score,quadratic,16,0.952
-TR_Score,quadratic,17,0.9665454545454545
-TR_Score,quadratic,18,0.952
-TR_Score,quadratic,19,0.952
-TR_Score,quadratic,20,0.9316363636363637
-TR_Score,quadratic,21,0.986909090909091
-TR_Score,quadratic,22,0.9927272727272726
-TR_Score,quadratic,23,0.9825454545454544
-TR_Score,quadratic,24,0.9607272727272728
-TR_Score,quadratic,25,0.9185454545454546
-TR_Score,quadratic,26,0.976727272727273
-TR_Score,quadratic,27,0.986909090909091
-TR_Score,quadratic,28,0.9796363636363635
-TR_Score,quadratic,29,0.9796363636363635
-TR_Score,quadratic,30,0.9621818181818184
-TR_Score,quadratic,31,0.9665454545454546
-TR_Score,quadratic,32,0.952
-TR_Score,quadratic,33,0.9665454545454546
-TR_Score,quadratic,34,0.9665454545454546
-TR_Score,quadratic,35,0.9549090909090908
-TR_Score,quadratic,36,0.9549090909090908
-TR_Score,quadratic,37,0.9607272727272727
-TR_Score,quadratic,38,0.9796363636363635
-TR_Score,quadratic,39,0.986909090909091
-TR_Score,quadratic,40,0.9127272727272726
-TR_Score,quadratic,41,0.9781818181818182
-TR_Score,quadratic,42,0.9781818181818182
-TR_Score,quadratic,43,0.9781818181818182
-TR_Score,quadratic,44,0.9476363636363637
-TR_Score,quadratic,45,0.9505454545454546
-TR_Score,quadratic,46,0.9447272727272726
-TR_Score,quadratic,47,0.9781818181818182
-TR_Score,quadratic,48,0.8225454545454546
+Analysis,Weighting,Paper_ID,Observed_weighted_agreement,Title
+LMIC_Relevance_Score,linear,1,0.8181818181818182,active deep neural network features selection for segmentation and recognition of brain tumors using mri images
+LMIC_Relevance_Score,linear,2,0.5636363636363636,brain tumor segmentation in mri with multi-modality spatial information enhancement and boundary shape correction
+LMIC_Relevance_Score,linear,3,0.7454545454545455,deep-learning approach with convolutional neural network for classification of maximum intensity projections of dynamic contrast-enhanced breast magnetic resonance imaging
+LMIC_Relevance_Score,linear,4,1.0,improvement of peripheral nerve visualization using a deep learning-based mr reconstruction algorithm
+LMIC_Relevance_Score,linear,5,0.6454545454545455,enhancement of brain tumor classification from mri images using multi-path convolutional neural network with svm classifier
+LMIC_Relevance_Score,linear,6,0.6727272727272727,a deep learning approach for brain tumor classification using mri images
+LMIC_Relevance_Score,linear,7,0.9545454545454546,automatic deep learning-based myocardial infarction segmentation from delayed enhancement mri
+LMIC_Relevance_Score,linear,8,0.5636363636363636,deep learning methods for automatic evaluation of delayed enhancement-mri. the results of the emidec challenge
+LMIC_Relevance_Score,linear,9,0.6818181818181818,deep learning-based super-resolution gradient echo imaging of the pancreas: improvement of image quality and reduction of acquisition time
+LMIC_Relevance_Score,linear,10,1.0,super-resolution and denoising of 4d-flow mri using physics-informed deep neural nets
+LMIC_Relevance_Score,linear,11,0.9545454545454546,multi-contrast high-field quality image synthesis for portable low-field mri using generative adversarial networks and paired data
+LMIC_Relevance_Score,linear,12,0.4909090909090909,super-resolution of brain mri images based on denoising diffusion probabilistic model
+LMIC_Relevance_Score,linear,13,0.8090909090909091,fine-tuning deep learning model parameters for improved super-resolution of dynamic mri with prior-knowledge
+LMIC_Relevance_Score,linear,14,0.5454545454545454,3d-mri super-resolution reconstruction using multi-modality based on multi-resolution cnn
+LMIC_Relevance_Score,linear,15,0.5363636363636364,super-resolution reconstruction of knee magnetic resonance imaging based on deep learning
+LMIC_Relevance_Score,linear,16,0.9545454545454546,deep learning super-resolution reconstruction for fast and high-quality cine cardiovascular magnetic resonance
+LMIC_Relevance_Score,linear,17,1.0,convolutional neural network-based enhancement method of 3d mri
+LMIC_Relevance_Score,linear,18,0.8,"cerebrovascular super-resolution 4d flow mri - sequential combination of resolution enhancement by deep learning and physics-informed image processing to non-invasively quantify intracranial velocity, flow, and relative pressure"
+LMIC_Relevance_Score,linear,19,1.0,deep learning based early detection of alzheimer's disease using image enhancement filters
+LMIC_Relevance_Score,linear,20,0.9545454545454546,deep learning-based method for denoising and image enhancement in low-field mri
+LMIC_Relevance_Score,linear,21,0.6636363636363637,deep transfer learning-based multi-modal digital twins for enhancement and diagnostic analysis of brain mri image
+LMIC_Relevance_Score,linear,22,0.6727272727272727,digital image enhancement using conventional neural network
+LMIC_Relevance_Score,linear,23,0.8636363636363636,mri super-resolution using similarity distance and multi-scale receptive field based feature fusion gan and pre-trained slice interpolation network
+LMIC_Relevance_Score,linear,24,0.9181818181818182,pushing the limits of low-cost ultra-low-field mri by dual-acquisition deep learning 3d superresolution
+LMIC_Relevance_Score,linear,25,1.0,joint b0b0 and image reconstruction in low-field mri by physics-informed deep-learning
+LMIC_Relevance_Score,linear,26,0.7818181818181819,multi-contrast super-resolution mri through a progressive network
+LMIC_Relevance_Score,linear,27,0.509090909090909,fa-gan: fused attentive generative adversarial networks for mri image super-resolution
+LMIC_Relevance_Score,linear,28,0.4727272727272727,deep learning myocardial infarction segmentation framework from cardiac magnetic resonance images
+LMIC_Relevance_Score,linear,29,0.7363636363636363,shuffleunet: super resolution of diffusion-weighted mris using deep learning
+LMIC_Relevance_Score,linear,30,0.8636363636363636,transfer learning in deep neural network based under-sampled mr image reconstruction
+LMIC_Relevance_Score,linear,31,1.0,enhancement of image quality in low-field knee mr imaging using deep learning
+LMIC_Relevance_Score,linear,32,0.9545454545454546,multisequence 3-t image synthesis from 64-mt low-field-strength mri using generative adversarial networks in multiple sclerosis
+LMIC_Relevance_Score,linear,33,0.9545454545454546,evaluation of epilepsy lesion visualisation enhancement in low-field mri using image quality transfer: a preliminary investigation of clinical potential for applications in developing countries
+LMIC_Relevance_Score,linear,34,0.9545454545454546,deep learning-based single image super-resolution for low-field mr brain images
+LMIC_Relevance_Score,linear,35,1.0,deep learning for fast low-field mri acquisitions
+LMIC_Relevance_Score,linear,36,0.8272727272727273,deep learning super-resolution reconstruction for fast and motion-robust t2-weighted prostate mri
+LMIC_Relevance_Score,linear,37,0.9545454545454546,super resolution using sparse sampling at portable ultra-low field mr
+LMIC_Relevance_Score,linear,38,0.8727272727272727,bridging the gap: improving correspondence between low-field and high-field magnetic resonance images in young people
+LMIC_Relevance_Score,linear,39,0.7272727272727273,mri super-resolution with ensemble learning and complementary priors
+LMIC_Relevance_Score,linear,40,0.6636363636363637,srflow: deep learning based super-resolution of 4d-flow mri data
+LMIC_Relevance_Score,linear,41,0.7272727272727273,smore: a self-supervised anti-aliasing and super-resolution algorithm for mri using deep learning
+LMIC_Relevance_Score,linear,42,0.45454545454545453,smir: a transformer-based model for mri super-resolution reconstruction
+LMIC_Relevance_Score,linear,43,0.7545454545454545,autoencoder-inspired convolutional network-based super-resolution method in mri
+LMIC_Relevance_Score,linear,44,0.509090909090909,a mass correlation based deep learning approach using deep convolutional neural network to classify the brain tumor
+LMIC_Relevance_Score,linear,45,0.8636363636363636,accuracy enhancement in detecting pituitary tumors using deep learning
+LMIC_Relevance_Score,linear,46,0.7090909090909091,a deep convolutional neural network based computer aided diagnosis system for the prediction of alzheimer's disease in mri images
+LMIC_Relevance_Score,linear,47,0.8272727272727273,a novel deep learning approach for brain tumors classification using mri images
+LMIC_Relevance_Score,linear,48,0.8636363636363636,automatic myocardial segmentation in dynamic contrast enhanced perfusion mri using monte carlo dropout in an encoder-decoder convolutional neural network
+LMIC_Relevance_Score,quadratic,1,0.8181818181818182,active deep neural network features selection for segmentation and recognition of brain tumors using mri images
+LMIC_Relevance_Score,quadratic,2,0.5636363636363636,brain tumor segmentation in mri with multi-modality spatial information enhancement and boundary shape correction
+LMIC_Relevance_Score,quadratic,3,0.8727272727272727,deep-learning approach with convolutional neural network for classification of maximum intensity projections of dynamic contrast-enhanced breast magnetic resonance imaging
+LMIC_Relevance_Score,quadratic,4,1.0,improvement of peripheral nerve visualization using a deep learning-based mr reconstruction algorithm
+LMIC_Relevance_Score,quadratic,5,0.6795454545454546,enhancement of brain tumor classification from mri images using multi-path convolutional neural network with svm classifier
+LMIC_Relevance_Score,quadratic,6,0.6727272727272727,a deep learning approach for brain tumor classification using mri images
+LMIC_Relevance_Score,quadratic,7,0.9886363636363636,automatic deep learning-based myocardial infarction segmentation from delayed enhancement mri
+LMIC_Relevance_Score,quadratic,8,0.7,deep learning methods for automatic evaluation of delayed enhancement-mri. the results of the emidec challenge
+LMIC_Relevance_Score,quadratic,9,0.825,deep learning-based super-resolution gradient echo imaging of the pancreas: improvement of image quality and reduction of acquisition time
+LMIC_Relevance_Score,quadratic,10,1.0,super-resolution and denoising of 4d-flow mri using physics-informed deep neural nets
+LMIC_Relevance_Score,quadratic,11,0.9886363636363636,multi-contrast high-field quality image synthesis for portable low-field mri using generative adversarial networks and paired data
+LMIC_Relevance_Score,quadratic,12,0.4909090909090909,super-resolution of brain mri images based on denoising diffusion probabilistic model
+LMIC_Relevance_Score,quadratic,13,0.9159090909090909,fine-tuning deep learning model parameters for improved super-resolution of dynamic mri with prior-knowledge
+LMIC_Relevance_Score,quadratic,14,0.5795454545454546,3d-mri super-resolution reconstruction using multi-modality based on multi-resolution cnn
+LMIC_Relevance_Score,quadratic,15,0.5977272727272728,super-resolution reconstruction of knee magnetic resonance imaging based on deep learning
+LMIC_Relevance_Score,quadratic,16,0.9886363636363636,deep learning super-resolution reconstruction for fast and high-quality cine cardiovascular magnetic resonance
+LMIC_Relevance_Score,quadratic,17,1.0,convolutional neural network-based enhancement method of 3d mri
+LMIC_Relevance_Score,quadratic,18,0.8909090909090909,"cerebrovascular super-resolution 4d flow mri - sequential combination of resolution enhancement by deep learning and physics-informed image processing to non-invasively quantify intracranial velocity, flow, and relative pressure"
+LMIC_Relevance_Score,quadratic,19,1.0,deep learning based early detection of alzheimer's disease using image enhancement filters
+LMIC_Relevance_Score,quadratic,20,0.9886363636363636,deep learning-based method for denoising and image enhancement in low-field mri
+LMIC_Relevance_Score,quadratic,21,0.7545454545454545,deep transfer learning-based multi-modal digital twins for enhancement and diagnostic analysis of brain mri image
+LMIC_Relevance_Score,quadratic,22,0.6727272727272727,digital image enhancement using conventional neural network
+LMIC_Relevance_Score,quadratic,23,0.8977272727272727,mri super-resolution using similarity distance and multi-scale receptive field based feature fusion gan and pre-trained slice interpolation network
+LMIC_Relevance_Score,quadratic,24,0.9795454545454545,pushing the limits of low-cost ultra-low-field mri by dual-acquisition deep learning 3d superresolution
+LMIC_Relevance_Score,quadratic,25,1.0,joint b0b0 and image reconstruction in low-field mri by physics-informed deep-learning
+LMIC_Relevance_Score,quadratic,26,0.8909090909090909,multi-contrast super-resolution mri through a progressive network
+LMIC_Relevance_Score,quadratic,27,0.5431818181818182,fa-gan: fused attentive generative adversarial networks for mri image super-resolution
+LMIC_Relevance_Score,quadratic,28,0.5636363636363636,deep learning myocardial infarction segmentation framework from cardiac magnetic resonance images
+LMIC_Relevance_Score,quadratic,29,0.8795454545454545,shuffleunet: super resolution of diffusion-weighted mris using deep learning
+LMIC_Relevance_Score,quadratic,30,0.8977272727272727,transfer learning in deep neural network based under-sampled mr image reconstruction
+LMIC_Relevance_Score,quadratic,31,1.0,enhancement of image quality in low-field knee mr imaging using deep learning
+LMIC_Relevance_Score,quadratic,32,0.9886363636363636,multisequence 3-t image synthesis from 64-mt low-field-strength mri using generative adversarial networks in multiple sclerosis
+LMIC_Relevance_Score,quadratic,33,0.9886363636363636,evaluation of epilepsy lesion visualisation enhancement in low-field mri using image quality transfer: a preliminary investigation of clinical potential for applications in developing countries
+LMIC_Relevance_Score,quadratic,34,0.9886363636363636,deep learning-based single image super-resolution for low-field mr brain images
+LMIC_Relevance_Score,quadratic,35,1.0,deep learning for fast low-field mri acquisitions
+LMIC_Relevance_Score,quadratic,36,0.8931818181818182,deep learning super-resolution reconstruction for fast and motion-robust t2-weighted prostate mri
+LMIC_Relevance_Score,quadratic,37,0.9886363636363636,super resolution using sparse sampling at portable ultra-low field mr
+LMIC_Relevance_Score,quadratic,38,0.9681818181818181,bridging the gap: improving correspondence between low-field and high-field magnetic resonance images in young people
+LMIC_Relevance_Score,quadratic,39,0.8636363636363636,mri super-resolution with ensemble learning and complementary priors
+LMIC_Relevance_Score,quadratic,40,0.8159090909090909,srflow: deep learning based super-resolution of 4d-flow mri data
+LMIC_Relevance_Score,quadratic,41,0.8181818181818182,smore: a self-supervised anti-aliasing and super-resolution algorithm for mri using deep learning
+LMIC_Relevance_Score,quadratic,42,0.48863636363636365,smir: a transformer-based model for mri super-resolution reconstruction
+LMIC_Relevance_Score,quadratic,43,0.8159090909090909,autoencoder-inspired convolutional network-based super-resolution method in mri
+LMIC_Relevance_Score,quadratic,44,0.5431818181818182,a mass correlation based deep learning approach using deep convolutional neural network to classify the brain tumor
+LMIC_Relevance_Score,quadratic,45,0.8977272727272727,accuracy enhancement in detecting pituitary tumors using deep learning
+LMIC_Relevance_Score,quadratic,46,0.7431818181818182,a deep convolutional neural network based computer aided diagnosis system for the prediction of alzheimer's disease in mri images
+LMIC_Relevance_Score,quadratic,47,0.8931818181818182,a novel deep learning approach for brain tumors classification using mri images
+LMIC_Relevance_Score,quadratic,48,0.9659090909090909,automatic myocardial segmentation in dynamic contrast enhanced perfusion mri using monte carlo dropout in an encoder-decoder convolutional neural network
+TR_Score,linear,1,0.7963636363636363,active deep neural network features selection for segmentation and recognition of brain tumors using mri images
+TR_Score,linear,2,0.8254545454545456,brain tumor segmentation in mri with multi-modality spatial information enhancement and boundary shape correction
+TR_Score,linear,3,0.9636363636363636,deep-learning approach with convolutional neural network for classification of maximum intensity projections of dynamic contrast-enhanced breast magnetic resonance imaging
+TR_Score,linear,4,0.8981818181818183,improvement of peripheral nerve visualization using a deep learning-based mr reconstruction algorithm
+TR_Score,linear,5,0.8618181818181819,enhancement of brain tumor classification from mri images using multi-path convolutional neural network with svm classifier
+TR_Score,linear,6,0.8472727272727272,a deep learning approach for brain tumor classification using mri images
+TR_Score,linear,7,0.8690909090909092,automatic deep learning-based myocardial infarction segmentation from delayed enhancement mri
+TR_Score,linear,8,0.8472727272727273,deep learning methods for automatic evaluation of delayed enhancement-mri. the results of the emidec challenge
+TR_Score,linear,9,0.8690909090909092,deep learning-based super-resolution gradient echo imaging of the pancreas: improvement of image quality and reduction of acquisition time
+TR_Score,linear,10,0.861818181818182,super-resolution and denoising of 4d-flow mri using physics-informed deep neural nets
+TR_Score,linear,11,0.8109090909090909,multi-contrast high-field quality image synthesis for portable low-field mri using generative adversarial networks and paired data
+TR_Score,linear,12,0.9636363636363636,super-resolution of brain mri images based on denoising diffusion probabilistic model
+TR_Score,linear,13,0.8763636363636365,fine-tuning deep learning model parameters for improved super-resolution of dynamic mri with prior-knowledge
+TR_Score,linear,14,0.9345454545454547,3d-mri super-resolution reconstruction using multi-modality based on multi-resolution cnn
+TR_Score,linear,15,0.9636363636363636,super-resolution reconstruction of knee magnetic resonance imaging based on deep learning
+TR_Score,linear,16,0.8254545454545456,deep learning super-resolution reconstruction for fast and high-quality cine cardiovascular magnetic resonance
+TR_Score,linear,17,0.8981818181818183,convolutional neural network-based enhancement method of 3d mri
+TR_Score,linear,18,0.8254545454545456,"cerebrovascular super-resolution 4d flow mri - sequential combination of resolution enhancement by deep learning and physics-informed image processing to non-invasively quantify intracranial velocity, flow, and relative pressure"
+TR_Score,linear,19,0.8254545454545456,deep learning based early detection of alzheimer's disease using image enhancement filters
+TR_Score,linear,20,0.7890909090909092,deep learning-based method for denoising and image enhancement in low-field mri
+TR_Score,linear,21,0.9345454545454547,deep transfer learning-based multi-modal digital twins for enhancement and diagnostic analysis of brain mri image
+TR_Score,linear,22,0.9636363636363636,digital image enhancement using conventional neural network
+TR_Score,linear,23,0.9127272727272728,mri super-resolution using similarity distance and multi-scale receptive field based feature fusion gan and pre-trained slice interpolation network
+TR_Score,linear,24,0.8472727272727273,pushing the limits of low-cost ultra-low-field mri by dual-acquisition deep learning 3d superresolution
+TR_Score,linear,25,0.7672727272727273,joint b0b0 and image reconstruction in low-field mri by physics-informed deep-learning
+TR_Score,linear,26,0.8981818181818183,multi-contrast super-resolution mri through a progressive network
+TR_Score,linear,27,0.9345454545454547,fa-gan: fused attentive generative adversarial networks for mri image super-resolution
+TR_Score,linear,28,0.8981818181818183,deep learning myocardial infarction segmentation framework from cardiac magnetic resonance images
+TR_Score,linear,29,0.8981818181818183,shuffleunet: super resolution of diffusion-weighted mris using deep learning
+TR_Score,linear,30,0.8545454545454545,transfer learning in deep neural network based under-sampled mr image reconstruction
+TR_Score,linear,31,0.8618181818181819,enhancement of image quality in low-field knee mr imaging using deep learning
+TR_Score,linear,32,0.8618181818181818,multisequence 3-t image synthesis from 64-mt low-field-strength mri using generative adversarial networks in multiple sclerosis
+TR_Score,linear,33,0.8618181818181819,evaluation of epilepsy lesion visualisation enhancement in low-field mri using image quality transfer: a preliminary investigation of clinical potential for applications in developing countries
+TR_Score,linear,34,0.8618181818181819,deep learning-based single image super-resolution for low-field mr brain images
+TR_Score,linear,35,0.8327272727272726,deep learning for fast low-field mri acquisitions
+TR_Score,linear,36,0.8618181818181819,deep learning super-resolution reconstruction for fast and motion-robust t2-weighted prostate mri
+TR_Score,linear,37,0.8472727272727272,super resolution using sparse sampling at portable ultra-low field mr
+TR_Score,linear,38,0.8981818181818183,bridging the gap: improving correspondence between low-field and high-field magnetic resonance images in young people
+TR_Score,linear,39,0.9345454545454547,mri super-resolution with ensemble learning and complementary priors
+TR_Score,linear,40,0.7600000000000001,srflow: deep learning based super-resolution of 4d-flow mri data
+TR_Score,linear,41,0.8909090909090909,smore: a self-supervised anti-aliasing and super-resolution algorithm for mri using deep learning
+TR_Score,linear,42,0.8909090909090909,smir: a transformer-based model for mri super-resolution reconstruction
+TR_Score,linear,43,0.8909090909090909,autoencoder-inspired convolutional network-based super-resolution method in mri
+TR_Score,linear,44,0.8254545454545456,a mass correlation based deep learning approach using deep convolutional neural network to classify the brain tumor
+TR_Score,linear,45,0.8254545454545456,accuracy enhancement in detecting pituitary tumors using deep learning
+TR_Score,linear,46,0.810909090909091,a deep convolutional neural network based computer aided diagnosis system for the prediction of alzheimer's disease in mri images
+TR_Score,linear,47,0.8909090909090909,a novel deep learning approach for brain tumors classification using mri images
+TR_Score,linear,48,0.6872727272727274,automatic myocardial segmentation in dynamic contrast enhanced perfusion mri using monte carlo dropout in an encoder-decoder convolutional neural network
+TR_Score,quadratic,1,0.9359999999999999,active deep neural network features selection for segmentation and recognition of brain tumors using mri images
+TR_Score,quadratic,2,0.9476363636363637,brain tumor segmentation in mri with multi-modality spatial information enhancement and boundary shape correction
+TR_Score,quadratic,3,0.9927272727272726,deep-learning approach with convolutional neural network for classification of maximum intensity projections of dynamic contrast-enhanced breast magnetic resonance imaging
+TR_Score,quadratic,4,0.9796363636363635,improvement of peripheral nerve visualization using a deep learning-based mr reconstruction algorithm
+TR_Score,quadratic,5,0.9665454545454546,enhancement of brain tumor classification from mri images using multi-path convolutional neural network with svm classifier
+TR_Score,quadratic,6,0.9607272727272727,a deep learning approach for brain tumor classification using mri images
+TR_Score,quadratic,7,0.9679999999999999,automatic deep learning-based myocardial infarction segmentation from delayed enhancement mri
+TR_Score,quadratic,8,0.9607272727272728,deep learning methods for automatic evaluation of delayed enhancement-mri. the results of the emidec challenge
+TR_Score,quadratic,9,0.9679999999999999,deep learning-based super-resolution gradient echo imaging of the pancreas: improvement of image quality and reduction of acquisition time
+TR_Score,quadratic,10,0.9621818181818179,super-resolution and denoising of 4d-flow mri using physics-informed deep neural nets
+TR_Score,quadratic,11,0.9141818181818182,multi-contrast high-field quality image synthesis for portable low-field mri using generative adversarial networks and paired data
+TR_Score,quadratic,12,0.9927272727272726,super-resolution of brain mri images based on denoising diffusion probabilistic model
+TR_Score,quadratic,13,0.9709090909090908,fine-tuning deep learning model parameters for improved super-resolution of dynamic mri with prior-knowledge
+TR_Score,quadratic,14,0.986909090909091,3d-mri super-resolution reconstruction using multi-modality based on multi-resolution cnn
+TR_Score,quadratic,15,0.9927272727272726,super-resolution reconstruction of knee magnetic resonance imaging based on deep learning
+TR_Score,quadratic,16,0.952,deep learning super-resolution reconstruction for fast and high-quality cine cardiovascular magnetic resonance
+TR_Score,quadratic,17,0.9665454545454545,convolutional neural network-based enhancement method of 3d mri
+TR_Score,quadratic,18,0.952,"cerebrovascular super-resolution 4d flow mri - sequential combination of resolution enhancement by deep learning and physics-informed image processing to non-invasively quantify intracranial velocity, flow, and relative pressure"
+TR_Score,quadratic,19,0.952,deep learning based early detection of alzheimer's disease using image enhancement filters
+TR_Score,quadratic,20,0.9316363636363637,deep learning-based method for denoising and image enhancement in low-field mri
+TR_Score,quadratic,21,0.986909090909091,deep transfer learning-based multi-modal digital twins for enhancement and diagnostic analysis of brain mri image
+TR_Score,quadratic,22,0.9927272727272726,digital image enhancement using conventional neural network
+TR_Score,quadratic,23,0.9825454545454544,mri super-resolution using similarity distance and multi-scale receptive field based feature fusion gan and pre-trained slice interpolation network
+TR_Score,quadratic,24,0.9607272727272728,pushing the limits of low-cost ultra-low-field mri by dual-acquisition deep learning 3d superresolution
+TR_Score,quadratic,25,0.9185454545454546,joint b0b0 and image reconstruction in low-field mri by physics-informed deep-learning
+TR_Score,quadratic,26,0.976727272727273,multi-contrast super-resolution mri through a progressive network
+TR_Score,quadratic,27,0.986909090909091,fa-gan: fused attentive generative adversarial networks for mri image super-resolution
+TR_Score,quadratic,28,0.9796363636363635,deep learning myocardial infarction segmentation framework from cardiac magnetic resonance images
+TR_Score,quadratic,29,0.9796363636363635,shuffleunet: super resolution of diffusion-weighted mris using deep learning
+TR_Score,quadratic,30,0.9621818181818184,transfer learning in deep neural network based under-sampled mr image reconstruction
+TR_Score,quadratic,31,0.9665454545454546,enhancement of image quality in low-field knee mr imaging using deep learning
+TR_Score,quadratic,32,0.952,multisequence 3-t image synthesis from 64-mt low-field-strength mri using generative adversarial networks in multiple sclerosis
+TR_Score,quadratic,33,0.9665454545454546,evaluation of epilepsy lesion visualisation enhancement in low-field mri using image quality transfer: a preliminary investigation of clinical potential for applications in developing countries
+TR_Score,quadratic,34,0.9665454545454546,deep learning-based single image super-resolution for low-field mr brain images
+TR_Score,quadratic,35,0.9549090909090908,deep learning for fast low-field mri acquisitions
+TR_Score,quadratic,36,0.9549090909090908,deep learning super-resolution reconstruction for fast and motion-robust t2-weighted prostate mri
+TR_Score,quadratic,37,0.9607272727272727,super resolution using sparse sampling at portable ultra-low field mr
+TR_Score,quadratic,38,0.9796363636363635,bridging the gap: improving correspondence between low-field and high-field magnetic resonance images in young people
+TR_Score,quadratic,39,0.986909090909091,mri super-resolution with ensemble learning and complementary priors
+TR_Score,quadratic,40,0.9127272727272726,srflow: deep learning based super-resolution of 4d-flow mri data
+TR_Score,quadratic,41,0.9781818181818182,smore: a self-supervised anti-aliasing and super-resolution algorithm for mri using deep learning
+TR_Score,quadratic,42,0.9781818181818182,smir: a transformer-based model for mri super-resolution reconstruction
+TR_Score,quadratic,43,0.9781818181818182,autoencoder-inspired convolutional network-based super-resolution method in mri
+TR_Score,quadratic,44,0.9476363636363637,a mass correlation based deep learning approach using deep convolutional neural network to classify the brain tumor
+TR_Score,quadratic,45,0.9505454545454546,accuracy enhancement in detecting pituitary tumors using deep learning
+TR_Score,quadratic,46,0.9447272727272726,a deep convolutional neural network based computer aided diagnosis system for the prediction of alzheimer's disease in mri images
+TR_Score,quadratic,47,0.9781818181818182,a novel deep learning approach for brain tumors classification using mri images
+TR_Score,quadratic,48,0.8225454545454546,automatic myocardial segmentation in dynamic contrast enhanced perfusion mri using monte carlo dropout in an encoder-decoder convolutional neural network

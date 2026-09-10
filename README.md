@@ -10,6 +10,13 @@ The reviewer-correction pipeline regenerates the corrected analyses, promoted ta
 # Creates the isolated environment if missing; regenerates promoted reviewer-corrected
 # tables and affected figures; then runs all offline verifiers and tests.
 powershell -ExecutionPolicy Bypass -File scripts/analysis/run_full_reproducibility_pipeline.ps1 -RunDate 20260817
+
+# Supplying the private reviewer workbook additionally regenerates Fleiss'
+# kappa, ordinal-weighted agreement, and ICC. The workbook is validated against
+# the canonical title order and is never copied into the repository.
+powershell -ExecutionPolicy Bypass -File scripts/analysis/run_full_reproducibility_pipeline.ps1 `
+  -RunDate 20260909 `
+  -PrivateRatingsXlsx C:\private\RECEIVED_SCORES.xlsx
 ```
 
 ## Requirements
@@ -112,6 +119,12 @@ article-level evidence and binary decisions used to reproduce the TR analysis
 without modifying the canonical source.
 Reviewer identities, reviewer assignments, individual ratings, and historical
 calibration files remain local-only and are not part of this repository.
+
+The public study identity contract is `data/included_study_order.csv`. It fixes
+the included corpus to canonical `Paper_ID` values 1–48 by title and DOI;
+derived tables and the private reviewer workbook are validated against this
+contract. Paper 24 is the *Pushing the limits of low-cost ultra-low-field MRI*
+study. IDs are never remapped by numeric shifting.
 
 Corrected dataset refined from an initial pool of 183 papers (2020-2025).
 

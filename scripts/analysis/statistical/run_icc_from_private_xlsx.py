@@ -123,9 +123,13 @@ def main() -> None:
     parser.add_argument("--input-xlsx", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--output-xlsx", type=Path)
+    parser.add_argument("--canonical-data", type=Path)
     args = parser.parse_args()
 
-    lmic, tr = _read_matrix(args.input_xlsx.resolve())
+    lmic, tr = _read_matrix(
+        args.input_xlsx.resolve(),
+        args.canonical_data.resolve() if args.canonical_data else None,
+    )
     rows = [
         _icc_summary(lmic, analysis="LMIC_Relevance_Score"),
         _icc_summary(tr, analysis="TR_Score"),

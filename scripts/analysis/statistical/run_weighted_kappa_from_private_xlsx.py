@@ -57,6 +57,7 @@ def _weighted_summary(
     categories: Sequence[int],
     analysis: str,
     weighting: str,
+    titles: Sequence[str] | None = None,
 ) -> tuple[dict[str, object], list[dict[str, object]]]:
     """Return generalized weighted Fleiss agreement and paper-level rows.
 
@@ -120,15 +121,17 @@ def _weighted_summary(
         "Pairwise_Cohen_kappa_max": float(pairwise_array.max()),
         "Pairwise_count": len(pairwise),
     }
-    item_rows = [
-        {
+    item_rows = []
+    for index in range(1, n_items + 1):
+        item = {
             "Analysis": analysis,
             "Weighting": weighting,
-            "Paper": index,
+            "Paper_ID": index,
             "Observed_weighted_agreement": float(observed_by_item[index - 1]),
         }
-        for index in range(1, n_items + 1)
-    ]
+        if titles is not None:
+            item["Title"] = titles[index - 1]
+        item_rows.append(item)
     return summary, item_rows
 
 
@@ -163,9 +166,14 @@ def main() -> None:
     parser.add_argument("--input-xlsx", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--output-xlsx", type=Path)
+    parser.add_argument("--canonical-data", type=Path)
     args = parser.parse_args()
 
-    lmic, tr = _read_matrix(args.input_xlsx.resolve())
+    lmic, tr, titles = _read_matrix(
+        args.input_xlsx.resolve(),
+        args.canonical_data.resolve() if args.canonical_data else None,
+        include_titles=True,
+    )
     summaries: list[dict[str, object]] = []
     item_rows: list[dict[str, object]] = []
     for name, ratings, categories in (
@@ -178,6 +186,7 @@ def main() -> None:
                 categories=categories,
                 analysis=name,
                 weighting=weighting,
+                titles=titles,
             )
             summaries.append(summary)
             item_rows.extend(items)

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import re
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -17,11 +19,41 @@ def require(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
+def normalize_title(value: object) -> str:
+    text = "" if pd.isna(value) else str(value)
+    text = unicodedata.normalize("NFKC", text)
+    text = "".join(char for char in text if unicodedata.category(char) != "Cf")
+    text = text.casefold()
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", text)).strip()
+
+
+def require_canonical_identity(
+    frame: pd.DataFrame, label: str, title_by_id: dict[int, str]
+) -> None:
+    require(
+        {"Paper_ID", "Title"}.issubset(frame.columns),
+        f"{label} lacks canonical identity columns",
+    )
+    ids = pd.to_numeric(frame["Paper_ID"], errors="raise").astype(int)
+    require(set(ids).issubset(set(title_by_id)), f"{label} contains unknown Paper_ID values")
+    if len(frame) == 48:
+        require(
+            sorted(ids.tolist()) == list(range(1, 49)),
+            f"{label} is not a complete contiguous 1-48 table",
+        )
+    for paper_id, title in zip(ids, frame["Title"]):
+        require(
+            normalize_title(title) == title_by_id[int(paper_id)],
+            f"{label} title does not match canonical Paper_ID={paper_id}",
+        )
+
+
 def main() -> None:
     repro = REPO / "analysis" / "reproducibility"
     analysis = REPO / "analysis" / "review_20260803"
 
     data = pd.read_csv(REPO / "data" / "data-clean.csv")
+    contract = pd.read_csv(REPO / "data" / "included_study_order.csv")
     screening = pd.read_csv(repro / "screening_log_183.csv")
     assignments = pd.read_csv(repro / "included_studies_assignments_48.csv")
     manifest = json.loads((repro / "source_manifest.json").read_text(encoding="utf-8"))
@@ -43,11 +75,26 @@ def main() -> None:
     ground_truth_summary = pd.read_csv(analysis / "ground_truth_metric_audit_20260804" / "ground_truth_metric_audit_summary.csv")
     rf_robustness = pd.read_csv(analysis / "random_forest_robustness_20260804" / "rf_repeated_cv_summary.csv")
 
+    require(
+        len(contract) == 48
+        and contract["Paper_ID"].tolist() == list(range(1, 49))
+        and contract["Title"].notna().all()
+        and contract["DOI"].notna().all(),
+        "canonical study-order contract is not a complete 1-48 title/DOI mapping",
+    )
+    title_by_id = dict(zip(contract["Paper_ID"].astype(int), contract["Title"].map(normalize_title)))
     require(len(data) == 48, f"data-clean.csv has {len(data)} rows, expected 48")
+    require_canonical_identity(data, "data/data-clean.csv", title_by_id)
+    require(
+        data.loc[data["Paper_ID"] == 24, "Title"].iloc[0]
+        == "Pushing the limits of low-cost ultra-low-field MRI by dual-acquisition deep learning 3D superresolution",
+        "Paper_ID=24 is not the canonical Pushing the limits study",
+    )
     require(len(screening) == 183, f"screening log has {len(screening)} rows, expected 183")
     require((screening["Status"].str.casefold() == "included").sum() == 48, "included screening count is not 48")
     require((screening["Status"].str.casefold() == "excluded").sum() == 135, "excluded screening count is not 135")
     require(len(assignments) == 48 and assignments["Paper_ID"].nunique() == 48, "assignment mapping is not one-to-one")
+    require(set(assignments["Paper_ID"].astype(int)) == set(range(1, 49)), "assignment mapping is not keyed 1-48")
     require(public_manifest["fleiss_kappa_status"] == "aggregate_summary_published_private_input", "Fleiss kappa release status is not current")
     require(analysis_manifest["fleiss_kappa"]["status"] == "not_run_without_private_input", "public core analysis must not require private ratings")
     require(analysis_manifest["fleiss_kappa"]["calculation_performed"] is False, "public core analysis must not calculate Fleiss kappa")
@@ -55,6 +102,7 @@ def main() -> None:
     require((fleiss_summary["Items"] == 48).all() and (fleiss_summary["Raters"] == 11).all(), "Fleiss summary dimensions are invalid")
     require(fleiss_summary["Fleiss_kappa"].between(-1, 1).all(), "Fleiss kappa values are invalid")
     require(len(fleiss_item_agreement) == 96, "Fleiss item agreement output should contain 96 rows")
+    require_canonical_identity(fleiss_item_agreement, "Fleiss item agreement", title_by_id)
     require(
         set(weighted_summary["Analysis"]) == {"LMIC_Relevance_Score", "TR_Score"}
         and set(weighted_summary["Weighting"]) == {"linear", "quadratic"},
@@ -67,6 +115,7 @@ def main() -> None:
         "weighted kappa summary dimensions or values are invalid",
     )
     require(len(weighted_item_agreement) == 192, "weighted item agreement output should contain 192 rows")
+    require_canonical_identity(weighted_item_agreement, "weighted item agreement", title_by_id)
     require(
         not any("Reviewer" in column or "Rating" in column for column in weighted_summary.columns)
         and not any("Reviewer" in column or "Rating" in column for column in weighted_item_agreement.columns),
@@ -113,6 +162,7 @@ def main() -> None:
         "PSNR/SSIM sensitivity columns are incomplete",
     )
     require(len(dataset_characterization) == 48, "dataset characterization should contain 48 studies")
+    require_canonical_identity(dataset_characterization, "dataset characterization", title_by_id)
     require(
         {
             "Input_Resolution",
@@ -124,6 +174,7 @@ def main() -> None:
         "dataset characterization lacks reviewer-requested evidence columns",
     )
     require(len(metric_suitability) == 48, "metric suitability table should contain 48 studies")
+    require_canonical_identity(metric_suitability, "metric suitability", title_by_id)
     require(metric_suitability["Paper_ID"].nunique() == 48, "metric suitability Paper_ID values are not unique")
     require(
         set(metric_suitability["PSNR_SSIM_Comparison_Eligibility"]).issubset(

@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import unicodedata
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -25,6 +26,8 @@ from statsmodels.stats.inter_rater import fleiss_kappa
 
 EXPECTED_ITEMS = 48
 EXPECTED_RATERS = 11
+REPO_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_CANONICAL_DATA = REPO_ROOT / "data" / "data-clean.csv"
 SUMMARY_NAME = "analysis_fleiss_kappa_summary.csv"
 ITEM_NAME = "analysis_fleiss_kappa_item_agreement.csv"
 
@@ -40,7 +43,39 @@ def _as_int(value: object, *, paper: int, reviewer: int, scale: str) -> int:
     return int(value)
 
 
-def _read_matrix(path: Path) -> tuple[np.ndarray, np.ndarray]:
+def _normalize_title(value: object) -> str:
+    text = "" if value is None else str(value)
+    text = unicodedata.normalize("NFKC", text)
+    text = "".join(char for char in text if unicodedata.category(char) != "Cf")
+    text = text.translate(str.maketrans({"–": "-", "—": "-", "’": "'", "‘": "'"}))
+    return " ".join(text.replace("\u00a0", " ").split()).casefold()
+
+
+def _canonical_titles(path: Path) -> list[str]:
+    import pandas as pd
+
+    if not path.exists():
+        raise FileNotFoundError(f"Canonical study data not found: {path}")
+    frame = pd.read_csv(path)
+    required = {"Paper_ID", "Title"}
+    if not required.issubset(frame.columns):
+        raise ValueError(f"Canonical study data must contain {sorted(required)}")
+    frame = frame.copy()
+    frame["Paper_ID"] = pd.to_numeric(frame["Paper_ID"], errors="raise").astype(int)
+    if len(frame) != EXPECTED_ITEMS or frame["Paper_ID"].tolist() != list(range(1, EXPECTED_ITEMS + 1)):
+        raise ValueError("Canonical study data must contain Paper_ID values 1-48 in order")
+    titles = [_normalize_title(value) for value in frame["Title"]]
+    if not all(titles) or len(set(titles)) != EXPECTED_ITEMS:
+        raise ValueError("Canonical study titles must be non-empty and unique")
+    return titles
+
+
+def _read_matrix(
+    path: Path,
+    canonical_data: Path | None = None,
+    *,
+    include_titles: bool = False,
+) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, list[str]]:
     if not path.exists():
         raise FileNotFoundError(f"Private reviewer workbook not found: {path}")
 
@@ -71,12 +106,20 @@ def _read_matrix(path: Path) -> tuple[np.ndarray, np.ndarray]:
             f"Expected {EXPECTED_RATERS} reviewer pairs; found {len(score_columns)}"
         )
 
+    canonical_titles = _canonical_titles(canonical_data or DEFAULT_CANONICAL_DATA)
+
     lmic: list[list[int]] = []
     tr: list[list[int]] = []
     for row_offset, row in enumerate(rows[2:], start=1):
         paper = row[0]
         if paper != row_offset:
             raise ValueError(f"Paper rows must be ordered 1-{EXPECTED_ITEMS}; found {paper}")
+        workbook_title = _normalize_title(row[1])
+        if workbook_title != canonical_titles[row_offset - 1]:
+            raise ValueError(
+                f"Paper {row_offset} title does not match canonical study order: "
+                f"{row[1]!r}"
+            )
         lmic.append(
             [
                 _as_int(row[lm_col], paper=row_offset, reviewer=i, scale="LMIC")
@@ -96,11 +139,16 @@ def _read_matrix(path: Path) -> tuple[np.ndarray, np.ndarray]:
         raise ValueError("LMIC scores must be integers from 1 to 5")
     if not np.all((0 <= tr_array) & (tr_array <= 5)):
         raise ValueError("TR scores must be integers from 0 to 5")
+    if include_titles:
+        return lmic_array, tr_array, canonical_titles
     return lmic_array, tr_array
 
 
 def _agreement_rows(
-    ratings: np.ndarray, categories: Sequence[int], analysis: str
+    ratings: np.ndarray,
+    categories: Sequence[int],
+    analysis: str,
+    titles: Sequence[str] | None = None,
 ) -> tuple[dict[str, object], list[dict[str, object]]]:
     n_items, n_raters = ratings.shape
     counts = np.asarray(
@@ -136,16 +184,17 @@ def _agreement_rows(
             for category, count in zip(categories, row_counts)
             if count == max_count
         ]
-        item_rows.append(
-            {
+        item = {
                 "Analysis": analysis,
-                "Paper": index,
+                "Paper_ID": index,
                 "Mean_pairwise_agreement": float(pair_agreement[index - 1]),
                 "Majority_share": float(majority[index - 1]),
                 "Modal_score": "/".join(modal),
                 "Unanimous": bool(max_count == n_raters),
-            }
-        )
+        }
+        if titles is not None:
+            item["Title"] = titles[index - 1]
+        item_rows.append(item)
     return summary, item_rows
 
 
@@ -164,16 +213,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input-xlsx", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--canonical-data", type=Path, default=DEFAULT_CANONICAL_DATA)
     args = parser.parse_args()
 
-    lmic, tr = _read_matrix(args.input_xlsx.resolve())
+    lmic, tr, titles = _read_matrix(
+        args.input_xlsx.resolve(), args.canonical_data.resolve(), include_titles=True
+    )
     summaries = []
     item_rows = []
     for name, ratings, categories in (
         ("LMIC_Relevance_Score", lmic, list(range(1, 6))),
         ("TR_Score", tr, list(range(0, 6))),
     ):
-        summary, items = _agreement_rows(ratings, categories, name)
+        summary, items = _agreement_rows(ratings, categories, name, titles)
         summaries.append(summary)
         item_rows.extend(items)
 

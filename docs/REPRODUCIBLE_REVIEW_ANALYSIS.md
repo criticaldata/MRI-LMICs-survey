@@ -15,6 +15,13 @@ path `data/private/`; it is not required to reproduce the public tables and
 figures. Final Fleiss kappa is published only as an aggregate summary; the
 private workbook and individual ratings are never tracked.
 
+The included-study identity contract is `data/included_study_order.csv`. It
+contains exactly the 48 canonical `Paper_ID` values, titles, and DOIs from
+`origin/main`. All active item-level outputs are checked against this contract
+by title/DOI; IDs are never repaired by numeric shifting. The agreement runners
+also validate every private workbook row against the same title order before
+writing any output.
+
 ## Corrected operational definitions
 
 The translational-readiness score is the sum of five equally weighted binary
@@ -112,6 +119,11 @@ The private workbook is validated and passed externally to
 `analysis_fleiss_kappa_item_agreement.csv`; it does not write reviewer names or
 individual ratings. The resulting aggregate values are LMIC κ = 0.505 and TR
 κ = 0.223.
+
+The same private-input pipeline also writes supplementary ordinal-weighted
+agreement (linear and quadratic generalized multi-rater weighted Fleiss
+statistics plus pairwise weighted Cohen summaries) and ICC outputs. These
+supplements do not replace the prespecified standard Fleiss κ.
 
 ## Scientometric boundary
 
