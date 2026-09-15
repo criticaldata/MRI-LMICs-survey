@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-15T16:52:53.261179+00:00",
+  "generated_at_utc": "2026-09-15T20:23:55.436483+00:00",
   "repository": "MRI-LMICs-survey",
   "tracked_public_corpus": {
     "logical_path": "data/data-clean.csv",
@@ -7,6 +7,15 @@
     "sha256_normalization": "utf8_lf",
     "rows": 48,
     "columns": 30
+  },
+  "tracked_public_evidence": {
+    "field_characterization": {
+      "logical_path": "data/field_characterization_evidence.csv",
+      "sha256": "6258d2611dd4246bde712532695798e3fac57760b29a216591739c0c0ee86064",
+      "sha256_normalization": "utf8_lf",
+      "rows": 48,
+      "columns": 11
+    }
   },
   "privacy": {
     "internal_source_contains_reviewer_names": true,

@@ -28,6 +28,7 @@ from scipy.stats import spearmanr
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TR_EVIDENCE_PATH = PROJECT_ROOT / "data" / "tr_criteria_evidence.csv"
+FIELD_EVIDENCE_PATH = PROJECT_ROOT / "data" / "field_characterization_evidence.csv"
 TR_CRITERIA = [
     "LowFieldDomain",
     "OpenScience",
@@ -245,6 +246,60 @@ def _field_pair(row: pd.Series) -> dict[str, str]:
     }
 
 
+def _apply_verified_field_evidence(result: pd.DataFrame) -> pd.DataFrame:
+    """Overlay the public, article-level target-field evidence layer.
+
+    The original extraction remains unchanged.  This overlay replaces the
+    narrower text heuristic only for target-field status, target strength, and
+    field pathway, using the canonical 48-study identity contract.
+    """
+
+    evidence = pd.read_csv(FIELD_EVIDENCE_PATH)
+    contract = pd.read_csv(PROJECT_ROOT / "data" / "included_study_order.csv")
+    required = {
+        "Paper_ID",
+        "DOI",
+        "Title",
+        "Target_Field_Status",
+        "Target_Field_Strength",
+        "Target_Field_Category",
+        "Field_Pathway",
+        "Evidence_Page",
+        "Evidence_Section",
+        "Evidence_Summary",
+        "Evidence_Source",
+    }
+    missing = sorted(required - set(evidence.columns))
+    if missing:
+        raise ValueError(f"Field evidence is missing columns: {missing}")
+    if len(evidence) != 48 or evidence["Paper_ID"].nunique() != 48:
+        raise ValueError("Field evidence must contain exactly 48 unique Paper_ID values")
+
+    evidence = evidence.sort_values("Paper_ID").reset_index(drop=True)
+    contract = contract.sort_values("Paper_ID").reset_index(drop=True)
+    if evidence["Paper_ID"].tolist() != list(range(1, 49)):
+        raise ValueError("Field evidence Paper_ID values must be contiguous from 1 to 48")
+    if evidence["Title"].tolist() != contract["Title"].tolist():
+        raise ValueError("Field evidence titles do not match the canonical study order")
+    if evidence["DOI"].str.strip().str.casefold().tolist() != contract["DOI"].str.strip().str.casefold().tolist():
+        raise ValueError("Field evidence DOI values do not match the canonical study order")
+
+    expected_ids = pd.to_numeric(result["Paper_ID"], errors="raise").astype(int)
+    if set(expected_ids) != set(evidence["Paper_ID"]):
+        raise ValueError("Field evidence Paper_ID values do not match the included studies")
+    indexed = evidence.set_index("Paper_ID")
+    output = result.copy()
+    output["Target_Field_Status"] = expected_ids.map(indexed["Target_Field_Status"])
+    output["Target_Field_Strength"] = expected_ids.map(indexed["Target_Field_Strength"])
+    output["Target_Field_Category"] = expected_ids.map(indexed["Target_Field_Category"])
+    output["Field_Pair_Category"] = expected_ids.map(indexed["Field_Pathway"])
+    output["Target_Field_Evidence_Page"] = expected_ids.map(indexed["Evidence_Page"])
+    output["Target_Field_Evidence_Section"] = expected_ids.map(indexed["Evidence_Section"])
+    output["Target_Field_Evidence_Source"] = expected_ids.map(indexed["Evidence_Source"])
+    output["Field_Evidence"] = expected_ids.map(indexed["Evidence_Summary"])
+    return output
+
+
 def _ground_truth(row: pd.Series) -> dict[str, str]:
     text = row_text(row).casefold()
     if _has(text, r"unpaired"):
@@ -366,7 +421,18 @@ def _metric_suitability_table(derived: pd.DataFrame) -> pd.DataFrame:
         ssim_reported = pd.notna(row.get("SSIM_Numeric"))
         metric_reported = psnr_reported or ssim_reported
         field_pathway = _text(row.get("Field_Pair_Category"))
-        if not field_pathway or field_pathway == "Unknown" or "unresolved" in field_pathway.casefold():
+        unresolved_pathways = {
+            "unknown",
+            "unclear",
+            "not reported",
+            "not available",
+            "not applicable",
+        }
+        if (
+            not field_pathway
+            or field_pathway.casefold() in unresolved_pathways
+            or "unresolved" in field_pathway.casefold()
+        ):
             field_pathway = "Not reported"
         pairedness = _text(row.get("Paired_Unpaired")) or "Not reported"
         ground_truth = _text(row.get("Ground_Truth_Type")) or "Not reported"
@@ -612,6 +678,7 @@ def add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
     field_rows = result.apply(_field_pair, axis=1, result_type="expand")
     ground_truth_rows = result.apply(_ground_truth, axis=1, result_type="expand")
     result = pd.concat([result, field_rows, ground_truth_rows], axis=1)
+    result = _apply_verified_field_evidence(result)
     result["Dataset_Real_Simulated"] = result.apply(_dataset_real_simulated, axis=1)
     result["Sequence_Summary"] = result.apply(_sequence_summary, axis=1)
     result["Contrast_Summary"] = result.apply(_contrast_summary, axis=1)
@@ -964,11 +1031,16 @@ def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
         "Dataset_Public_Availability",
         "Dataset_Availability_Evidence",
         "Input_Field_Category",
+        "Target_Field_Status",
+        "Target_Field_Strength",
         "Target_Field_Category",
         "Field_Pair_Category",
         "Ground_Truth_Type",
         "Paired_Unpaired",
         "Field_Evidence",
+        "Target_Field_Evidence_Page",
+        "Target_Field_Evidence_Section",
+        "Target_Field_Evidence_Source",
         "Training_Data_Source",
     ]
     dataset_characterization = derived[[column for column in dataset_columns if column in derived.columns]].copy()
@@ -979,11 +1051,16 @@ def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
             "Title",
             "Field_Strength_Type",
             "Input_Field_Category",
+            "Target_Field_Status",
+            "Target_Field_Strength",
             "Target_Field_Category",
             "Field_Pair_Category",
             "Ground_Truth_Type",
             "Paired_Unpaired",
             "Field_Evidence",
+            "Target_Field_Evidence_Page",
+            "Target_Field_Evidence_Section",
+            "Target_Field_Evidence_Source",
         ]
     ].copy()
     return {
@@ -1033,6 +1110,11 @@ def write_analysis_outputs(analysis: dict, output_dir: Path, source_path: Path) 
     manifest = {
         "source": str(source_path),
         "source_sha256": sha256_file(source_path),
+        "field_evidence": {
+            "logical_path": "data/field_characterization_evidence.csv",
+            "sha256": sha256_file(FIELD_EVIDENCE_PATH),
+            "rows": int(len(pd.read_csv(FIELD_EVIDENCE_PATH))),
+        },
         "derived_data_sha256": dataframe_sha256(derived),
         "n_included": int(len(derived)),
         "fleiss_kappa": {

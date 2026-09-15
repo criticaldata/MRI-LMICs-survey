@@ -44,9 +44,15 @@ row per included study, final `Yes`/`No` decisions for all five criteria, the
 supporting page/section, and a rubric-based reason. The canonical Master Data
 Sheet remains unchanged and is joined to this evidence layer by `Paper_ID`.
 
+Target-field characterization uses the separate public evidence layer
+`data/field_characterization_evidence.csv`. It is matched one-to-one to the
+canonical corpus by title and DOI and records the exact target-field statement,
+field pathway, page/section, and supporting text. It does not overwrite the
+Master Data Sheet and contains no reviewer identities or process labels.
+
 ## Current rerun outputs
 
-The promoted 2026-08-18 rerun is in `analysis/review_20260803/` and includes:
+The promoted 2026-09-15 rerun is in `analysis/review_20260803/` and includes:
 
 - corrected per-paper TR criteria and score;
 - sensitivity restricted to SR-primary cohorts, with strict and
@@ -170,8 +176,10 @@ metadata is listed, with no imputation, in
 
 The dataset-characterization output includes `Input_Resolution`,
 `Target_Resolution`, `Dataset_Public_Availability`, and source-evidence
-columns. A value is populated only when frozen source text explicitly
-supports it; otherwise the derived table states `Not reported`.
+columns. Target field strength is explicitly reported for 22 studies, not
+applicable for 15, not reported by 6, and not verifiable from the available
+publisher text for 5. These states are kept separate; they are not collapsed
+into a heuristic `Unknown` category.
 
 `analysis_psnr_ssim_metric_suitability.csv` has one row per included study and
 states whether a reported PSNR/SSIM value has explicit paired, ground-truth,

@@ -11,10 +11,11 @@ sys.path.insert(0, str(REPO / "scripts" / "analysis"))
 sys.path.insert(0, str(REPO / "scripts" / "figures"))
 
 from mapper import load_data  # noqa: E402
-from review_metrics import _hardware_awareness, build_analysis  # noqa: E402
+from review_metrics import _hardware_awareness, build_analysis, sha256_file, write_analysis_outputs  # noqa: E402
 
 
 TR_EVIDENCE_PATH = REPO / "data" / "tr_criteria_evidence.csv"
+FIELD_EVIDENCE_PATH = REPO / "data" / "field_characterization_evidence.csv"
 TR_CRITERIA = [
     "LowFieldDomain",
     "OpenScience",
@@ -77,6 +78,65 @@ def test_dataset_characterization_has_reviewer_required_columns():
     )
 
 
+def test_verified_field_evidence_is_complete_and_canonical():
+    """The public field-evidence layer must map one-to-one to the canonical corpus."""
+    evidence = pd.read_csv(FIELD_EVIDENCE_PATH)
+    canonical = pd.read_csv(REPO / "data" / "included_study_order.csv")
+
+    assert len(evidence) == 48
+    assert evidence["Paper_ID"].tolist() == list(range(1, 49))
+    assert evidence["Title"].tolist() == canonical["Title"].tolist()
+    assert evidence["DOI"].str.casefold().tolist() == canonical["DOI"].str.casefold().tolist()
+    assert evidence["Target_Field_Status"].value_counts().to_dict() == {
+        "Explicitly reported": 22,
+        "Not applicable": 15,
+        "Not reported": 6,
+        "Not available": 5,
+    }
+    assert "Evidence_Summary" in evidence.columns
+    assert "Evidence_Quote" not in evidence.columns
+    assert evidence["Evidence_Summary"].fillna("").str.split().str.len().max() <= 25
+    assert not any(
+        token in column.casefold()
+        for column in evidence.columns
+        for token in ("ai_", "_ai", "auto_", "provisional", "human", "manual")
+    )
+
+
+def test_dataset_characterization_uses_verified_target_field_evidence():
+    """Verified full-text target fields must replace the 44 heuristic Unknown values."""
+    table = build_analysis(load_data())["dataset_characterization"]
+
+    assert table["Target_Field_Status"].value_counts().to_dict() == {
+        "Explicitly reported": 22,
+        "Not applicable": 15,
+        "Not reported": 6,
+        "Not available": 5,
+    }
+    assert "Unknown" not in set(table["Target_Field_Category"])
+    pushing_limits = table.loc[
+        table["Title"].eq(
+            "Pushing the limits of low-cost ultra-low-field MRI by dual-acquisition deep learning 3D superresolution"
+        )
+    ].iloc[0]
+    assert pushing_limits["Target_Field_Status"] == "Explicitly reported"
+    assert pushing_limits["Target_Field_Category"] == "≤64 mT"
+    assert pushing_limits["Field_Pair_Category"] == "low-field → low-field"
+    assert pushing_limits["Target_Field_Evidence_Page"] == "1,3,5,6"
+
+
+def test_analysis_manifest_pins_the_field_evidence_input(tmp_path):
+    """A regenerated analysis must record the field-evidence file it consumed."""
+    source = REPO / "data" / "data-clean.csv"
+    manifest = write_analysis_outputs(build_analysis(load_data()), tmp_path, source)
+
+    assert manifest["field_evidence"] == {
+        "logical_path": "data/field_characterization_evidence.csv",
+        "sha256": sha256_file(FIELD_EVIDENCE_PATH),
+        "rows": 48,
+    }
+
+
 def test_public_review_outputs_use_neutral_source_labels():
     """Public outputs describe source evidence, not the extraction process."""
     for frame_name in ("tr", "field_ground_truth", "dataset_characterization"):
@@ -99,6 +159,18 @@ def test_metric_suitability_has_one_conservative_row_per_included_study():
     )
     metric_rows = table[table["PSNR_or_SSIM_Reported"] == "Yes"]
     assert (metric_rows["PSNR_SSIM_Comparison_Eligibility"] != "Eligible").any()
+
+
+def test_unclear_field_pathway_cannot_make_psnr_ssim_comparison_eligible():
+    """An unresolved field direction is not evidence for a comparable metric pair."""
+    table = build_analysis(load_data())["metric_suitability"]
+    unresolved = table[
+        table["Field_Pathway"].isin(
+            {"Unclear", "Not reported", "Not available", "Not applicable"}
+        )
+    ]
+
+    assert not unresolved["PSNR_SSIM_Comparison_Eligibility"].eq("Eligible").any()
 
 
 def test_training_hardware_does_not_satisfy_inference_hardware_awareness():

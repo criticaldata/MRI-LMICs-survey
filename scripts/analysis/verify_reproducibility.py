@@ -54,6 +54,7 @@ def main() -> None:
 
     data = pd.read_csv(REPO / "data" / "data-clean.csv")
     contract = pd.read_csv(REPO / "data" / "included_study_order.csv")
+    field_evidence = pd.read_csv(REPO / "data" / "field_characterization_evidence.csv")
     screening = pd.read_csv(repro / "screening_log_183.csv")
     assignments = pd.read_csv(repro / "included_studies_assignments_48.csv")
     manifest = json.loads((repro / "source_manifest.json").read_text(encoding="utf-8"))
@@ -89,6 +90,11 @@ def main() -> None:
     title_by_id = dict(zip(contract["Paper_ID"].astype(int), contract["Title"].map(normalize_title)))
     require(len(data) == 48, f"data-clean.csv has {len(data)} rows, expected 48")
     require_canonical_identity(data, "data/data-clean.csv", title_by_id)
+    require_canonical_identity(
+        field_evidence,
+        "data/field_characterization_evidence.csv",
+        title_by_id,
+    )
     require(
         data.loc[data["Paper_ID"] == 24, "Title"].iloc[0]
         == "Pushing the limits of low-cost ultra-low-field MRI by dual-acquisition deep learning 3D superresolution",
@@ -221,6 +227,20 @@ def main() -> None:
         "metric suitability uses an unexpected eligibility value",
     )
     require("Field_Manual_Review" not in dataset_characterization.columns, "retired manual-review label remains in dataset characterization")
+    require(
+        dataset_characterization["Target_Field_Status"].value_counts().to_dict()
+        == {
+            "Explicitly reported": 22,
+            "Not applicable": 15,
+            "Not reported": 6,
+            "Not available": 5,
+        },
+        "target-field evidence statuses do not match the verified 48-study evidence layer",
+    )
+    require(
+        "Unknown" not in set(dataset_characterization["Target_Field_Category"]),
+        "heuristic Unknown target fields remain after applying verified evidence",
+    )
     require(temporal_primary["Year"].tolist() == [2020, 2021, 2022, 2023, 2024], "primary temporal scope is not 2020-2024")
     require(
         temporal_preliminary["Year"].tolist() == [2025]

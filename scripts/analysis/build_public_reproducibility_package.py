@@ -20,6 +20,7 @@ import pandas as pd
 
 REPO = Path(__file__).resolve().parents[2]
 TRACKED_PUBLIC_DATA = REPO / "data" / "data-clean.csv"
+FIELD_EVIDENCE = REPO / "data" / "field_characterization_evidence.csv"
 PRIVATE_DATA = REPO / "data" / "private" / "data-clean_internal.csv"
 SOURCE_SCREENING = REPO / "analysis" / "reproducibility" / "screening_log_183.csv"
 SOURCE_ASSIGNMENTS = (
@@ -93,6 +94,7 @@ def sanitize_url_columns(frames: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.
 def build_package() -> dict:
     for path in (
         TRACKED_PUBLIC_DATA,
+        FIELD_EVIDENCE,
         SOURCE_SCREENING,
         SOURCE_ASSIGNMENTS,
         *SPEARMAN_OUTPUTS,
@@ -105,6 +107,7 @@ def build_package() -> dict:
         shutil.copy2(TRACKED_PUBLIC_DATA, PRIVATE_DATA)
 
     internal_data = pd.read_csv(PRIVATE_DATA)
+    field_evidence = pd.read_csv(FIELD_EVIDENCE)
     internal_screening = pd.read_csv(SOURCE_SCREENING)
     internal_assignments = pd.read_csv(SOURCE_ASSIGNMENTS)
 
@@ -156,7 +159,7 @@ def build_package() -> dict:
 
     public_text = "\n".join(
         frame.fillna("").astype(str).agg(" | ".join, axis=1).str.cat(sep="\n")
-        for frame in (public_data, public_screening, public_assignments)
+        for frame in (public_data, public_screening, public_assignments, field_evidence)
     ).casefold()
     leaked_tokens = sorted(token for token in reviewer_tokens if token in public_text)
     if leaked_tokens:
@@ -269,6 +272,15 @@ are included. This package was generated locally and was not pushed to GitHub.
             "sha256_normalization": "utf8_lf",
             "rows": int(len(public_data)),
             "columns": int(len(public_data.columns)),
+        },
+        "tracked_public_evidence": {
+            "field_characterization": {
+                "logical_path": "data/field_characterization_evidence.csv",
+                "sha256": sha256_utf8_lf(FIELD_EVIDENCE),
+                "sha256_normalization": "utf8_lf",
+                "rows": int(len(field_evidence)),
+                "columns": int(len(field_evidence.columns)),
+            }
         },
         "privacy": manifest["privacy"],
         "independent_reviewer_ratings_included": False,
