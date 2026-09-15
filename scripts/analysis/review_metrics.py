@@ -23,6 +23,7 @@ from typing import Iterable
 
 import numpy as np
 import pandas as pd
+from scipy.stats import spearmanr
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -729,6 +730,61 @@ def spearman_permutation(x: pd.Series, y: pd.Series, permutations: int = 10000, 
     }
 
 
+def spearman_inference(
+    x: pd.Series,
+    y: pd.Series,
+    *,
+    permutations: int = 10_000,
+    bootstrap_replicates: int = 10_000,
+    seed: int = 42,
+) -> dict[str, object]:
+    """Return deterministic two-sided permutation and bootstrap inference.
+
+    Spearman rho uses average ranks for ties. The permutation and percentile
+    bootstrap streams are initialized separately with the same recorded seed,
+    so each component is reproducible independently.
+    """
+
+    valid = pd.concat([x, y], axis=1).dropna()
+    permutation = spearman_permutation(
+        valid.iloc[:, 0], valid.iloc[:, 1], permutations=permutations, seed=seed
+    )
+    if len(valid) < 3:
+        return {
+            **permutation,
+            "bootstrap_ci_2_5": None,
+            "bootstrap_ci_97_5": None,
+            "bootstrap_replicates": 0,
+            "bootstrap_seed": seed,
+            "rank_method": "average",
+        }
+
+    x_values = valid.iloc[:, 0].to_numpy(dtype=float)
+    y_values = valid.iloc[:, 1].to_numpy(dtype=float)
+    rng = np.random.default_rng(seed)
+    bootstrap_rhos = []
+    for _ in range(bootstrap_replicates):
+        indices = rng.integers(0, len(valid), size=len(valid))
+        rho = spearmanr(x_values[indices], y_values[indices]).statistic
+        if np.isfinite(rho):
+            bootstrap_rhos.append(float(rho))
+    if not bootstrap_rhos:
+        bootstrap_low = None
+        bootstrap_high = None
+    else:
+        bootstrap_low, bootstrap_high = (
+            float(value) for value in np.quantile(bootstrap_rhos, [0.025, 0.975])
+        )
+    return {
+        **permutation,
+        "bootstrap_ci_2_5": bootstrap_low,
+        "bootstrap_ci_97_5": bootstrap_high,
+        "bootstrap_replicates": int(bootstrap_replicates),
+        "bootstrap_seed": seed,
+        "rank_method": "average",
+    }
+
+
 def unknown_audit(df: pd.DataFrame) -> pd.DataFrame:
     specs = [
         ("Field_Strength_Type", "Field_Strength_Norm", normalize_field_category),
@@ -887,7 +943,9 @@ def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
         ("SR primary strict (Pure SR, SR + Denoising, SR + Other)", derived["SR_Primary_Strict"]),
         ("SR primary pure/denoising", derived["SR_Primary_Pure_or_Denoising"]),
     ]:
-        stats = spearman_permutation(derived.loc[mask, "LMIC_Score"], derived.loc[mask, "TR_Score"])
+        stats = spearman_inference(
+            derived.loc[mask, "LMIC_Score"], derived.loc[mask, "TR_Score"]
+        )
         correlation_rows.append({"Cohort": label, **stats})
 
     dataset_columns = [

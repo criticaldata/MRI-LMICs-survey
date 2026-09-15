@@ -1,0 +1,2 @@
+Cohort,n,rho,p_permutation,permutations,seed,bootstrap_ci_2_5,bootstrap_ci_97_5,bootstrap_replicates,bootstrap_seed,rank_method,aggregation
+All included studies: reviewer median,48,-0.25769998006564165,0.0786921307869213,10000,42,-0.5397196933433509,0.03972313668026812,10000,42,average,per-paper median of 11 complete raters

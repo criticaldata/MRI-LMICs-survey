@@ -51,7 +51,8 @@ The promoted 2026-08-18 rerun is in `analysis/review_20260803/` and includes:
 - corrected per-paper TR criteria and score;
 - sensitivity restricted to SR-primary cohorts, with strict and
   pure/denoising definitions shown separately;
-- Spearman LMIC–TR correlations with deterministic permutation p-values;
+- Spearman LMIC–TR correlations with deterministic permutation p-values and
+  bootstrap percentile confidence intervals;
 - dataset characterization: size, sequence, contrast, real/synthetic status,
   paired/unpaired status, input/target field categories, field-pair direction,
   and ground-truth type;
@@ -97,6 +98,11 @@ intervals remain above zero. This association must still be described as
 exploratory because the two constructs share deployment-related content; it is
 separate from the final 11-author agreement analysis.
 
+Weighting robustness is not scorer-dependence robustness. The four weighting
+schemes reuse the canonical study-level inputs and test how the TR definition
+changes under alternative criterion weights; they do not test whether the
+LMIC--TR association depends on the people supplying ratings.
+
 The random-forest robustness analysis is in
 `analysis/review_20260803/random_forest_robustness_20260804/`. It uses a
 constrained forest, 5-fold repeated cross-validation (10 repeats), a mean
@@ -124,6 +130,26 @@ The same private-input pipeline also writes supplementary ordinal-weighted
 agreement (linear and quadratic generalized multi-rater weighted Fleiss
 statistics plus pairwise weighted Cohen summaries) and ICC outputs. These
 supplements do not replace the prespecified standard Fleiss κ.
+
+The private-input pipeline also calculates a reviewer-consensus Spearman
+sensitivity. Before any output is written, the shared workbook validator
+requires exactly 48 papers in the canonical title order, 11 complete raters for
+both LMIC and TR, integer LMIC values from 1 to 5, and integer TR values from 0
+to 5. The runner aggregates each paper by the median of its 11 ratings and uses
+the same average-rank Spearman method, deterministic two-sided 10,000-
+permutation p-value, 10,000 paired bootstrap percentile interval, and seed 42
+as the canonical analysis. It promotes only
+`tables/analysis_lmic_tr_correlation_reviewer_consensus.csv`, with no reviewer
+names, individual ratings, private paths, or paper-level medians.
+
+The canonical study-level analysis remains primary. It reads LMIC from
+`data/data-clean.csv` and TR from `data/tr_criteria_evidence.csv`; for all 48
+studies it gives rho = 0.4059228847, permutation p = 0.0032996700, and 95%
+bootstrap CI 0.1639207818 to 0.6065349303. The reviewer-median sensitivity gives
+rho = -0.2576999801, permutation p = 0.0786921308, and 95% bootstrap CI
+-0.5397196933 to 0.0397231367. This contrast is evidence of scorer-source
+sensitivity that should be reported explicitly, not resolved by selecting the
+more favorable estimate.
 
 ## Scientometric boundary
 

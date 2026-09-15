@@ -26,6 +26,10 @@ SOURCE_ASSIGNMENTS = (
     REPO / "analysis" / "reproducibility" / "included_studies_assignments_48.csv"
 )
 OUTPUT = REPO / "analysis" / "reproducibility" / "public_package"
+SPEARMAN_OUTPUTS = (
+    REPO / "tables" / "analysis_lmic_tr_correlation.csv",
+    REPO / "tables" / "analysis_lmic_tr_correlation_reviewer_consensus.csv",
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -74,7 +78,12 @@ def sanitize_url_columns(frames: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.
 
 
 def build_package() -> dict:
-    for path in (TRACKED_PUBLIC_DATA, SOURCE_SCREENING, SOURCE_ASSIGNMENTS):
+    for path in (
+        TRACKED_PUBLIC_DATA,
+        SOURCE_SCREENING,
+        SOURCE_ASSIGNMENTS,
+        *SPEARMAN_OUTPUTS,
+    ):
         if not path.exists():
             raise FileNotFoundError(path)
 
@@ -250,6 +259,14 @@ are included. This package was generated locally and was not pushed to GitHub.
         "privacy": manifest["privacy"],
         "independent_reviewer_ratings_included": False,
         "fleiss_kappa_status": "aggregate_summary_published_private_input",
+        "analysis_outputs": {
+            path.name: {
+                "logical_path": f"tables/{path.name}",
+                "sha256": sha256_file(path),
+                "rows": int(len(pd.read_csv(path))),
+            }
+            for path in SPEARMAN_OUTPUTS
+        },
     }
     (REPO / "data" / "public_release_manifest.json").write_text(
         json.dumps(public_manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"

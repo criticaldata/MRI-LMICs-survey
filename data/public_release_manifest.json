@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-10T05:03:39.527582+00:00",
+  "generated_at_utc": "2026-09-15T05:05:38.286910+00:00",
   "repository": "MRI-LMICs-survey",
   "tracked_public_corpus": {
     "logical_path": "data/data-clean.csv",
@@ -24,5 +24,17 @@
     "query_tokens_detected_after_scrub": []
   },
   "independent_reviewer_ratings_included": false,
-  "fleiss_kappa_status": "aggregate_summary_published_private_input"
+  "fleiss_kappa_status": "aggregate_summary_published_private_input",
+  "analysis_outputs": {
+    "analysis_lmic_tr_correlation.csv": {
+      "logical_path": "tables/analysis_lmic_tr_correlation.csv",
+      "sha256": "52513d2c36829c34b81c547252c37e60db6cb9a52066b32621ee82b01cee6e0d",
+      "rows": 3
+    },
+    "analysis_lmic_tr_correlation_reviewer_consensus.csv": {
+      "logical_path": "tables/analysis_lmic_tr_correlation_reviewer_consensus.csv",
+      "sha256": "7c4879616098a79e773f01bf0b2220ed896f34623a8c482e1c809c7b8782c313",
+      "rows": 1
+    }
+  }
 }

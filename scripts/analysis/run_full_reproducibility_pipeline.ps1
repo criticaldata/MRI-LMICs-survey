@@ -36,7 +36,8 @@ function Invoke-MriPython {
         [string[]]$Arguments = @()
     )
 
-    Write-Host "Running: $Script $($Arguments -join ' ')"
+    # Arguments may contain the private workbook path; never echo them.
+    Write-Host "Running: $Script"
     & $PythonPath $Script @Arguments
     if ($LASTEXITCODE -ne 0) {
         throw "Failed: $Script"
@@ -54,7 +55,7 @@ try {
     Invoke-MriPython "scripts/figures/figS1_temporal_trends.py"
 
     if ([string]::IsNullOrWhiteSpace($PrivateRatingsXlsx)) {
-        Write-Host "Skipping final Fleiss' kappa: no private reviewer workbook supplied."
+        Write-Host "Skipping private reviewer analyses: no private reviewer workbook supplied."
     }
     else {
         if (-not (Test-Path -LiteralPath $PrivateRatingsXlsx)) {
@@ -71,6 +72,11 @@ try {
             "--canonical-data", "data/data-clean.csv"
         )
         Invoke-MriPython "scripts/analysis/statistical/run_icc_from_private_xlsx.py" @(
+            "--input-xlsx", $PrivateRatingsXlsx,
+            "--output-dir", "tables",
+            "--canonical-data", "data/data-clean.csv"
+        )
+        Invoke-MriPython "scripts/analysis/statistical/run_lmic_tr_correlation_from_private_xlsx.py" @(
             "--input-xlsx", $PrivateRatingsXlsx,
             "--output-dir", "tables",
             "--canonical-data", "data/data-clean.csv"

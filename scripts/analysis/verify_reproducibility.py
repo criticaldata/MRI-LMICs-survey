@@ -70,6 +70,10 @@ def main() -> None:
     weighted_summary = pd.read_csv(REPO / "tables" / "analysis_weighted_kappa_summary.csv")
     weighted_item_agreement = pd.read_csv(REPO / "tables" / "analysis_weighted_kappa_item_agreement.csv")
     icc_summary = pd.read_csv(REPO / "tables" / "analysis_icc_summary.csv")
+    canonical_spearman = pd.read_csv(REPO / "tables" / "analysis_lmic_tr_correlation.csv")
+    consensus_spearman = pd.read_csv(
+        REPO / "tables" / "analysis_lmic_tr_correlation_reviewer_consensus.csv"
+    )
     tr_weighting = pd.read_csv(analysis / "tr_weighting_sensitivity_20260804" / "analysis_tr_weighting_sensitivity.csv")
     tr_primary_leave_one_out = pd.read_csv(analysis / "tr_weighting_sensitivity_20260804" / "analysis_tr_primary_leave_one_out.csv")
     ground_truth_summary = pd.read_csv(analysis / "ground_truth_metric_audit_20260804" / "ground_truth_metric_audit_summary.csv")
@@ -132,6 +136,40 @@ def main() -> None:
         and icc_summary["ICC_2_k_absolute_agreement"].between(-1, 1).all()
         and not any("Reviewer" in column or "Rating" in column for column in icc_summary.columns),
         "ICC output is invalid or exposes reviewer-level fields",
+    )
+    canonical_spearman_all = canonical_spearman.loc[
+        canonical_spearman["Cohort"] == "All included studies"
+    ].iloc[0]
+    consensus_spearman_all = consensus_spearman.iloc[0]
+    require(
+        len(canonical_spearman) == 3
+        and canonical_spearman["n"].tolist() == [48, 30, 23]
+        and (canonical_spearman["permutations"] == 10_000).all()
+        and (canonical_spearman["bootstrap_replicates"] == 10_000).all()
+        and (canonical_spearman["rank_method"] == "average").all(),
+        "canonical LMIC--TR Spearman output is incomplete",
+    )
+    require(
+        abs(float(canonical_spearman_all["rho"]) - 0.40592288472740023) < 1e-12
+        and abs(float(canonical_spearman_all["p_permutation"]) - 0.0032996700329967) < 1e-12
+        and abs(float(canonical_spearman_all["bootstrap_ci_2_5"]) - 0.16392078177387287) < 1e-12
+        and abs(float(canonical_spearman_all["bootstrap_ci_97_5"]) - 0.606534930261319) < 1e-12,
+        "canonical LMIC--TR Spearman estimate changed unexpectedly",
+    )
+    require(
+        len(consensus_spearman) == 1
+        and int(consensus_spearman_all["n"]) == 48
+        and int(consensus_spearman_all["permutations"]) == 10_000
+        and int(consensus_spearman_all["bootstrap_replicates"]) == 10_000
+        and consensus_spearman_all["rank_method"] == "average",
+        "reviewer-median LMIC--TR Spearman output is incomplete",
+    )
+    require(
+        abs(float(consensus_spearman_all["rho"]) + 0.25769998006564165) < 1e-12
+        and abs(float(consensus_spearman_all["p_permutation"]) - 0.0786921307869213) < 1e-12
+        and abs(float(consensus_spearman_all["bootstrap_ci_2_5"]) + 0.5397196933433509) < 1e-12
+        and abs(float(consensus_spearman_all["bootstrap_ci_97_5"]) - 0.03972313668026812) < 1e-12,
+        "reviewer-median LMIC--TR Spearman estimate changed unexpectedly",
     )
 
     total_quality = quality.loc[quality["Domain"] == "Total Quality"].iloc[0]
@@ -248,6 +286,11 @@ def main() -> None:
             "LMIC_Relevance_Score_ICC_2_k": float(icc_summary.loc[icc_summary["Analysis"] == "LMIC_Relevance_Score", "ICC_2_k_absolute_agreement"].iloc[0]),
             "TR_Score_ICC_2_1": float(icc_summary.loc[icc_summary["Analysis"] == "TR_Score", "ICC_2_1_absolute_agreement"].iloc[0]),
             "TR_Score_ICC_2_k": float(icc_summary.loc[icc_summary["Analysis"] == "TR_Score", "ICC_2_k_absolute_agreement"].iloc[0]),
+            "raw_ratings_included": False,
+        },
+        "lmic_tr_spearman": {
+            "canonical": float(canonical_spearman_all["rho"]),
+            "reviewer_median_sensitivity": float(consensus_spearman_all["rho"]),
             "raw_ratings_included": False,
         },
         "status": "PASS",

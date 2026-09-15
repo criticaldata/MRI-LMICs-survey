@@ -12,8 +12,9 @@ The reviewer-correction pipeline regenerates the corrected analyses, promoted ta
 powershell -ExecutionPolicy Bypass -File scripts/analysis/run_full_reproducibility_pipeline.ps1 -RunDate 20260817
 
 # Supplying the private reviewer workbook additionally regenerates Fleiss'
-# kappa, ordinal-weighted agreement, and ICC. The workbook is validated against
-# the canonical title order and is never copied into the repository.
+# kappa, ordinal-weighted agreement, ICC, and the reviewer-consensus Spearman
+# sensitivity analysis. The workbook is validated against the canonical title
+# order and is never copied into the repository.
 powershell -ExecutionPolicy Bypass -File scripts/analysis/run_full_reproducibility_pipeline.ps1 `
   -RunDate 20260909 `
   -PrivateRatingsXlsx C:\private\RECEIVED_SCORES.xlsx
@@ -38,6 +39,9 @@ The pipeline includes advanced analytics for manuscript revision:
 - **Intraclass correlation**: supplementary two-way absolute-agreement ICC for
   single ratings and the mean of the 11 reviewers. Individual ratings remain
   private.
+- **LMIC--TR Spearman analysis**: primary study-level correlation from
+  `data/data-clean.csv` and `data/tr_criteria_evidence.csv`, plus an optional
+  reviewer-median sensitivity summary from the private workbook.
 - **Geographic Equity**: World Bank income classification mapping.
 
 To regenerate the aggregate agreement outputs from the private workbook, run:
@@ -77,6 +81,21 @@ python scripts/analysis/statistical/run_icc_from_private_xlsx.py `
 The primary ICC is ICC(2,1), two-way random effects with absolute agreement;
 ICC(2,k) is also reported for the mean of all 11 reviewers.
 
+To regenerate the reviewer-consensus Spearman sensitivity summary, run:
+
+```powershell
+python scripts/analysis/statistical/run_lmic_tr_correlation_from_private_xlsx.py `
+  --input-xlsx <private-reviewer-workbook.xlsx> `
+  --output-dir tables `
+  --canonical-data data/data-clean.csv
+```
+
+The runner requires exactly 48 papers in canonical title order and 11 complete
+raters for both scores. It validates LMIC scores in 1--5 and TR scores in 0--5
+before writing. It then takes the per-paper median across the 11 raters and
+writes only `tables/analysis_lmic_tr_correlation_reviewer_consensus.csv`; no
+names, individual ratings, private path, or per-paper median is exported.
+
 ## Generate Individual Outputs
 
 ```bash
@@ -109,7 +128,9 @@ and is not an active result. The current aggregate agreement outputs are
 `tables/analysis_fleiss_kappa_item_agreement.csv`. The supplementary ordinal
 weighted outputs are `tables/analysis_weighted_kappa_summary.csv` and
 `tables/analysis_weighted_kappa_item_agreement.csv`; the supplementary ICC
-output is `tables/analysis_icc_summary.csv`.
+output is `tables/analysis_icc_summary.csv`. The canonical Spearman output is
+`tables/analysis_lmic_tr_correlation.csv`, and the aggregate reviewer-median
+sensitivity is `tables/analysis_lmic_tr_correlation_reviewer_consensus.csv`.
 
 ## Data
 
@@ -125,6 +146,16 @@ the included corpus to canonical `Paper_ID` values 1–48 by title and DOI;
 derived tables and the private reviewer workbook are validated against this
 contract. Paper 24 is the *Pushing the limits of low-cost ultra-low-field MRI*
 study. IDs are never remapped by numeric shifting.
+
+The primary LMIC--TR estimate is the canonical study-level analysis: LMIC is
+read from `data/data-clean.csv`, and TR is read from
+`data/tr_criteria_evidence.csv`. For all 48 studies, Spearman rho is 0.4059,
+the deterministic two-sided 10,000-permutation p-value is 0.00330, and the
+10,000-bootstrap percentile 95% CI is 0.1639 to 0.6065 (seed 42; average ranks
+for ties). The separate reviewer-median sensitivity gives rho -0.2577,
+p = 0.07869, and a 95% CI of -0.5397 to 0.0397. Weighting robustness is not
+scorer-dependence robustness: changing TR criterion weights does not test
+whether the association changes when scores come from independent reviewers.
 
 Corrected dataset refined from an initial pool of 183 papers (2020-2025).
 

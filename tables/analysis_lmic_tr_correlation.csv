@@ -1,4 +1,4 @@
-Cohort,n,rho,p_permutation,permutations,seed
-All included studies,48,0.40592288472740023,0.0032996700329967,10000,42
-"SR primary strict (Pure SR, SR + Denoising, SR + Other)",30,0.4380543581124685,0.016998300169983,10000,42
-SR primary pure/denoising,23,0.5313745831957234,0.0091990800919908,10000,42
+Cohort,n,rho,p_permutation,permutations,seed,bootstrap_ci_2_5,bootstrap_ci_97_5,bootstrap_replicates,bootstrap_seed,rank_method
+All included studies,48,0.40592288472740023,0.0032996700329967,10000,42,0.16392078177387287,0.606534930261319,10000,42,average
+"SR primary strict (Pure SR, SR + Denoising, SR + Other)",30,0.4380543581124685,0.016998300169983,10000,42,0.062035212711487195,0.7157832313372686,10000,42,average
+SR primary pure/denoising,23,0.5313745831957234,0.0091990800919908,10000,42,0.12801311632106535,0.8124597747805447,10000,42,average
