@@ -1,9 +1,10 @@
 {
-  "generated_at_utc": "2026-09-15T05:05:38.286910+00:00",
+  "generated_at_utc": "2026-09-15T16:52:53.261179+00:00",
   "repository": "MRI-LMICs-survey",
   "tracked_public_corpus": {
     "logical_path": "data/data-clean.csv",
-    "sha256": "a96576beb17a53e14e23bfe1fd40dc59fa0d67ad1c67cfcd825afcf4a24392ab",
+    "sha256": "8beeaad423a4937a26b41a40d0039341db8e6f2eb67f75a40c524966b5dcbf5a",
+    "sha256_normalization": "utf8_lf",
     "rows": 48,
     "columns": 30
   },
@@ -28,12 +29,14 @@
   "analysis_outputs": {
     "analysis_lmic_tr_correlation.csv": {
       "logical_path": "tables/analysis_lmic_tr_correlation.csv",
-      "sha256": "52513d2c36829c34b81c547252c37e60db6cb9a52066b32621ee82b01cee6e0d",
+      "sha256": "b902f2874de33cfaf7a3b2297c5f6b2946065eb92bea847dbf97af4f65482eb6",
+      "sha256_normalization": "utf8_lf",
       "rows": 3
     },
     "analysis_lmic_tr_correlation_reviewer_consensus.csv": {
       "logical_path": "tables/analysis_lmic_tr_correlation_reviewer_consensus.csv",
-      "sha256": "7c4879616098a79e773f01bf0b2220ed896f34623a8c482e1c809c7b8782c313",
+      "sha256": "75d91bcb819cb1007d5cf02dc0ef4a16945f63e97980a41b788605c9e6c539e9",
+      "sha256_normalization": "utf8_lf",
       "rows": 1
     }
   }

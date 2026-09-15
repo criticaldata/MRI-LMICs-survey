@@ -162,15 +162,22 @@ def test_reviewer_consensus_output_matches_approved_current_result():
     assert consensus.loc[0, "rank_method"] == "average"
 
 
-def test_public_manifest_pins_both_spearman_outputs_by_hash():
+def test_public_manifest_hashes_are_platform_independent_utf8_lf():
     manifest = json.loads(PUBLIC_MANIFEST.read_text(encoding="utf-8"))
-    outputs = manifest["analysis_outputs"]
+    entries = [manifest["tracked_public_corpus"], *manifest["analysis_outputs"].values()]
 
-    for path in (CANONICAL_CORRELATION, CONSENSUS_CORRELATION):
-        entry = outputs[path.name]
-        assert entry["logical_path"] == f"tables/{path.name}"
+    for entry in entries:
+        path = REPO / entry["logical_path"]
+        normalized = (
+            path.read_bytes()
+            .decode("utf-8")
+            .replace("\r\n", "\n")
+            .replace("\r", "\n")
+            .encode("utf-8")
+        )
+        assert entry["sha256_normalization"] == "utf8_lf"
         assert entry["rows"] == len(pd.read_csv(path))
-        assert entry["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+        assert entry["sha256"] == hashlib.sha256(normalized).hexdigest()
 
 
 def test_general_reproducibility_verifier_reports_both_spearman_results():

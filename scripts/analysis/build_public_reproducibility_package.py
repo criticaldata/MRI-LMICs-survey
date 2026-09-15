@@ -40,6 +40,19 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def sha256_utf8_lf(path: Path) -> str:
+    """Hash versioned text with one cross-platform newline representation."""
+
+    normalized = (
+        path.read_bytes()
+        .decode("utf-8")
+        .replace("\r\n", "\n")
+        .replace("\r", "\n")
+        .encode("utf-8")
+    )
+    return hashlib.sha256(normalized).hexdigest()
+
+
 def write_csv(frame: pd.DataFrame, path: Path) -> None:
     frame.to_csv(path, index=False, encoding="utf-8")
 
@@ -252,7 +265,8 @@ are included. This package was generated locally and was not pushed to GitHub.
         "repository": manifest["repository"],
         "tracked_public_corpus": {
             "logical_path": "data/data-clean.csv",
-            "sha256": sha256_file(TRACKED_PUBLIC_DATA),
+            "sha256": sha256_utf8_lf(TRACKED_PUBLIC_DATA),
+            "sha256_normalization": "utf8_lf",
             "rows": int(len(public_data)),
             "columns": int(len(public_data.columns)),
         },
@@ -262,7 +276,8 @@ are included. This package was generated locally and was not pushed to GitHub.
         "analysis_outputs": {
             path.name: {
                 "logical_path": f"tables/{path.name}",
-                "sha256": sha256_file(path),
+                "sha256": sha256_utf8_lf(path),
+                "sha256_normalization": "utf8_lf",
                 "rows": int(len(pd.read_csv(path))),
             }
             for path in SPEARMAN_OUTPUTS
