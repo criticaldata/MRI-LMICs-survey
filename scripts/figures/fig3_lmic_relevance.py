@@ -5,14 +5,19 @@ The paper's signature figure. Multi-panel:
   A. LMIC score distribution (styled horizontal bars)
   B. Accessibility indicators by LMIC score (grouped bars)
   C. Low-field mention by LMIC score
-  D. Translational readiness summary
+  D. Translational Readiness (TR) criteria (five binary criteria)
 """
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import sys
+from pathlib import Path
 from mapper import load_data, save_figure, configure_matplotlib, panel_title
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "analysis"))
+from review_metrics import add_derived_fields
 
 np.random.seed(42)
 
@@ -166,27 +171,30 @@ def create_fig3():
     ax_c.grid(axis="y", linestyle="--", alpha=0.2)
 
     # ========================
-    # Panel D: Translational Readiness Summary (horizontal bar chart)
+    # Panel D: the exact five Translational Readiness (TR) criteria
     # ========================
     ax_d = fig.add_subplot(gs[1, 1])
 
-    # Summary indicators for the whole dataset
-    n = len(df)
-    summary = [
-        ("Resource constraints\naddressed", (df["Resource_Constraints_Norm"] == "Yes").sum(), "#2E86AB"),
-        ("Clinical validation\nreported", (df["Clinical_Validation_Norm"] != "None").sum(), "#A23B72"),
-        ("High LMIC relevance\n(Score 4\u20135)", len(df[df["LMIC_Score"] >= 4]), "#2ECC71"),
-        ("Low-field MRI\nmentioned", (df["Low_Field_Norm"] == "Yes").sum(), "#F18F01"),
-        ("Code publicly\navailable", (df["Code_Available_Norm"] == "Yes").sum(), "#C73E1D"),
+    # TR decisions come from review_metrics.add_derived_fields, which overlays
+    # the frozen per-article evidence in data/tr_criteria_evidence.csv.
+    tr_df = add_derived_fields(df)
+    n = len(tr_df)
+    tr_criteria = [
+        ("Low-Field Domain", "TR_LowFieldDomain", "#E74C3C"),
+        ("Open Science", "TR_OpenScience", "#2E86AB"),
+        ("Clinical Evaluation", "TR_ClinicalEvaluation", "#2ECC71"),
+        ("Hardware Awareness", "TR_HardwareAwareness", "#9B59B6"),
+        ("Data Diversity", "TR_DataDiversity", "#F18F01"),
     ]
-
-    labels, values, colors = zip(*summary)
+    labels = [item[0] for item in tr_criteria]
+    values = [int(tr_df[item[1]].sum()) for item in tr_criteria]
+    colors = [item[2] for item in tr_criteria]
     y_pos = np.arange(len(labels))
 
-    bars = ax_d.barh(y_pos, values, height=0.55, color=colors,
-                     edgecolor="white", linewidth=1)
+    ax_d.barh(y_pos, values, height=0.55, color=colors,
+              edgecolor="white", linewidth=1)
 
-    for i, (bar, val) in enumerate(zip(bars, values)):
+    for i, val in enumerate(values):
         pct = val / n * 100
         ax_d.text(val + 0.5, i, f"{val}/{n} ({pct:.0f}%)",
                   va="center", fontsize=9, fontweight="bold", color="#2C3E50")
@@ -195,13 +203,13 @@ def create_fig3():
     ax_d.set_yticklabels(labels, fontsize=9, fontweight="bold")
     ax_d.invert_yaxis()
     ax_d.set_xlabel("Number of Papers", fontsize=10)
-    panel_title(ax_d, "D.  Translational Readiness Overview",
-                "Key indicators for LMIC deployment feasibility")
+    panel_title(ax_d, "D.  Translational Readiness (TR) criteria",
+                f"Studies satisfying each of the five TR criteria (n={n})")
     ax_d.spines["top"].set_visible(False)
     ax_d.spines["right"].set_visible(False)
     ax_d.tick_params(length=0)
     ax_d.grid(axis="x", linestyle="--", alpha=0.2)
-    ax_d.set_xlim(0, max(values) + 10)
+    ax_d.set_xlim(0, n)
 
     plt.tight_layout()
     save_figure(fig, "fig3_lmic_relevance")
@@ -214,6 +222,8 @@ def create_fig3():
     print(f"  Low-field mentioned: {(df['Low_Field_Norm'] == 'Yes').sum()}")
     print(f"  Code available: {(df['Code_Available_Norm'] == 'Yes').sum()}")
     print(f"  Clinical validation: {(df['Clinical_Validation_Norm'] != 'None').sum()}")
+    for label, value in zip(labels, values):
+        print(f"  TR {label}: {value}/{n}")
 
     return fig
 
