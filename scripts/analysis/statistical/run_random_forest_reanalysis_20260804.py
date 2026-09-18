@@ -22,6 +22,14 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+import sys
+from pathlib import Path
+
+_STATS = Path(__file__).resolve().parent
+if str(_STATS) not in sys.path:
+    sys.path.insert(0, str(_STATS))
+from utils import has_metric_reported
 import scipy
 import sklearn
 from sklearn.ensemble import RandomForestRegressor
@@ -111,7 +119,9 @@ def clinical_validation(value: object) -> int:
 
 
 def psnr_reported(value: object) -> int:
-    return int(text(value).casefold() not in {"", "none", "n/a", "na", "not reported", "not reported."})
+    # One rule for "did this study report the metric", shared with utils so that
+    # free-text values such as "Not reported (uses PVNR ...)" stay non-reporting.
+    return int(has_metric_reported(value))
 
 
 def main() -> None:

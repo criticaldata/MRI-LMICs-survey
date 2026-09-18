@@ -51,6 +51,7 @@ try {
     Invoke-MriPython "scripts/analysis/extract_metric_ground_truth_from_cached_fulltext.py"
     Invoke-MriPython "scripts/analysis/statistical/run_random_forest_robustness_20260804.py"
     Invoke-MriPython "scripts/tables/analysis_temporal_trends.py"
+    Invoke-MriPython "scripts/figures/fig3_lmic_relevance.py"
     Invoke-MriPython "scripts/figures/fig4_performance_comparison.py"
     Invoke-MriPython "scripts/figures/figS1_temporal_trends.py"
 

@@ -92,24 +92,14 @@ def _first_evidence(text: str, patterns: list[str]) -> str:
     return ""
 
 
+from field_strength import CURATED_LABELS, normalize as _normalize_field
+
+FIELD_STRENGTH_LABELS = CURATED_LABELS
+
+
 def normalize_field_category(value: object) -> str:
-    """Apply one aggregate field-strength taxonomy to the raw field label."""
-    text = _lower(value)
-    if not text or text in {"not reported", "not_specified", "nan"}:
-        return "Not specified"
-    if text == "mixed":
-        return "Mixed"
-    has_low = bool(re.search(r"low[ -]?field|ultra[ -]?low|\b\d+\s*m?t\b|\b0\.\d+\s*t\b", text))
-    has_standard = bool(re.search(r"standard|1\.5\s*t|3\s*t|high[ -]?field", text))
-    if has_low and has_standard:
-        return "Mixed"
-    if has_low:
-        return "Low-field"
-    if "high-field" in text or re.search(r"\b7\s*t\b|\b9\.4\s*t\b", text):
-        return "High-field"
-    if has_standard:
-        return "Standard-field"
-    return "Unknown"
+    """Delegates to the shared taxonomy in scripts/analysis/field_strength.py."""
+    return _normalize_field(value)
 
 
 def normalize_primary_focus(value: object) -> str:
