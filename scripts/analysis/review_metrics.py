@@ -92,8 +92,37 @@ def _first_evidence(text: str, patterns: list[str]) -> str:
     return ""
 
 
+# Mirrors FIELD_STRENGTH_MAP in scripts/figures/mapper.py, which encodes the
+# manuscript schema: 3 T is Standard-field, and a low-field acquisition mapped to
+# a standard- or high-field target is Low-field rather than Mixed. The two copies
+# are pinned together by tests/analysis/test_field_strength_taxonomy.py.
+FIELD_STRENGTH_LABELS = {
+    "Not_specified": "Not specified",
+    "Standard-field": "Standard-field",
+    "standard field": "Standard-field",
+    "3T MRI": "Standard-field",
+    "1.5 and 3T MRI": "Standard-field",
+    "1.5T and 3T MRI scanners": "Standard-field",
+    "1.5T and 3T": "Standard-field",
+    "Low-field": "Low-field",
+    "Low-Field MRI": "Low-field",
+    "Low-Field": "Low-field",
+    "Low_field (0.1T)": "Low-field",
+    "Portable Ultra-Low Field (0.064 Tesla)": "Low-field",
+    "Ultra-low-field (64 mT / 0.064 T) vs. High-field (3.0 T)": "Low-field",
+    "Low field (64 mT) and Standard field (3 T)": "Low-field",
+    "Low-field (0.4T) + High-field reference (3T)": "Low-field",
+    "Mixed (0.36 T and 1.5 T)": "Mixed",
+    "Mixed": "Mixed",
+    "High-field": "High-field",
+}
+
+
 def normalize_field_category(value: object) -> str:
     """Apply one aggregate field-strength taxonomy to the raw field label."""
+    mapped = FIELD_STRENGTH_LABELS.get(str(value).strip()) if value is not None else None
+    if mapped is not None:
+        return mapped
     text = _lower(value)
     if not text or text in {"not reported", "not_specified", "nan"}:
         return "Not specified"
