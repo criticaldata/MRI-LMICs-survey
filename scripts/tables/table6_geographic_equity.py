@@ -21,7 +21,7 @@ import numpy as np
 from mapper import load_data, get_project_root
 from world_bank_mapper import get_equity_classification
 
-# Reproducibilidad
+# Reproducibility
 np.random.seed(42)
 
 def create_table6():
@@ -29,7 +29,7 @@ def create_table6():
     
     print("\n=== Table 6: Geographic & Economic Equity ===\n")
     
-    # Cargar datos
+    # Load data
     df = load_data()
     
     out_dir = get_project_root() / "tables"

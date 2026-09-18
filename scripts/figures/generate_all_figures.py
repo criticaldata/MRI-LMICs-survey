@@ -60,7 +60,6 @@ tables = [
     (tables_dir / "table_merged_performance_lmic.py", "Table 2 (Main): Merged Performance & LMIC"),
     (tables_dir / "analysis_cross_field_generalization.py", "Analysis: Cross-Field Generalization"),
     (tables_dir / "analysis_edge_deployment.py", "Analysis: Edge Deployment Candidates"),
-    (tables_dir / "analysis_reviewer_bias.py", "Analysis: Reviewer Bias / IRR Proxy"),
     (tables_dir / "analysis_temporal_trends.py", "Analysis: Temporal Trends"),
     (tables_dir / "analysis_translational_readiness.py", "Analysis: Translational Readiness"),
     (tables_dir / "analysis_dataset_diversity.py", "Analysis: Dataset Diversity"),

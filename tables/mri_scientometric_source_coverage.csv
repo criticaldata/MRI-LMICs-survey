@@ -1,0 +1,10 @@
+﻿Source,Requests,Success,Not_Indexed,Not_Applicable,Auth_or_Access_Errors,Rate_Limited,Other_Errors,Status_Breakdown,FullText_Requests,FullText_Success,FullText_Status_Breakdown
+PubMed,48,30,18,0,0,0,0,"{""not_indexed"": 18, ""success"": 30}",0,0,{}
+Europe PMC,48,31,17,0,0,0,0,"{""not_indexed"": 17, ""success"": 31}",11,8,"{""not_available"": 37, ""parse_error"": 3, ""success"": 8}"
+Semantic Scholar,48,46,0,0,0,0,2,"{""not_found"": 2, ""success"": 46}",0,0,{}
+Crossref,48,48,0,0,0,0,0,"{""success"": 48}",0,0,{}
+Elsevier Abstract API,48,22,0,26,0,0,0,"{""not_applicable"": 26, ""success"": 22}",0,0,{}
+IEEE Computer Society CSDL,48,1,0,36,0,0,11,"{""not_applicable"": 36, ""not_found"": 11, ""success"": 1}",0,0,{}
+Scopus,1,0,0,0,1,0,0,"{""auth_error"": 1}",0,0,{}
+SerpAPI (Google),48,48,0,0,0,0,0,"{""success"": 48}",0,0,{}
+ORCID,164,164,0,0,0,0,0,"{""success"": 164}",0,0,{}

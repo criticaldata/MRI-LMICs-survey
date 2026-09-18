@@ -214,6 +214,84 @@ CODE_AVAILABLE_MAP = {
     "Not reported": "No",
 }
 
+
+def normalize_resource_constraints(value):
+    """Normalize resource-constraint evidence without treating unknown as Yes.
+
+    The extraction sheet contains both binary entries and narrative evidence.
+    A narrative entry is affirmative only when it explicitly describes a
+    resource, portability, acquisition-time, or computational constraint.
+    Unrecognized or blank values remain ``Unknown`` so they cannot inflate the
+    deployment counts by default.
+    """
+    if pd.isna(value):
+        return "Unknown"
+    text = " ".join(str(value).strip().split())
+    if not text:
+        return "Unknown"
+    lower = text.casefold()
+    if lower in {"yes", "y", "true"} or lower.startswith("yes ("):
+        return "Yes"
+    if lower in {"no", "n", "false"} or lower.startswith("no ("):
+        return "No"
+    affirmative_markers = (
+        "addressed",
+        "computational efficiency",
+        "model size",
+        "scan time",
+        "motion artefact",
+        "motion artifact",
+        "cost-effective",
+        "cost-effectiveness",
+        "low-resource",
+        "low resource",
+        "portability",
+        "portable",
+        "reduced power",
+    )
+    if any(marker in lower for marker in affirmative_markers):
+        return "Yes"
+    return "Unknown"
+
+
+def normalize_code_available(value):
+    """Separate public code from upon-request availability."""
+    if pd.isna(value):
+        return "Unknown"
+    text = " ".join(str(value).strip().split())
+    if not text:
+        return "Unknown"
+    lower = text.casefold()
+    if "upon_request" in lower or "upon request" in lower:
+        return "Upon request"
+    if lower in {"yes", "y", "true"} or "github.com/" in lower or "gitlab.com/" in lower:
+        return "Yes"
+    if lower in {"no", "n", "false"} or lower.startswith("no ("):
+        return "No"
+    if "not reported" in lower:
+        return "Not reported"
+    return "Unknown"
+
+
+def normalize_field_strength(value):
+    """Use one aggregate taxonomy; directional input/target fields are separate."""
+    if pd.isna(value):
+        return "Not specified"
+    text = " ".join(str(value).strip().split()).casefold()
+    if not text or text in {"not reported", "not_specified"}:
+        return "Not specified"
+    has_low = bool(re.search(r"low[ -]?field|ultra[ -]?low|\b\d+\s*m?t\b|\b0\.\d+\s*t\b", text))
+    has_standard = bool(re.search(r"standard|1\.5\s*t|3\s*t|high[ -]?field", text))
+    if has_low and has_standard:
+        return "Mixed"
+    if has_low:
+        return "Low-field"
+    if "high-field" in text or re.search(r"\b7\s*t\b|\b9\.4\s*t\b", text):
+        return "High-field"
+    if has_standard:
+        return "Standard-field"
+    return "Unknown"
+
 CLINICAL_VALIDATION_MAP = {
     "None": "None",
     "No": "None",
@@ -264,8 +342,26 @@ def load_data(data_path=None):
 
     df = pd.read_csv(data_path)
 
+    if "Paper_ID" not in df.columns:
+        raise ValueError("Canonical MRI data must contain Paper_ID")
+    df["Paper_ID"] = pd.to_numeric(df["Paper_ID"], errors="raise").astype(int)
+    expected_ids = list(range(1, N_PRIMARY_SR + 1))
+    if len(df) != N_PRIMARY_SR or df["Paper_ID"].tolist() != expected_ids:
+        raise ValueError("Canonical MRI data must contain Paper_ID values 1-48 in order")
+    if "Title" not in df.columns or df["Title"].astype(str).str.strip().eq("").any():
+        raise ValueError("Canonical MRI data must contain a non-empty Title for every study")
+    contract_path = get_project_root() / "data" / "included_study_order.csv"
+    if contract_path.exists():
+        contract = pd.read_csv(contract_path)
+        if len(contract) != N_PRIMARY_SR or contract["Paper_ID"].tolist() != expected_ids:
+            raise ValueError("included_study_order.csv is not a contiguous 1-48 contract")
+        data_titles = df["Title"].astype(str).str.replace(r"\s+", " ", regex=True).str.strip().str.casefold()
+        contract_titles = contract["Title"].astype(str).str.replace(r"\s+", " ", regex=True).str.strip().str.casefold()
+        if data_titles.tolist() != contract_titles.tolist():
+            raise ValueError("Canonical data titles do not match included_study_order.csv")
+
     # Strip whitespace from string columns
-    for col in df.select_dtypes(include="object").columns:
+    for col in df.select_dtypes(include=["object", "string"]).columns:
         df[col] = df[col].str.strip()
 
     # Parse Year to int
@@ -273,15 +369,17 @@ def load_data(data_path=None):
 
     # Normalize categorical columns
     df["Application_Norm"] = df["MRI_Application_Area"].map(APPLICATION_MAP).fillna("Other")
-    df["Field_Strength_Norm"] = df["Field_Strength_Type"].map(FIELD_STRENGTH_MAP).fillna("Not specified")
+    df["Field_Strength_Norm"] = df["Field_Strength_Type"].apply(normalize_field_strength)
     df["Primary_Focus_Norm"] = df["Primary_Focus"].map(PRIMARY_FOCUS_MAP).fillna("Other")
     df["Architecture_Norm"] = df["AI_Architecture"].map(ARCHITECTURE_MAP).fillna("Other")
     df["Dataset_Type_Norm"] = df["Dataset_Type"].map(DATASET_TYPE_MAP).fillna("Other")
     df["LMIC_Score"] = df["LMIC_Relevance_Score"].astype(str).map(LMIC_SCORE_MAP)
     df["LMIC_Relevance_Score"] = pd.to_numeric(df["LMIC_Score"], errors='coerce')
-    df["Low_Field_Norm"] = df["Low_Field_Mentioned"].map(YES_NO_MAP).fillna("No")
-    df["Resource_Constraints_Norm"] = df["Resource_Constraints_Addressed"].map(YES_NO_MAP).fillna("Yes")
-    df["Code_Available_Norm"] = df["Code_Available"].map(CODE_AVAILABLE_MAP).fillna("No")
+    df["Low_Field_Norm"] = df["Low_Field_Mentioned"].map(YES_NO_MAP).fillna("Unknown")
+    df["Resource_Constraints_Norm"] = df["Resource_Constraints_Addressed"].apply(
+        normalize_resource_constraints
+    )
+    df["Code_Available_Norm"] = df["Code_Available"].apply(normalize_code_available)
     df["Clinical_Validation_Norm"] = df["Clinical_Validation_Type"].map(CLINICAL_VALIDATION_MAP).fillna("None")
 
     # Parse PSNR — extract first numeric value (dB)
@@ -362,8 +460,13 @@ def save_figure(fig, filename, output_dir=None, dpi=300):
 
     fig.savefig(png_dir / f"{filename}.png", dpi=dpi, bbox_inches="tight",
                 facecolor="white", edgecolor="none")
-    fig.savefig(pdf_dir / f"{filename}.pdf", bbox_inches="tight",
-                facecolor="white", edgecolor="none")
+    fig.savefig(
+        pdf_dir / f"{filename}.pdf",
+        bbox_inches="tight",
+        facecolor="white",
+        edgecolor="none",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
     print(f"  Saved: {png_dir / filename}.png")
     print(f"  Saved: {pdf_dir / filename}.pdf")
 

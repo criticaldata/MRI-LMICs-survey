@@ -1,0 +1,18 @@
+# Verified local runtime requirements for the corrected review pipeline.
+# This file covers source freezing, corrected metrics, CSV outputs, and Figure 4.
+# Optional legacy modules may additionally require the packages listed in pyproject.toml.
+pandas==3.0.5
+numpy==2.5.1
+scipy==1.18.0
+scikit-learn==1.9.0
+statsmodels==0.14.6
+mord==0.7
+openpyxl==3.1.5
+matplotlib==3.11.1
+seaborn==0.13.2
+pillow==12.3.0
+requests==2.34.2
+python-dotenv==1.0.1
+tqdm==4.68.3
+reportlab==4.4.9
+pytest>=8.3,<9

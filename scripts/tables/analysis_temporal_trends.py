@@ -1,69 +1,73 @@
-"""
-Analysis: Temporal Trends (Checklist #36)
+"""Temporal trend analysis with 2020-2024 primary and 2025 preliminary scopes."""
 
-Year-by-year breakdown of LMIC scores, % low-field, % code available,
-and % clinical validation per year.
-"""
+from __future__ import annotations
 
 import sys
 from pathlib import Path
 
+import pandas as pd
+
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "figures"))
 
-import numpy as np
-import pandas as pd
-from mapper import load_data, get_project_root
-
-np.random.seed(42)
+from mapper import get_project_root, load_data  # noqa: E402
 
 
-def analyze_temporal_trends():
-    df = load_data()
+PRIMARY_YEAR_START = 2020
+PRIMARY_YEAR_END = 2024
+PRELIMINARY_YEAR = 2025
 
-    # Group by year
-    years = sorted(df["Year"].dropna().unique())
+
+def _summarize_years(df: pd.DataFrame, status: str) -> pd.DataFrame:
+    """Summarize a specific year scope without mixing incomplete years."""
     rows = []
-
-    for year in years:
-        subset = df[df["Year"] == year]
+    for year in sorted(df["Year"].dropna().unique()):
+        subset = df.loc[df["Year"] == year]
         n = len(subset)
         scored = subset.dropna(subset=["LMIC_Score"])
+        rows.append(
+            {
+                "Year": int(year),
+                "N_Papers": n,
+                "LMIC_Score_Mean": scored["LMIC_Score"].mean() if len(scored) else None,
+                "LMIC_Score_Median": scored["LMIC_Score"].median() if len(scored) else None,
+                "Pct_Low_Field": (subset["Low_Field_Norm"] == "Yes").sum() / n * 100 if n else 0,
+                "Pct_Code_Available": (subset["Code_Available_Norm"] == "Yes").sum() / n * 100 if n else 0,
+                "Pct_Clinical_Validation": (subset["Clinical_Validation_Norm"] != "None").sum() / n * 100 if n else 0,
+                "Status": status,
+            }
+        )
+    return pd.DataFrame(rows)
 
-        row = {
-            "Year": int(year),
-            "N_Papers": n,
-            "LMIC_Score_Mean": scored["LMIC_Score"].mean() if len(scored) > 0 else np.nan,
-            "LMIC_Score_Median": scored["LMIC_Score"].median() if len(scored) > 0 else np.nan,
-            "Pct_Low_Field": (subset["Low_Field_Norm"] == "Yes").sum() / n * 100 if n > 0 else 0,
-            "Pct_Code_Available": (subset["Code_Available_Norm"] == "Yes").sum() / n * 100 if n > 0 else 0,
-            "Pct_Clinical_Validation": (subset["Clinical_Validation_Norm"] != "None").sum() / n * 100 if n > 0 else 0,
-        }
-        rows.append(row)
 
-    result = pd.DataFrame(rows)
+def build_temporal_trends(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Return primary full-year results and the separately labelled 2025 snapshot."""
+    primary = _summarize_years(
+        df.loc[df["Year"].between(PRIMARY_YEAR_START, PRIMARY_YEAR_END)].copy(),
+        "Primary full-year analysis",
+    )
+    preliminary = _summarize_years(
+        df.loc[df["Year"] == PRELIMINARY_YEAR].copy(),
+        "Preliminary and incomplete",
+    )
+    return primary, preliminary
 
-    # Save
+
+def analyze_temporal_trends() -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Write the reviewer-safe temporal outputs without deleting 2025 evidence."""
+    primary, preliminary = build_temporal_trends(load_data())
     out_dir = get_project_root() / "tables"
     out_dir.mkdir(parents=True, exist_ok=True)
-    result.to_csv(out_dir / "analysis_temporal_trends.csv", index=False)
-
-    # Print summary
-    print("\n=== Temporal Trends Analysis ===\n")
-    print(f"  Year range: {int(years[0])}–{int(years[-1])}")
-    print(f"  Total papers: {len(df)}")
-    print()
-    print(f"  {'Year':<8} {'N':>4} {'LMIC Mean':>10} {'LMIC Med':>10} {'%LowField':>10} {'%Code':>8} {'%ClinVal':>10}")
-    print(f"  {'-'*62}")
-    for _, row in result.iterrows():
-        print(
-            f"  {int(row['Year']):<8} {int(row['N_Papers']):>4} "
-            f"{row['LMIC_Score_Mean']:>10.2f} {row['LMIC_Score_Median']:>10.1f} "
-            f"{row['Pct_Low_Field']:>10.1f} {row['Pct_Code_Available']:>8.1f} "
-            f"{row['Pct_Clinical_Validation']:>10.1f}"
-        )
-
-    print(f"\n  Saved: {out_dir / 'analysis_temporal_trends.csv'}")
-    return result
+    primary_path = out_dir / "analysis_temporal_trends.csv"
+    preliminary_path = out_dir / "analysis_temporal_trends_2025_preliminary.csv"
+    primary.to_csv(primary_path, index=False)
+    preliminary.to_csv(preliminary_path, index=False)
+    print("=== Temporal Trends Analysis ===")
+    print(f"Primary full-year scope: {PRIMARY_YEAR_START}-{PRIMARY_YEAR_END}; papers={int(primary['N_Papers'].sum())}")
+    print(f"Preliminary {PRELIMINARY_YEAR} scope: papers={int(preliminary['N_Papers'].sum())}")
+    print(f"Saved primary: {primary_path}")
+    print(f"Saved preliminary: {preliminary_path}")
+    return primary, preliminary
 
 
 if __name__ == "__main__":
