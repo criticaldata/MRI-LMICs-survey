@@ -1,6 +1,15 @@
 import os
 import sys
 import pandas as pd
+
+import sys
+from pathlib import Path
+
+_ANALYSIS = Path(__file__).resolve().parent.parent
+if str(_ANALYSIS) not in sys.path:
+    sys.path.insert(0, str(_ANALYSIS))
+from field_strength import normalize_legacy as _normalize_legacy
+
 from datetime import datetime
 
 # Project root calculation: scripts/analysis/statistical/utils.py -> root
@@ -50,13 +59,9 @@ def normalize_dataset_type(dtype):
     return 'Other'
 
 def normalize_field_strength(field):
-    if pd.isna(field): return 'Not_Specified'
-    field_lower = str(field).lower().strip()
-    if 'low' in field_lower: return 'Low_Field'
-    if 'high' in field_lower: return 'High_Field'
-    if 'mixed' in field_lower: return 'Mixed'
-    if 'standard' in field_lower: return 'Standard_Field'
-    return 'Not_Specified'
+    """Delegates to the shared taxonomy in scripts/analysis/field_strength.py."""
+    return _normalize_legacy(field)
+
 
 def normalize_clinical_validation(val):
     if pd.isna(val): return 'None'

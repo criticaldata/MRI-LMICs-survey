@@ -7,6 +7,14 @@ to ensure cross-figure consistency.
 
 import re
 import pandas as pd
+
+import sys
+from pathlib import Path
+
+_ANALYSIS = Path(__file__).resolve().parent.parent / "analysis"
+if str(_ANALYSIS) not in sys.path:
+    sys.path.insert(0, str(_ANALYSIS))
+from field_strength import CURATED_LABELS, normalize as _normalize  # noqa: E402
 import numpy as np
 from pathlib import Path
 
@@ -96,26 +104,7 @@ APPLICATION_MAP = {
     "Not MRI (Remote Sensing)": "Non-MRI",
 }
 
-FIELD_STRENGTH_MAP = {
-    "Not_specified": "Not specified",
-    "Standard-field": "Standard-field",
-    "standard field": "Standard-field",
-    "3T MRI": "Standard-field",
-    "1.5 and 3T MRI": "Standard-field",
-    "1.5T and 3T MRI scanners": "Standard-field",
-    "1.5T and 3T": "Standard-field",
-    "Low-field": "Low-field",
-    "Low-Field MRI": "Low-field",
-    "Low-Field": "Low-field",
-    "Low_field (0.1T)": "Low-field",
-    "Portable Ultra-Low Field (0.064 Tesla)": "Low-field",
-    "Ultra-low-field (64 mT / 0.064 T) vs. High-field (3.0 T)": "Low-field",
-    "Low field (64 mT) and Standard field (3 T)": "Low-field",
-    "Low-field (0.4T) + High-field reference (3T)": "Low-field",
-    "Mixed (0.36 T and 1.5 T)": "Mixed",
-    "Mixed": "Mixed",
-    "High-field": "High-field",
-}
+FIELD_STRENGTH_MAP = CURATED_LABELS  # one taxonomy, see scripts/analysis/field_strength.py
 
 PRIMARY_FOCUS_MAP = {
     "Pure_SR": "Pure SR",
@@ -274,33 +263,9 @@ def normalize_code_available(value):
 
 
 def normalize_field_strength(value):
-    """Use one aggregate taxonomy; directional input/target fields are separate."""
-    if pd.isna(value):
-        return "Not specified"
-    # The curated map encodes the manuscript schema (3 T is Standard-field; a
-    # low-field input mapped to a higher-field target is Low-field), so it wins.
-    mapped = FIELD_STRENGTH_MAP.get(str(value).strip())
-    if mapped is not None:
-        return mapped
-    text = " ".join(str(value).strip().split()).casefold()
-    if not text or text in {"not reported", "not_specified"}:
-        return "Not specified"
-    # A bare "Mixed" label matches neither regex below; without this it fell
-    # through to "Unknown" (Papers 11, 14, 22, 32, 40).  Mirrors
-    # review_metrics.normalize_field_category.
-    if text == "mixed":
-        return "Mixed"
-    has_low = bool(re.search(r"low[ _-]?field|ultra[ _-]?low|\b\d+(?:\.\d+)?\s*mt\b|\b0\.\d+\s*t\b", text))
-    has_standard = bool(re.search(r"standard|1\.5\s*t|3\s*t|high[ -]?field", text))
-    if has_low and has_standard:
-        return "Mixed"
-    if has_low:
-        return "Low-field"
-    if "high-field" in text or re.search(r"\b7\s*t\b|\b9\.4\s*t\b", text):
-        return "High-field"
-    if has_standard:
-        return "Standard-field"
-    return "Unknown"
+    """Delegates to the shared taxonomy in scripts/analysis/field_strength.py."""
+    return _normalize(value)
+
 
 CLINICAL_VALIDATION_MAP = {
     "None": "None",
