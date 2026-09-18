@@ -280,6 +280,11 @@ def normalize_field_strength(value):
     text = " ".join(str(value).strip().split()).casefold()
     if not text or text in {"not reported", "not_specified"}:
         return "Not specified"
+    # A bare "Mixed" label matches neither regex below; without this it fell
+    # through to "Unknown" (Papers 11, 14, 22, 32, 40).  Mirrors
+    # review_metrics.normalize_field_category.
+    if text == "mixed":
+        return "Mixed"
     has_low = bool(re.search(r"low[ -]?field|ultra[ -]?low|\b\d+\s*m?t\b|\b0\.\d+\s*t\b", text))
     has_standard = bool(re.search(r"standard|1\.5\s*t|3\s*t|high[ -]?field", text))
     if has_low and has_standard:
