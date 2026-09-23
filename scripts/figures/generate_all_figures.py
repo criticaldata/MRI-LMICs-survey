@@ -6,7 +6,15 @@ Run: python scripts/figures/generate_all_figures.py
 import sys
 import time
 import subprocess
+import os
 from pathlib import Path
+
+# Normalize the coordinator's own streams as well as child processes. Setting
+# PYTHONUTF8 for children alone is insufficient when this script is launched
+# with PYTHONIOENCODING inherited from a legacy Windows console.
+for stream in (sys.stdout, sys.stderr):
+    if hasattr(stream, "reconfigure"):
+        stream.reconfigure(encoding="utf-8", errors="replace")
 
 print("=" * 70)
 print("MRI-LMICs SURVEY - FIGURE & TABLE GENERATION")
@@ -29,7 +37,8 @@ def run_script(script_path, description):
     try:
         result = subprocess.run(
             [sys.executable, str(script_path)],
-            capture_output=True, text=True, check=True,
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            env={**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}, check=True,
         )
         elapsed = time.time() - t0
         task_times[description] = elapsed
@@ -78,13 +87,14 @@ print("GENERATING FIGURES")
 print("=" * 70)
 
 figures = [
-    (scripts_dir / "fig1_prisma_flow.py", "Figure 1: PRISMA Flow Diagram (SVG -> PNG)"),
-    (scripts_dir / "fig1_year_distribution.py", "Figure 1B: Year Distribution"),
+    (scripts_dir / "fig1_year_distribution.py", "Figure 1: Year Distribution"),
     (scripts_dir / "fig2_architecture_distribution.py", "Figure 2: Architecture Distribution"),
-    (scripts_dir / "fig3_lmic_relevance.py", "Figure 3: LMIC Relevance"),
-    (scripts_dir / "fig4_performance_comparison.py", "Figure 4: Performance Comparison"),
+    (scripts_dir / "fig3_performance_comparison.py", "Figure 3: Performance Comparison"),
+    (scripts_dir / "fig4_lmic_translational_gap.py", "Figure 4: LMIC and Translational Gap"),
     (scripts_dir / "fig5_field_strength_application.py", "Figure 5: Field Strength & Application"),
+    (scripts_dir / "fig6_translational_roadmap.py", "Figure 6: Translational Roadmap"),
     (scripts_dir / "figS1_temporal_trends.py", "Figure S1: Temporal Trends"),
+    (scripts_dir / "figS2_prisma_flow.py", "Figure S2: Study-selection Flow"),
 ]
 
 fig_ok = sum(run_script(path, desc) for path, desc in figures)
@@ -111,29 +121,10 @@ for d in ["tables", "figures/main/png", "figures/main/pdf"]:
         files = list(p.glob("*"))
         print(f"  {d}/: {len(files)} files")
 
-# --- Figure 6 PDF Conversion (Manual) ---
 print("\n" + "=" * 70)
-print("POST-PROCESSING: FIGURE 6 PDF CONVERSION")
-print("=" * 70)
-try:
-    from PIL import Image
-    png_path = project_root / "figures/main/png/fig6_translational_roadmap.png"
-    pdf_path = project_root / "figures/main/pdf/fig6_translational_roadmap.pdf"
-    
-    if png_path.exists():
-        print(f"Converting {png_path.name} to PDF...")
-        image = Image.open(png_path)
-        if image.mode == 'RGBA':
-            image = image.convert('RGB')
-        image.save(pdf_path, "PDF", resolution=300.0)
-        print(f"✓ Saved: {pdf_path.name}")
-    else:
-        print(f"⚠ Warning: {png_path.name} not found. Skipping conversion.")
-except ImportError:
-    print("⚠ Error: Pillow not installed. Cannot convert PNG to PDF.")
-except Exception as e:
-    print(f"⚠ Error converting Figure 6: {e}")
+if table_ok != len(tables) or fig_ok != len(figures):
+    print("GENERATION FAILED: one or more table/figure tasks failed.")
+    sys.exit(1)
 
-print("\n" + "=" * 70)
 print("ALL DONE!")
 print("=" * 70)

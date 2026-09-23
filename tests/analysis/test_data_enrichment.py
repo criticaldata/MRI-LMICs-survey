@@ -14,10 +14,11 @@ import pytest
 from mapper import load_data
 
 
-def test_cache_directory_exists():
-    """Test that the data cache directory exists."""
+def test_cache_is_optional_for_a_clean_clone():
+    """Public analyses must not require an ignored network-response cache."""
     cache_path = Path("data/.cache")
-    assert cache_path.exists(), "Cache directory doesn't exist"
+    if cache_path.exists():
+        assert cache_path.is_dir()
 
 
 def test_data_enrichment_schema_integrity():

@@ -1,0 +1,12 @@
+Title,DOI,Source_Form_Paper_ID,Exclusion_Category,Reason
+A comprehensive review on deep learning based remote sensing image super-resolution methods,,,Not MRI modality,Remote-sensing imagery rather than MRI
+Spectral super-resolution meets deep learning: Achievements and challenges,,,Not MRI modality,Hyperspectral imaging rather than MRI
+Image Quality Enhancement Using a Deep Neural Network for Plane Wave Medical Ultrasound Imaging,,,Not MRI modality,Ultrasound rather than MRI
+Medical image super-resolution reconstruction algorithms based on deep learning: A survey,,,Review/survey only,Review rather than primary research
+Review of Computer Aided-Diagnosis (CAD) Systems for MRI Gliomas brain tumors explorations based on Machine Learning and Deep learning,,,Review/survey only,Review rather than primary research
+MRI at low field: A review of software solutions for improving SNR,,,Review/survey only,Review rather than primary research
+Cerebrovascular super-resolution 4D Flow MRI – Sequential combination of resolution enhancement by deep learning and physics-informed image processing to non-invasively quantify intracranial velocity flow and relative pressure,,,Duplicate,Duplicate publication record
+Deep learning-based single image super-resolution for low-field MR brain images,,,Duplicate,Duplicate publication record
+Multi-contrast high-field quality image synthesis for portable low-field MRI using generative adversarial networks and paired data,10.1101/2023.12.28.23300409,11.0,Duplicate,"Earlier medRxiv preprint of the peer-reviewed 2025 LowGAN report (DOI 10.1148/radiol.233529); retain the final article, which adds a validation cohort and expanded reported metrics."
+Digital Image Enhancement using Conventional Neural Network,10.1109/inocon57975.2023.10100995,22.0,Not MRI modality,The study demonstrates generic natural-image SRCNN enhancement and reports no MRI-specific experiment or MRI dataset.
+Super resolution using sparse sampling at portable ultra-low field MR,10.3389/fneur.2024.1330203,37.0,No AI/DL method,"The full text (Methods, p. 8) explicitly states that FouSR does not rely on deep learning. The review's eligibility scope requires an AI/deep-learning MRI enhancement or super-resolution method."

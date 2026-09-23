@@ -1,10 +1,18 @@
 import os
+import re
 import sys
 import pandas as pd
 from datetime import datetime
 
 # Project root calculation: scripts/analysis/statistical/utils.py -> root
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+from scripts.field_taxonomy import (  # noqa: E402
+    has_reported_low_field_strength,
+    normalize_field_category,
+)
+
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 RESULTS_DIR = os.path.join(BASE_DIR, 'tables')
 FIGURES_DIR = os.path.join(BASE_DIR, 'figures')
@@ -50,13 +58,7 @@ def normalize_dataset_type(dtype):
     return 'Other'
 
 def normalize_field_strength(field):
-    if pd.isna(field): return 'Not_Specified'
-    field_lower = str(field).lower().strip()
-    if 'low' in field_lower: return 'Low_Field'
-    if 'high' in field_lower: return 'High_Field'
-    if 'mixed' in field_lower: return 'Mixed'
-    if 'standard' in field_lower: return 'Standard_Field'
-    return 'Not_Specified'
+    return normalize_field_category(field)
 
 def normalize_clinical_validation(val):
     if pd.isna(val): return 'None'
@@ -77,8 +79,21 @@ def normalize_low_field_mentioned(val):
     if pd.isna(val): return 0
     return 1 if str(val).lower().strip() in ['yes', 'true', '1'] else 0
 
-def has_metric_reported(val):
-    if pd.isna(val): return 0
-    val_str = str(val).lower().strip()
-    if val_str in ['not reported', 'n/a', 'na', '', 'not reported.']: return 0
-    return 1
+def has_metric_reported(val, metric=None):
+    """Count only values containing a parseable PSNR/SSIM-like number."""
+    if pd.isna(val):
+        return 0
+    val_str = str(val).strip()
+    if val_str.casefold().startswith(
+        ("not reported", "n/a", "reported", "not explicitly reported", "uses", "paper uses")
+    ):
+        return 0
+    for match in re.findall(r"(\d+\.\d+|\d{2,}\.?\d*)", val_str):
+        number = float(match)
+        if 10.0 <= number <= 80.0 or 0.4 <= number <= 1.0:
+            if metric == "PSNR":
+                return int(10.0 <= number <= 80.0)
+            if metric == "SSIM":
+                return int(0.4 <= number <= 1.0)
+            return 1
+    return 0

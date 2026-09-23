@@ -1,8 +1,9 @@
 """Calculate ordinal weighted inter-rater agreement from a private workbook.
 
-The input contains the 48 papers and the 11 individual reviewer ratings. It must
-remain outside the public repository. The public outputs contain only aggregate
-statistics and paper-level agreement, with no reviewer identities or ratings.
+The input contains the 48 scored form records and the 11 individual reviewer
+ratings. It must remain outside the public repository. The public outputs
+contain only aggregate statistics and paper-level agreement for all 48 rated
+records, with no reviewer identities or ratings.
 
 Because the study has 11 reviewers, the primary implementation is a generalized
 weighted Fleiss kappa for ordinal categories. Pairwise weighted Cohen kappas are
@@ -126,7 +127,7 @@ def _weighted_summary(
         item = {
             "Analysis": analysis,
             "Weighting": weighting,
-            "Paper_ID": index,
+            "Scoring_Form_ID": index,
             "Observed_weighted_agreement": float(observed_by_item[index - 1]),
         }
         if titles is not None:
@@ -167,12 +168,15 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--output-xlsx", type=Path)
     parser.add_argument("--canonical-data", type=Path)
+    parser.add_argument("--scoring-order", type=Path)
     args = parser.parse_args()
 
     lmic, tr, titles = _read_matrix(
         args.input_xlsx.resolve(),
         args.canonical_data.resolve() if args.canonical_data else None,
         include_titles=True,
+        include_excluded_items=True,
+        scoring_order_path=args.scoring_order.resolve() if args.scoring_order else None,
     )
     summaries: list[dict[str, object]] = []
     item_rows: list[dict[str, object]] = []
@@ -202,7 +206,10 @@ def main() -> None:
     print(
         json.dumps(
             {
-                "items": 48,
+                "items": int(lmic.shape[0]),
+                "form_items": 48,
+                "final_eligible_items": 45,
+                "excluded_from_final_synthesis_after_scoring": 48 - 45,
                 "raters": 11,
                 "summary": str(summary_path),
                 "item_agreement": str(item_path),

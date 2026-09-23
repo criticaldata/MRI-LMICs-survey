@@ -1,9 +1,10 @@
 """Calculate reviewer-consensus LMIC--TR correlation from a private workbook.
 
-The private workbook is supplied as an external CLI argument. It is validated
-as an exact 48-paper by 11-rater matrix before any output is created. The only
-written artifact is an aggregate correlation summary; reviewer identities,
-individual ratings, workbook paths, and per-paper medians are never written.
+The private workbook is supplied as an external CLI argument. Its 48 scored
+form rows are validated against the title/DOI contract before ineligible
+records are removed. The only written artifact is an aggregate correlation
+summary for the final corpus; reviewer identities, individual ratings,
+workbook paths, and per-paper medians are never written.
 """
 
 from __future__ import annotations
@@ -44,10 +45,10 @@ AGGREGATION = "per-paper median of 11 complete raters"
 
 
 def _consensus_summary(lmic: np.ndarray, tr: np.ndarray) -> dict[str, object]:
-    if lmic.shape != (EXPECTED_ITEMS, EXPECTED_RATERS):
-        raise ValueError("LMIC ratings must form an exact 48-paper by 11-rater matrix")
-    if tr.shape != (EXPECTED_ITEMS, EXPECTED_RATERS):
-        raise ValueError("TR ratings must form an exact 48-paper by 11-rater matrix")
+    if lmic.ndim != 2 or lmic.shape[1] != EXPECTED_RATERS or lmic.shape[0] < 2:
+        raise ValueError("LMIC ratings must contain eligible papers scored by 11 reviewers")
+    if tr.shape != lmic.shape:
+        raise ValueError("LMIC and TR ratings must share the same eligible papers and raters")
     lmic_median = np.median(lmic, axis=1)
     tr_median = np.median(tr, axis=1)
     inference = spearman_inference(
@@ -58,7 +59,8 @@ def _consensus_summary(lmic: np.ndarray, tr: np.ndarray) -> dict[str, object]:
         seed=42,
     )
     return {
-        "Cohort": "All included studies: reviewer median",
+        "Cohort": "All eligible included studies: reviewer median",
+        "n_raters": EXPECTED_RATERS,
         **inference,
         "aggregation": AGGREGATION,
     }
@@ -69,11 +71,14 @@ def main() -> None:
     parser.add_argument("--input-xlsx", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--canonical-data", type=Path, default=DEFAULT_CANONICAL_DATA)
+    parser.add_argument("--scoring-order", type=Path, default=None)
     args = parser.parse_args()
 
     # All workbook/title/completeness/range checks happen before output setup.
     lmic, tr = _read_matrix(
-        args.input_xlsx.resolve(), args.canonical_data.resolve()
+        args.input_xlsx.resolve(),
+        args.canonical_data.resolve(),
+        scoring_order_path=args.scoring_order.resolve() if args.scoring_order else None,
     )
     summary = _consensus_summary(lmic, tr)
 
@@ -84,7 +89,9 @@ def main() -> None:
     print(
         json.dumps(
             {
-                "items": EXPECTED_ITEMS,
+                "items": int(lmic.shape[0]),
+                "form_items": EXPECTED_ITEMS,
+                "excluded_after_form_scoring": EXPECTED_ITEMS - int(lmic.shape[0]),
                 "raters": EXPECTED_RATERS,
                 "summary": SUMMARY_NAME,
                 "individual_ratings_written": False,

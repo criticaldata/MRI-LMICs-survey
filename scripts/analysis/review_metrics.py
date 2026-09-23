@@ -6,9 +6,9 @@ readiness criteria defined in the revised manuscript. Final TR decisions come
 from the frozen article-level evidence table; the text rules remain available
 as validation helpers but do not replace the verified evidence layer.
 
-This module does not calculate Fleiss' kappa.  The existing provisional
-10-paper/2-reviewer calculation is kept separate until independent ratings
-from all 11 reviewers are available.
+This module does not calculate Fleiss' kappa. Reviewer agreement is generated
+from the private 48-row form by a separate runner and restricted to the final
+eligible corpus defined by the public scoring-order contract.
 """
 
 from __future__ import annotations
@@ -29,6 +29,8 @@ from scipy.stats import spearmanr
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TR_EVIDENCE_PATH = PROJECT_ROOT / "data" / "tr_criteria_evidence.csv"
 FIELD_EVIDENCE_PATH = PROJECT_ROOT / "data" / "field_characterization_evidence.csv"
+DATASET_EVIDENCE_PATH = PROJECT_ROOT / "data" / "dataset_characterization_evidence.csv"
+PRIMARY_SR_SCOPE_PATH = PROJECT_ROOT / "data" / "primary_sr_scope_evidence.csv"
 TR_CRITERIA = [
     "LowFieldDomain",
     "OpenScience",
@@ -37,10 +39,13 @@ TR_CRITERIA = [
     "DataDiversity",
 ]
 FIGURES_DIR = PROJECT_ROOT / "scripts" / "figures"
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 if str(FIGURES_DIR) not in sys.path:
     sys.path.insert(0, str(FIGURES_DIR))
 
-from mapper import load_data  # noqa: E402
+from scripts.field_taxonomy import normalize_field_category as _normalize_field_category  # noqa: E402
+from mapper import load_data, normalize_primary_focus  # noqa: E402
 
 
 TEXT_FIELDS = [
@@ -93,52 +98,8 @@ def _first_evidence(text: str, patterns: list[str]) -> str:
 
 
 def normalize_field_category(value: object) -> str:
-    """Apply one aggregate field-strength taxonomy to the raw field label."""
-    text = _lower(value)
-    if not text or text in {"not reported", "not_specified", "nan"}:
-        return "Not specified"
-    if text == "mixed":
-        return "Mixed"
-    has_low = bool(re.search(r"low[ -]?field|ultra[ -]?low|\b\d+\s*m?t\b|\b0\.\d+\s*t\b", text))
-    has_standard = bool(re.search(r"standard|1\.5\s*t|3\s*t|high[ -]?field", text))
-    if has_low and has_standard:
-        return "Mixed"
-    if has_low:
-        return "Low-field"
-    if "high-field" in text or re.search(r"\b7\s*t\b|\b9\.4\s*t\b", text):
-        return "High-field"
-    if has_standard:
-        return "Standard-field"
-    return "Unknown"
-
-
-def normalize_primary_focus(value: object) -> str:
-    text = _lower(value)
-    if not text:
-        return "Unknown"
-    if text in {"pure_sr", "pure sr"}:
-        return "Pure SR"
-    if "review" in text or "survey" in text:
-        return "Review/Survey"
-    if "segmentation" in text and "classification" in text and "sr" not in text and "super-resolution" not in text:
-        return "Other"
-    if "segmentation" in text and "super-resolution" not in text and "sr" not in text:
-        return "Other"
-    if "denois" in text and ("sr" in text or "super-resolution" in text or "low" in text and "field" in text):
-        return "SR + Denoising"
-    if "classification" in text or "classif" in text:
-        return "SR + Classification"
-    if "diagnos" in text:
-        return "SR + Diagnosis"
-    if "segment" in text:
-        return "SR + Segmentation"
-    if "super-resolution" in text or "super resolution" in text or re.search(r"\bsr\b", text):
-        return "Pure SR" if text in {"pure_sr", "pure sr"} else "SR + Other"
-    if "high resolution" in text and "low resolution" in text:
-        return "Pure SR"
-    if "transfer learning" in text or "reconstruction" in text:
-        return "SR + Other"
-    return "Unknown"
+    """Apply the shared, threshold-aware field-strength taxonomy."""
+    return _normalize_field_category(value)
 
 
 def normalize_dataset_category(value: object) -> str:
@@ -251,7 +212,7 @@ def _apply_verified_field_evidence(result: pd.DataFrame) -> pd.DataFrame:
 
     The original extraction remains unchanged.  This overlay replaces the
     narrower text heuristic only for target-field status, target strength, and
-    field pathway, using the canonical 48-study identity contract.
+    field pathway, using the canonical included-study identity contract.
     """
 
     evidence = pd.read_csv(FIELD_EVIDENCE_PATH)
@@ -272,13 +233,13 @@ def _apply_verified_field_evidence(result: pd.DataFrame) -> pd.DataFrame:
     missing = sorted(required - set(evidence.columns))
     if missing:
         raise ValueError(f"Field evidence is missing columns: {missing}")
-    if len(evidence) != 48 or evidence["Paper_ID"].nunique() != 48:
-        raise ValueError("Field evidence must contain exactly 48 unique Paper_ID values")
+    if len(evidence) != len(contract) or evidence["Paper_ID"].nunique() != len(contract):
+        raise ValueError("Field evidence must contain one row per included Paper_ID")
 
     evidence = evidence.sort_values("Paper_ID").reset_index(drop=True)
     contract = contract.sort_values("Paper_ID").reset_index(drop=True)
-    if evidence["Paper_ID"].tolist() != list(range(1, 49)):
-        raise ValueError("Field evidence Paper_ID values must be contiguous from 1 to 48")
+    if evidence["Paper_ID"].tolist() != contract["Paper_ID"].tolist():
+        raise ValueError("Field evidence Paper_ID values must follow the included-study order")
     if evidence["Title"].tolist() != contract["Title"].tolist():
         raise ValueError("Field evidence titles do not match the canonical study order")
     if evidence["DOI"].str.strip().str.casefold().tolist() != contract["DOI"].str.strip().str.casefold().tolist():
@@ -297,6 +258,125 @@ def _apply_verified_field_evidence(result: pd.DataFrame) -> pd.DataFrame:
     output["Target_Field_Evidence_Section"] = expected_ids.map(indexed["Evidence_Section"])
     output["Target_Field_Evidence_Source"] = expected_ids.map(indexed["Evidence_Source"])
     output["Field_Evidence"] = expected_ids.map(indexed["Evidence_Summary"])
+    return output
+
+
+def _apply_verified_dataset_evidence(result: pd.DataFrame) -> pd.DataFrame:
+    """Overlay the frozen full-text dataset-characterization evidence.
+
+    The canonical extraction remains unchanged. This public evidence layer
+    replaces keyword-only inference for dataset provenance, availability,
+    pairing, ground truth, sequence, contrast, and resolution fields.
+    """
+
+    evidence = pd.read_csv(DATASET_EVIDENCE_PATH)
+    contract = pd.read_csv(PROJECT_ROOT / "data" / "included_study_order.csv")
+    required = {
+        "Paper_ID",
+        "DOI",
+        "Title",
+        "Dataset_Name",
+        "Dataset_Public_Availability",
+        "Dataset_Real_Simulated",
+        "Dataset_Size",
+        "Train_Validation_Test_Split",
+        "Input_Resolution",
+        "Target_Resolution",
+        "Input_Field_Strength",
+        "Target_Field_Strength",
+        "Field_Pathway",
+        "MRI_Sequence",
+        "MRI_Contrast",
+        "Paired_Unpaired",
+        "Ground_Truth_Type",
+        "Ground_Truth_Source",
+        "Low_Field_Data_Provenance",
+        "Evidence_Page",
+        "Evidence_Section",
+        "Evidence_Summary",
+        "Dataset_Evidence_Status",
+        "Evidence_Source",
+    }
+    missing = sorted(required - set(evidence.columns))
+    if missing:
+        raise ValueError(f"Dataset evidence is missing columns: {missing}")
+    evidence = evidence.sort_values("Paper_ID").reset_index(drop=True)
+    contract = contract.sort_values("Paper_ID").reset_index(drop=True)
+    if len(evidence) != len(contract) or evidence["Paper_ID"].tolist() != contract["Paper_ID"].tolist():
+        raise ValueError("Dataset evidence must follow the included-study order")
+    if evidence["Title"].tolist() != contract["Title"].tolist():
+        raise ValueError("Dataset evidence titles do not match the canonical study order")
+    if evidence["DOI"].str.strip().str.casefold().tolist() != contract["DOI"].str.strip().str.casefold().tolist():
+        raise ValueError("Dataset evidence DOI values do not match the canonical study order")
+
+    expected_ids = pd.to_numeric(result["Paper_ID"], errors="raise").astype(int)
+    if set(expected_ids) != set(evidence["Paper_ID"]):
+        raise ValueError("Dataset evidence Paper_ID values do not match the included studies")
+    indexed = evidence.set_index("Paper_ID")
+    output = result.copy()
+    direct_map = {
+        "Dataset_Name_Verified": "Dataset_Name",
+        "Dataset_Public_Availability": "Dataset_Public_Availability",
+        "Dataset_Real_Simulated": "Dataset_Real_Simulated",
+        "Dataset_Size": "Dataset_Size",
+        "Train_Validation_Test_Split": "Train_Validation_Test_Split",
+        "Input_Resolution": "Input_Resolution",
+        "Target_Resolution": "Target_Resolution",
+        "Input_Field_Strength": "Input_Field_Strength",
+        "Target_Field_Strength_Detail": "Target_Field_Strength",
+        "Field_Pathway_Detail": "Field_Pathway",
+        "Sequence_Summary": "MRI_Sequence",
+        "Contrast_Summary": "MRI_Contrast",
+        "Paired_Unpaired": "Paired_Unpaired",
+        "Ground_Truth_Type": "Ground_Truth_Type",
+        "Ground_Truth_Source": "Ground_Truth_Source",
+        "Low_Field_Data_Provenance": "Low_Field_Data_Provenance",
+        "Dataset_Evidence_Page": "Evidence_Page",
+        "Dataset_Evidence_Section": "Evidence_Section",
+        "Dataset_Evidence_Summary": "Evidence_Summary",
+        "Dataset_Evidence_Status": "Dataset_Evidence_Status",
+        "Dataset_Evidence_Source": "Evidence_Source",
+    }
+    for destination, source in direct_map.items():
+        output[destination] = expected_ids.map(indexed[source])
+    output["Resolution_Evidence"] = output["Dataset_Evidence_Summary"]
+    output["Dataset_Availability_Evidence"] = output["Dataset_Evidence_Summary"]
+    return output
+
+
+def _apply_primary_sr_scope_evidence(result: pd.DataFrame) -> pd.DataFrame:
+    """Apply the explicit, article-identified SR-primary cohort contract."""
+    evidence = pd.read_csv(PRIMARY_SR_SCOPE_PATH)
+    required = {
+        "Paper_ID",
+        "DOI",
+        "Title",
+        "Primary_Focus_Corrected",
+        "Primary_SR_Sensitivity_Eligible",
+        "Pure_or_Denoising_SR_Eligible",
+    }
+    missing = sorted(required - set(evidence.columns))
+    if missing:
+        raise ValueError(f"Primary-SR scope evidence is missing columns: {missing}")
+    evidence = evidence.sort_values("Paper_ID").reset_index(drop=True)
+    source = result.sort_values("Paper_ID").reset_index(drop=True)
+    if len(evidence) != len(source) or evidence["Paper_ID"].tolist() != source["Paper_ID"].astype(int).tolist():
+        raise ValueError("Primary-SR scope evidence must map one-to-one to the eligible corpus")
+    if evidence["Title"].astype(str).str.strip().tolist() != source["Title"].astype(str).str.strip().tolist():
+        raise ValueError("Primary-SR scope evidence titles do not match the canonical corpus")
+    if evidence["DOI"].astype(str).str.strip().str.casefold().tolist() != source["DOI"].astype(str).str.strip().str.casefold().tolist():
+        raise ValueError("Primary-SR scope evidence DOIs do not match the canonical corpus")
+    for column in ("Primary_SR_Sensitivity_Eligible", "Pure_or_Denoising_SR_Eligible"):
+        if not set(evidence[column].dropna()) <= {"Yes", "No"}:
+            raise ValueError(f"{column} must use only Yes/No")
+    indexed = evidence.set_index("Paper_ID")
+    ids = pd.to_numeric(result["Paper_ID"], errors="raise").astype(int)
+    output = result.copy()
+    output["Primary_Focus_Norm_Corrected"] = ids.map(indexed["Primary_Focus_Corrected"])
+    output["Primary_SR_Sensitivity_Eligible"] = ids.map(indexed["Primary_SR_Sensitivity_Eligible"])
+    output["Pure_or_Denoising_SR_Eligible"] = ids.map(indexed["Pure_or_Denoising_SR_Eligible"])
+    output["SR_Primary_Strict"] = output["Primary_SR_Sensitivity_Eligible"].eq("Yes")
+    output["SR_Primary_Pure_or_Denoising"] = output["Pure_or_Denoising_SR_Eligible"].eq("Yes")
     return output
 
 
@@ -452,6 +532,7 @@ def _metric_suitability_table(derived: pd.DataFrame) -> pd.DataFrame:
         rows.append(
             {
                 "Paper_ID": int(row["Paper_ID"]),
+                "DOI": _text(row.get("DOI")),
                 "Title": _text(row["Title"]),
                 "PSNR_Reported": "Yes" if psnr_reported else "No",
                 "SSIM_Reported": "Yes" if ssim_reported else "No",
@@ -632,8 +713,8 @@ def _apply_verified_tr_evidence(result: pd.DataFrame) -> pd.DataFrame:
     """
 
     evidence = pd.read_csv(TR_EVIDENCE_PATH)
-    if len(evidence) != 48 or evidence["Paper_ID"].nunique() != 48:
-        raise ValueError("TR evidence must contain exactly 48 unique Paper_ID values")
+    if len(evidence) != len(result) or evidence["Paper_ID"].nunique() != len(result):
+        raise ValueError("TR evidence must contain one row per included Paper_ID")
     expected_ids = set(pd.to_numeric(result["Paper_ID"], errors="raise").astype(int))
     evidence_ids = set(pd.to_numeric(evidence["Paper_ID"], errors="raise").astype(int))
     if evidence_ids != expected_ids:
@@ -672,6 +753,7 @@ def add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
     result = df.copy()
     result["Field_Strength_Norm"] = result["Field_Strength_Type"].apply(normalize_field_category)
     result["Primary_Focus_Norm_Corrected"] = result["Primary_Focus"].apply(normalize_primary_focus)
+    result = _apply_primary_sr_scope_evidence(result)
     result["Dataset_Type_Norm_Corrected"] = result["Dataset_Type"].apply(normalize_dataset_category)
     result["Architecture_Norm_Corrected"] = result["AI_Architecture"].apply(normalize_architecture)
 
@@ -684,6 +766,7 @@ def add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
     result["Contrast_Summary"] = result.apply(_contrast_summary, axis=1)
     dataset_evidence_rows = result.apply(_dataset_resolution_and_availability, axis=1, result_type="expand")
     result = pd.concat([result, dataset_evidence_rows], axis=1)
+    result = _apply_verified_dataset_evidence(result)
 
     tr_rows = result.apply(
         lambda row: {
@@ -708,12 +791,6 @@ def add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
         "TR_DataDiversity",
     ]
     result["TR_Score"] = result[tr_cols].sum(axis=1).astype(int)
-    result["SR_Primary_Strict"] = result["Primary_Focus_Norm_Corrected"].isin(
-        ["Pure SR", "SR + Denoising", "SR + Other"]
-    )
-    result["SR_Primary_Pure_or_Denoising"] = result["Primary_Focus_Norm_Corrected"].isin(
-        ["Pure SR", "SR + Denoising"]
-    )
     return result
 
 
@@ -1017,9 +1094,12 @@ def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
 
     dataset_columns = [
         "Paper_ID",
+        "DOI",
         "Title",
         "Year",
+        "Dataset_Name_Verified",
         "Dataset_Size",
+        "Train_Validation_Test_Split",
         "Dataset_Type",
         "Dataset_Type_Norm_Corrected",
         "Dataset_Real_Simulated",
@@ -1031,16 +1111,26 @@ def build_analysis(df: pd.DataFrame) -> dict[str, pd.DataFrame | dict]:
         "Dataset_Public_Availability",
         "Dataset_Availability_Evidence",
         "Input_Field_Category",
+        "Input_Field_Strength",
         "Target_Field_Status",
         "Target_Field_Strength",
+        "Target_Field_Strength_Detail",
         "Target_Field_Category",
         "Field_Pair_Category",
+        "Field_Pathway_Detail",
         "Ground_Truth_Type",
+        "Ground_Truth_Source",
         "Paired_Unpaired",
+        "Low_Field_Data_Provenance",
         "Field_Evidence",
         "Target_Field_Evidence_Page",
         "Target_Field_Evidence_Section",
         "Target_Field_Evidence_Source",
+        "Dataset_Evidence_Page",
+        "Dataset_Evidence_Section",
+        "Dataset_Evidence_Summary",
+        "Dataset_Evidence_Status",
+        "Dataset_Evidence_Source",
         "Training_Data_Source",
     ]
     dataset_characterization = derived[[column for column in dataset_columns if column in derived.columns]].copy()
@@ -1114,6 +1204,11 @@ def write_analysis_outputs(analysis: dict, output_dir: Path, source_path: Path) 
             "logical_path": "data/field_characterization_evidence.csv",
             "sha256": sha256_file(FIELD_EVIDENCE_PATH),
             "rows": int(len(pd.read_csv(FIELD_EVIDENCE_PATH))),
+        },
+        "dataset_evidence": {
+            "logical_path": "data/dataset_characterization_evidence.csv",
+            "sha256": sha256_file(DATASET_EVIDENCE_PATH),
+            "rows": int(len(pd.read_csv(DATASET_EVIDENCE_PATH))),
         },
         "derived_data_sha256": dataframe_sha256(derived),
         "n_included": int(len(derived)),

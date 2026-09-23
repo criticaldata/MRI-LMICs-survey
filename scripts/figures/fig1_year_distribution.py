@@ -8,7 +8,13 @@ breakdown by primary focus. Clean publication-quality style.
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from mapper import load_data, save_figure, configure_matplotlib, panel_title
+from mapper import (
+    apply_primary_sr_scope_evidence,
+    load_data,
+    save_figure,
+    configure_matplotlib,
+    panel_title,
+)
 
 np.random.seed(42)
 
@@ -26,11 +32,11 @@ BASE_COLORS = {
 
 def create_fig1():
     configure_matplotlib()
-    df = load_data()
+    df = apply_primary_sr_scope_evidence(load_data())
 
-    focus_order = df["Primary_Focus_Norm"].value_counts().index.tolist()
+    focus_order = df["Primary_Focus_Corrected"].value_counts().index.tolist()
     year_order = sorted(df["Year"].dropna().unique())
-    ct = pd.crosstab(df["Year"], df["Primary_Focus_Norm"])
+    ct = pd.crosstab(df["Year"], df["Primary_Focus_Corrected"])
     ct = ct.reindex(columns=focus_order, fill_value=0).reindex(index=year_order, fill_value=0)
 
     fig, ax = plt.subplots(figsize=(12, 6))
@@ -53,7 +59,8 @@ def create_fig1():
 
     totals = ct.sum(axis=1)
     for i, total in enumerate(totals):
-        ax.text(total + 0.5, i, f"{int(total)} papers",
+        suffix = " (preliminary)" if int(year_order[i]) == 2025 else ""
+        ax.text(total + 0.5, i, f"{int(total)} papers{suffix}",
                 va="center", fontsize=9, fontweight="bold", color="#2C3E50")
 
     ax.set_yticks(y_positions)
@@ -61,7 +68,7 @@ def create_fig1():
     ax.invert_yaxis()
 
     panel_title(ax, "MRI Super-Resolution: Publication Trends by Year",
-                f"Primary focus distribution across {len(df)} studies (2020\u20132025)",
+                f"Primary focus distribution across {len(df)} studies; 2025 is incomplete (n=2)",
                 fontsize=13)
 
     ax.set_xlabel("Number of Papers", fontsize=11)

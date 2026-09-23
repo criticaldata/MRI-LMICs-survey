@@ -1,0 +1,20 @@
+{
+  "generated_at_utc": "2026-09-23T04:04:02.642470+00:00",
+  "status": "PASS",
+  "alignment_key": "normalized DOI; Paper_ID assigned from final canonical corpus",
+  "source_rows": 45,
+  "source_acquisition_rows": 48,
+  "source_acquisition_reference": "data/reviewer_scoring_order.csv",
+  "source_acquisition_reference_rows": 48,
+  "final_rows": 45,
+  "excluded_from_final_export": 0,
+  "excluded_from_final_export_total": 3,
+  "doi_aliases_applied": [],
+  "canonical_contract": "data/included_study_order.csv",
+  "public_result": "tables/mri_scientometric_results.csv",
+  "source_coverage_reference": {
+    "path": "tables/mri_scientometric_source_coverage.csv",
+    "meaning": "coverage counts refer to the prior API acquisition over the original 48-record scored form, not the final eligible 45-study export"
+  },
+  "sha256_utf8_lf": "bd7a17a2112eda13578c09aaaf64e1c8c3f2d4dff88b3627deb4c0c03dbb3ded"
+}

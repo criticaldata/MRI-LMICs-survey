@@ -1,35 +1,67 @@
 {
-  "generated_at_utc": "2026-09-15T20:23:55.436483+00:00",
+  "generated_at_utc": "2026-09-23T04:08:54.732010+00:00",
   "repository": "MRI-LMICs-survey",
   "tracked_public_corpus": {
     "logical_path": "data/data-clean.csv",
-    "sha256": "8beeaad423a4937a26b41a40d0039341db8e6f2eb67f75a40c524966b5dcbf5a",
+    "sha256": "6ea9a1776bbce516aee933a38595817276e440dcaceea54f3a4990d800b9af6d",
     "sha256_normalization": "utf8_lf",
-    "rows": 48,
-    "columns": 30
+    "rows": 45,
+    "columns": 31
   },
   "tracked_public_evidence": {
     "field_characterization": {
       "logical_path": "data/field_characterization_evidence.csv",
-      "sha256": "6258d2611dd4246bde712532695798e3fac57760b29a216591739c0c0ee86064",
+      "sha256": "7e7250bc9cf2607cadbb1dd5b2625704c33c2ccf52ee22ee796eda8b3067ef15",
       "sha256_normalization": "utf8_lf",
-      "rows": 48,
+      "rows": 45,
       "columns": 11
+    },
+    "dataset_characterization": {
+      "logical_path": "data/dataset_characterization_evidence.csv",
+      "sha256": "126a6cab19eb95a109463e033fe564832da9bc5a83d80594d703f52810c941ac",
+      "sha256_normalization": "utf8_lf",
+      "rows": 45,
+      "columns": 24
+    },
+    "primary_sr_scope": {
+      "logical_path": "data/primary_sr_scope_evidence.csv",
+      "sha256": "7b2e902aad83699c6fb720afcfa554617b5e25d1c0d3c23277bc82e43f79fddb",
+      "sha256_normalization": "utf8_lf",
+      "rows": 45,
+      "columns": 10
+    }
+  },
+  "study_identity_contracts": {
+    "included_study_order": {
+      "logical_path": "data/included_study_order.csv",
+      "sha256": "86584cff8e82bcdd025dee3ab5b9d838387020627a37883f105e95bf707ebdb3",
+      "sha256_normalization": "utf8_lf",
+      "rows": 45
+    },
+    "reviewer_scoring_order": {
+      "logical_path": "data/reviewer_scoring_order.csv",
+      "sha256": "316bb2937c64809a5bb10c4fd2c821f873fd8ca0a9c9fc5a0fc0be915e23428e",
+      "sha256_normalization": "utf8_lf",
+      "rows": 48
+    },
+    "post_extraction_exclusions": {
+      "logical_path": "data/post_extraction_exclusions.csv",
+      "sha256": "fa8c9213a5f91408543ca9061c0b06e2f5093c487f9e4220c4f7fa97842db516",
+      "sha256_normalization": "utf8_lf",
+      "rows": 11
     }
   },
   "privacy": {
-    "internal_source_contains_reviewer_names": true,
+    "internal_source_contains_reviewer_names": false,
     "removed_columns_from_public_canonical": [
       "Assigned_Reviewer",
       "Reviewer_Name"
     ],
     "reviewer_identifiers_detected_after_scrub": [],
     "independent_reviewer_ratings_included": false,
-    "url_query_parameters_removed": 22,
+    "url_query_parameters_removed": 0,
     "url_columns_sanitized": [
-      "assignments.URL",
-      "data.URL",
-      "screening.URL"
+      "data.URL"
     ],
     "query_tokens_detected_after_scrub": []
   },
@@ -38,15 +70,21 @@
   "analysis_outputs": {
     "analysis_lmic_tr_correlation.csv": {
       "logical_path": "tables/analysis_lmic_tr_correlation.csv",
-      "sha256": "b902f2874de33cfaf7a3b2297c5f6b2946065eb92bea847dbf97af4f65482eb6",
+      "sha256": "3578ee2fafe44c314ffeebb9c4dc0cc222f16b4cce426b9bc2df9c369def0a0c",
       "sha256_normalization": "utf8_lf",
       "rows": 3
     },
     "analysis_lmic_tr_correlation_reviewer_consensus.csv": {
       "logical_path": "tables/analysis_lmic_tr_correlation_reviewer_consensus.csv",
-      "sha256": "75d91bcb819cb1007d5cf02dc0ef4a16945f63e97980a41b788605c9e6c539e9",
+      "sha256": "f645a8edbfdab3eada4ca3f9678c86c4413e3c563c681ec09c7fd54081ad1c00",
       "sha256_normalization": "utf8_lf",
       "rows": 1
+    },
+    "analysis_random_forest_robustness_summary.csv": {
+      "logical_path": "tables/analysis_random_forest_robustness_summary.csv",
+      "sha256": "47c0357cd7c172c59af6ebd8716ef594d73a607a5736aad319c7344f4a822f09",
+      "sha256_normalization": "utf8_lf",
+      "rows": 4
     }
   }
 }

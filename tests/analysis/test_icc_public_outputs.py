@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 
 REPO = Path(__file__).resolve().parents[2]
@@ -29,4 +30,7 @@ def test_public_icc_outputs_are_aggregate_only():
     assert (summary["Raters"] == 11).all()
     assert summary["ICC_2_1_absolute_agreement"].between(-1, 1).all()
     assert summary["ICC_2_k_absolute_agreement"].between(-1, 1).all()
+    assert summary["ICC_2_1_absolute_agreement"].tolist() == pytest.approx(
+        [0.5534006458183125, 0.569587722155862]
+    )
     assert not any("Reviewer" in column or "Rating" in column for column in summary.columns)

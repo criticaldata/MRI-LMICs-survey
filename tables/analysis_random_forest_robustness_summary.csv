@@ -1,0 +1,5 @@
+Analysis,Model,N_Studies,MAE_Mean,MAE_SD,Seed,R2_Mean,R2_SD,Resampling_Splits,MAE_Improvement_vs_Mean_Baseline,Positive_MAE_Improvement_Splits,Total_Holdout_Splits
+Repeated holdout model comparison,Regularized ridge benchmark,45,0.6384158759237707,0.14453924288737946,42,0.15123130678169402,0.33784777265201993,50,,,50
+Repeated holdout model comparison,Regularized ordinal logistic,45,0.6533333333333333,0.191320878391357,42,-0.04923114731321285,0.5145805771381002,50,,,50
+Repeated holdout model comparison,Constrained Random Forest,45,0.6786960586263107,0.17545902550093603,42,0.031142988547959948,0.2834596659164175,50,0.10377307717615851,44.0,50
+Repeated holdout model comparison,Mean baseline,45,0.7824691358024691,0.1462253443253336,42,-0.19979686440040922,0.2757946579097362,50,,,50

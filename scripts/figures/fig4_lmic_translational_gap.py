@@ -1,5 +1,5 @@
 """
-Figure 3: LMIC Relevance & Translational Gap Analysis
+Figure 4: LMIC Relevance & Translational Gap Analysis
 
 The paper's signature figure. Multi-panel:
   A. LMIC score distribution (styled horizontal bars)
@@ -12,7 +12,19 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from mapper import load_data, save_figure, configure_matplotlib, panel_title
+import sys
+from pathlib import Path
+from mapper import (
+    FIELD_CATEGORY_ORDER,
+    FIELD_STRENGTH_COLORS,
+    load_data,
+    save_figure,
+    configure_matplotlib,
+    panel_title,
+)
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "analysis"))
+from review_metrics import add_derived_fields
 
 np.random.seed(42)
 
@@ -33,9 +45,9 @@ SCORE_LABELS = {
 }
 
 
-def create_fig3():
+def create_fig4():
     configure_matplotlib()
-    df = load_data()
+    df = add_derived_fields(load_data())
     scored = df.dropna(subset=["LMIC_Score"])
 
     fig = plt.figure(figsize=(15, 12))
@@ -127,25 +139,34 @@ def create_fig3():
     # ========================
     ax_c = fig.add_subplot(gs[1, 0])
 
-    fs_colors = {
-        "Low-field": "#E74C3C",
-        "Standard-field": "#3498DB",
-        "Mixed": "#9B59B6",
-        "High-field": "#2ECC71",
-        "Not specified": "#BDC3C7",
-    }
-
-    fs_order = ["Low-field", "Standard-field", "Mixed", "High-field", "Not specified"]
     ct_fs = pd.crosstab(scored["LMIC_Score"], scored["Field_Strength_Norm"])
     ct_fs = ct_fs.reindex(index=[1, 2, 3, 4, 5], fill_value=0)
+    fs_order = [category for category in FIELD_CATEGORY_ORDER if category in ct_fs.columns]
     ct_fs = ct_fs.reindex(columns=[c for c in fs_order if c in ct_fs.columns], fill_value=0)
 
     bottom = np.zeros(5)
     x = np.arange(5)
+    fs_short_labels = {
+        "Ultra-low-field (<0.05 T)": "Ultra-low <0.05 T",
+        "Low-field (0.05-0.5 T)": "Low 0.05-0.5 T",
+        "Intermediate-field (>0.5-<1.5 T)": "Intermediate >0.5-<1.5 T",
+        "Standard-field (1.5-3 T)": "Standard 1.5-3 T",
+        "High-field (>3 T)": "High >3 T",
+        "Ultra-low-field (strength unspecified)": "Ultra-low; strength n/r",
+        "Low-field (threshold unspecified)": "Low-field; threshold n/r",
+        "Standard-field (strength unspecified)": "Standard; strength n/r",
+        "High-field (threshold unspecified)": "High-field; threshold n/r",
+        "Not specified": "Not specified",
+        "Not reported": "Not reported",
+        "Unknown": "Unknown",
+        "Mixed": "Mixed",
+    }
     for fs in ct_fs.columns:
         vals = ct_fs[fs].values
-        ax_c.bar(x, vals, bottom=bottom, width=0.6, label=fs,
-                 color=fs_colors.get(fs, "#bdc3c7"), edgecolor="white", linewidth=0.8)
+        ax_c.bar(x, vals, bottom=bottom, width=0.6,
+                 label=fs_short_labels.get(fs, fs),
+                 color=FIELD_STRENGTH_COLORS.get(fs, "#bdc3c7"),
+                 edgecolor="white", linewidth=0.8)
         for i, (v, b) in enumerate(zip(vals, bottom)):
             if v >= 2:
                 ax_c.text(i, b + v / 2, str(int(v)), ha="center", va="center",
@@ -157,9 +178,9 @@ def create_fig3():
     ax_c.set_xlabel("LMIC Relevance Score", fontsize=10)
     ax_c.set_ylabel("Number of Papers", fontsize=10)
     panel_title(ax_c, "C.  Field Strength Distribution by LMIC Score",
-                "Low-field papers concentrate in high LMIC-relevance scores")
-    ax_c.legend(fontsize=7, loc="upper right", frameon=True,
-                fancybox=True, edgecolor="#ddd")
+                "Numeric bins require an explicitly reported tesla value")
+    ax_c.legend(fontsize=6.2, loc="upper left", frameon=True,
+                fancybox=True, edgecolor="#ddd", ncol=2)
     ax_c.spines["top"].set_visible(False)
     ax_c.spines["right"].set_visible(False)
     ax_c.tick_params(length=0)
@@ -170,14 +191,14 @@ def create_fig3():
     # ========================
     ax_d = fig.add_subplot(gs[1, 1])
 
-    # Summary indicators for the whole dataset
+    # Exact five-criterion TR definition used in Methods.
     n = len(df)
     summary = [
-        ("Resource constraints\naddressed", (df["Resource_Constraints_Norm"] == "Yes").sum(), "#2E86AB"),
-        ("Clinical validation\nreported", (df["Clinical_Validation_Norm"] != "None").sum(), "#A23B72"),
-        ("High LMIC relevance\n(Score 4\u20135)", len(df[df["LMIC_Score"] >= 4]), "#2ECC71"),
-        ("Low-field MRI\nmentioned", (df["Low_Field_Norm"] == "Yes").sum(), "#F18F01"),
-        ("Code publicly\navailable", (df["Code_Available_Norm"] == "Yes").sum(), "#C73E1D"),
+        ("Low-Field\nDomain", int(df["TR_LowFieldDomain"].sum()), "#E74C3C"),
+        ("Open\nScience", int(df["TR_OpenScience"].sum()), "#2E86AB"),
+        ("Clinical\nEvaluation", int(df["TR_ClinicalEvaluation"].sum()), "#2ECC71"),
+        ("Hardware\nAwareness", int(df["TR_HardwareAwareness"].sum()), "#9B59B6"),
+        ("Data\nDiversity", int(df["TR_DataDiversity"].sum()), "#F18F01"),
     ]
 
     labels, values, colors = zip(*summary)
@@ -195,8 +216,8 @@ def create_fig3():
     ax_d.set_yticklabels(labels, fontsize=9, fontweight="bold")
     ax_d.invert_yaxis()
     ax_d.set_xlabel("Number of Papers", fontsize=10)
-    panel_title(ax_d, "D.  Translational Readiness Overview",
-                "Key indicators for LMIC deployment feasibility")
+    panel_title(ax_d, "D.  Translational Readiness Criteria",
+                f"Exact five-criterion TR definition; n={n} eligible studies")
     ax_d.spines["top"].set_visible(False)
     ax_d.spines["right"].set_visible(False)
     ax_d.tick_params(length=0)
@@ -204,10 +225,10 @@ def create_fig3():
     ax_d.set_xlim(0, max(values) + 10)
 
     plt.tight_layout()
-    save_figure(fig, "fig3_lmic_relevance")
+    save_figure(fig, "fig4_lmic_translational_gap")
 
     # Summary
-    print("\n=== Figure 3 Summary ===")
+    print("\n=== Figure 4 Summary ===")
     print(f"  Papers scored: {len(scored)}/{len(df)}")
     print(f"  Median LMIC score: {scored['LMIC_Score'].median():.0f}")
     print(f"  Score 4\u20135 (high): {(scored['LMIC_Score'] >= 4).sum()} ({(scored['LMIC_Score'] >= 4).sum()/len(scored)*100:.1f}%)")
@@ -219,4 +240,4 @@ def create_fig3():
 
 
 if __name__ == "__main__":
-    create_fig3()
+    create_fig4()
