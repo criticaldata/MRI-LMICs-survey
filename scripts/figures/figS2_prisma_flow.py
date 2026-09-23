@@ -34,7 +34,7 @@ def _box(
         linewidth=1.4,
     )
     ax.add_patch(patch)
-    ax.text(x, y, text, ha="center", va="center", fontsize=8.3, color="#18344A")
+    ax.text(x, y, text, ha="center", va="center", fontsize=11.5, color="#18344A")
 
 
 def build_selection_flow(root: Path) -> tuple[list[dict[str, object]], list[tuple[int, int]], str]:
@@ -79,40 +79,47 @@ def build_selection_flow(root: Path) -> tuple[list[dict[str, object]], list[tupl
             "x": 0.25,
             "y": 0.75,
             "width": 0.42,
-            "height": 0.15,
+            "height": 0.17,
             "label": f"Records with no recoverable\nscreening disposition\n(n = {no_recoverable_disposition})\nStage not inferred",
         },
         {
             "x": 0.75,
             "y": 0.75,
             "width": 0.42,
-            "height": 0.15,
-            "label": f"Records with recoverable\nscreening disposition\n(n = {extracted})\n8 pre-scoring exclusions + 48 scored",
+            "height": 0.17,
+            "label": f"Records with recoverable\nscreening disposition\n(n = {extracted})\n8 pre-scoring exclusions\n+ 48 scored",
         },
         {
             "x": 0.5,
             "y": 0.57,
             "width": 0.68,
-            "height": 0.09,
+            "height": 0.10,
             "label": f"Excluded before the all-author scoring form (n = {len(pre_scoring)})\n"
-            f"{pre_counts['Not MRI modality']} non-MRI; {pre_counts['Review/survey only']} reviews/surveys; {pre_counts['Duplicate']} duplicates",
+            f"{pre_counts['Not MRI modality']} non-MRI; {pre_counts['Review/survey only']} reviews/surveys;\n"
+            f"{pre_counts['Duplicate']} duplicates",
         },
-        {"x": 0.5, "y": 0.42, "width": 0.68, "height": 0.09, "label": f"Records independently scored by all 11 reviewers\n(n = {len(form)})"},
         {
             "x": 0.5,
-            "y": 0.27,
+            "y": 0.42,
             "width": 0.68,
             "height": 0.09,
-            "label": f"Excluded after scoring during eligibility reconciliation (n = {len(post_scoring)})\n"
-            f"{post_counts['Duplicate']} duplicate preprint; {post_counts['Not MRI modality']} paper without an MRI experiment; "
-            f"{post_counts['No AI/DL method']} method without AI/deep learning",
+            "label": f"Records independently scored by all 11\nreviewers (n = {len(form)})",
         },
-        {"x": 0.5, "y": 0.12, "width": 0.68, "height": 0.09, "label": f"Final analytical corpus\n(n = {len(included)})"},
+        {
+            "x": 0.5,
+            "y": 0.255,
+            "width": 0.68,
+            "height": 0.13,
+            "label": f"Excluded after scoring during eligibility\nreconciliation (n = {len(post_scoring)})\n"
+            f"{post_counts['Duplicate']} duplicate preprint; {post_counts['Not MRI modality']} paper without an MRI\n"
+            f"experiment; {post_counts['No AI/DL method']} method without AI/deep learning",
+        },
+        {"x": 0.5, "y": 0.09, "width": 0.68, "height": 0.09, "label": f"Final analytical corpus\n(n = {len(included)})"},
     ]
     edges = [(0, 1), (0, 2), (2, 3), (3, 4), (4, 5), (5, 6)]
     footnote = (
-        "A disposition is recoverable for 56 records; the archived export has no reliable stage label for 127. "
-        "Their screening stage is not inferred."
+        "The archived export has no reliable stage label for 127 records; disposition is recoverable for 56.\n"
+        "Screening stage is not inferred."
     )
     return nodes, edges, footnote
 
@@ -122,16 +129,16 @@ def create_figS2():
     root = _project_root()
     nodes, edges, footnote = build_selection_flow(root)
 
-    figure, ax = plt.subplots(figsize=(12, 10))
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0.01, 1.02)
+    figure, ax = plt.subplots(figsize=(8, 7.2))
+    ax.set_xlim(-0.04, 1.04)
+    ax.set_ylim(-0.12, 1.02)
     ax.axis("off")
     ax.set_title(
         "Supplementary Figure 2. Study-selection flow",
-        fontsize=15,
+        fontsize=16,
         fontweight="bold",
         color="#15324A",
-        pad=20,
+        pad=12,
     )
     for index, node in enumerate(nodes):
         _box(
@@ -159,19 +166,34 @@ def create_figS2():
         )
     for source, target in edges[2:]:
         from_node, to_node = nodes[source], nodes[target]
+        start = (
+            float(from_node["x"]),
+            float(from_node["y"]) - float(from_node["height"]) / 2,
+        )
+        end = (
+            float(to_node["x"]),
+            float(to_node["y"]) + float(to_node["height"]) / 2,
+        )
+        if start[0] != end[0]:
+            elbow_y = (start[1] + end[1]) / 2
+            ax.plot([start[0], start[0]], [start[1], elbow_y], color="#56758A", lw=1.5)
+            ax.plot([start[0], end[0]], [elbow_y, elbow_y], color="#56758A", lw=1.5)
+            arrow_start = (end[0], elbow_y)
+        else:
+            arrow_start = start
         ax.annotate(
             "",
-            xy=(float(to_node["x"]), float(to_node["y"]) + float(to_node["height"]) / 2),
-            xytext=(float(from_node["x"]), float(from_node["y"]) - float(from_node["height"]) / 2),
+            xy=end,
+            xytext=arrow_start,
             arrowprops={"arrowstyle": "-|>", "color": "#56758A", "lw": 1.5},
         )
     ax.text(
         0.5,
-        0.035,
+        -0.035,
         footnote,
         ha="center",
         va="center",
-        fontsize=8.5,
+        fontsize=10.5,
         color="#5C6770",
         wrap=True,
     )
