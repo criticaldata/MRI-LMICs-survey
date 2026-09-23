@@ -150,7 +150,11 @@ def test_prisma_flow_reconciles_extraction_scoring_and_final_corpus_counts():
     assert (0, 1) in edges and (0, 2) in edges
     assert (1, 2) not in edges
     assert "not inferred" in flat_labels[1].casefold()
-    assert "n = 8" in flat_labels[3] and "3 non-MRI; 3 reviews/surveys; 2 duplicates" in flat_labels[3]
+    assert "n = 8" in flat_labels[3]
+    assert all(
+        reason in flat_labels[3]
+        for reason in ("3 non-MRI", "3 reviews/surveys", "2 duplicates")
+    )
     assert "n = 48" in flat_labels[4]
     assert "n = 3" in flat_labels[5]
     assert "duplicate preprint" in flat_labels[5]
