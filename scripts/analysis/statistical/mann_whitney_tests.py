@@ -18,6 +18,9 @@ warnings.filterwarnings('ignore')
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, SCRIPTS_DIR)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPTS_DIR)))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 from utils import (has_metric_reported, normalize_code_available, 
                    normalize_low_field_mentioned, normalize_field_strength, 
                    normalize_dataset_type, BASE_DIR, DATA_DIR, RESULTS_DIR, 
@@ -33,8 +36,8 @@ def load_and_prepare(log_file):
     df = df.dropna(subset=['Title'], how='all')
     df = df[df['Title'].notna() & (df['Title'].str.strip() != '')]
 
-    df['Reports_PSNR'] = df['PSNR_Value'].apply(has_metric_reported)
-    df['Reports_SSIM'] = df['SSIM_Value'].apply(has_metric_reported)
+    df['Reports_PSNR'] = df['PSNR_Value'].apply(lambda value: has_metric_reported(value, "PSNR"))
+    df['Reports_SSIM'] = df['SSIM_Value'].apply(lambda value: has_metric_reported(value, "SSIM"))
     df['Reports_Any_Metric'] = ((df['Reports_PSNR'] == 1) | (df['Reports_SSIM'] == 1)).astype(int)
 
     df['LMIC_Relevance_Score'] = df['LMIC_Relevance_Score'].astype(str).map(LMIC_SCORE_MAP).fillna(df['LMIC_Relevance_Score'])

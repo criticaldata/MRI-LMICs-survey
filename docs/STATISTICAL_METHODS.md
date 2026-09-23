@@ -1,166 +1,77 @@
-# Statistical Methodology - MRI Super-Resolution Narrative Review
+# Statistical Methods and Current Results
 
-This document details the statistical and ML framework used to analyze factors influencing LMIC relevance and the reporting quality of MRI super-resolution (SR) studies.
+## Analysis population
 
-## 1. Random Forest Robustness Supplement
+All 11 authors independently scored the 48 candidate records on LMIC Relevance and Translational Readiness. Three records were excluded from the final scientific synthesis after DOI/title and eligibility adjudication: an earlier LowGAN preprint duplicated by the retained peer-reviewed article, a generic natural-image enhancement paper with no MRI experiment, and a study whose Methods explicitly state that its method does not use deep learning. The final analytic corpus is 45 studies. Reliability estimates use all 48 scored records because they describe the completed scoring exercise; substantive analyses use the 45 eligible studies. The private workbook is checked against the original 48-record scoring order. See `data/reviewer_scoring_order.csv` and `data/post_extraction_exclusions.csv`.
 
-The current exploratory analysis uses all 48 included studies and a
-**constrained Random Forest Regressor** to predict the ordinal
-`LMIC_Relevance_Score` (1-5). Nominal ordinal values are explicitly coerced
-to numeric via predefined dictionaries. It is supplementary, not a deployable
-prediction model or causal analysis.
+## Random-forest robustness analysis
 
-- **Hyperparameters**: 400 trees, `max_depth=3`, `min_samples_split=6`,
-  `min_samples_leaf=4`, `max_features=0.7`.
-- **Validation**: repeated 5-fold held-out validation (10 repeats; 50 test
-  splits), with a mean baseline, regularized ridge benchmark, and regularized
-  ordinal-logistic benchmark.
-- **Features**: Binary encodings of AI architecture (CNN, GAN, U-Net, Transformer), dataset source (Clinical vs Synthetic), code availability, low-field mentioning, and metrics reported (PSNR/SSIM).
-- **Metrics**: held-out MAE and R2. Feature stability is assessed with held-out
-  permutation importance and 200 bootstrap resamples (seed 42).
-- **Interpretation**: held-out performance is limited (mean MAE 0.622; mean
-  R2 0.167). Feature measures reflect association in this sample only and
-  **must not** be read as causal evidence of clinical or deployment impact.
+This is a supplementary, exploratory ordinal prediction analysis—not a causal or deployable model. It uses a constrained Random Forest, 50 held-out splits from repeated 5-fold cross-validation (10 repeats), a mean baseline, regularized ridge and ordinal-logistic benchmarks, held-out permutation importance, and 200 bootstrap resamples; the fixed seed is 42. On the 45-study corpus, mean held-out MAE is 0.679 (SD 0.175) and mean held-out R² is 0.031 (SD 0.283), compared with MAE 0.782 for the mean baseline. The forest has lower MAE than the baseline in 44 of 50 paired splits. The field-strength feature is positive only when a numeric 0.05-0.5 T field is explicitly reported; generic labels are not treated as measurements. The variation and small corpus limit predictive interpretation. These results do not establish causal effects, feature importance outside this dataset, or deployment readiness.
 
-## 2. Mann-Whitney U & Reporting Bias
+The aggregate comparison is versioned in `tables/analysis_random_forest_robustness_summary.csv`. Detailed split scores, permutation results, bootstrap intervals, runtime lock, and hashes are generated under `analysis/review_20260803/random_forest_robustness_20260804/` and are local reproducibility outputs rather than individual-rating data.
 
-We performed pairwise comparisons to test for "Reporting Bias." Studies that report traditional metrics (PSNR/SSIM) were compared against those that do not.
+## Reporting-pattern tests
 
-- **Continuous/Ordinal Variables**: Mann-Whitney U test (e.g., comparing `LMIC_Relevance_Score` medians).
-- **Categorical Variables**: Pearson's Chi-Square test or Fisher's Exact Test (where N < 5 per cell).
-- **Hypothesis**: $H_0$: There is no statistical difference in the characteristics (e.g., low-field focus, code availability) of papers based on their metric reporting status.
-- **Multiple Comparisons**: All tests are subjected to Benjamini-Hochberg False Discovery Rate (FDR) correction ($\alpha = 0.05$). Exported tables explicitly report `q_value_fdr` to control the expected proportion of false discoveries among the rejected hypotheses.
+Mann–Whitney U tests compare LMIC score distributions for studies with versus without parseable PSNR or SSIM. Categorical associations use chi-square or Fisher's exact tests as appropriate; multiplicity-adjusted q-values are retained where multiple hypotheses are tested. These analyses are descriptive/exploratory and do not establish that reporting missingness is random. Current results are in `tables/table5b_mann_whitney_results.csv` and the associated analysis outputs.
 
-## 3. Fleiss' Kappa (Inter-Rater Reliability)
+## Inter-rater agreement
 
-The historical 2-rater, 10-paper calculation is a calibration artifact only.
-It is not used as the final IRR result. The final analysis uses the same 48
-papers scored independently by all 11 reviewers and reports separate kappa
-values for the two ordinal score scales:
+Each of the 11 authors scored all 48 form records. Standard nominal Fleiss' κ is the prespecified primary multi-rater statistic and is calculated over all 48 scored candidates, including three records later excluded from the scientific synthesis. This estimates agreement for the full scoring task. Scientific outcomes and correlations are calculated over the 45 eligible studies.
 
-- **LMIC Relevance Score (1-5):** Fleiss' $\kappa$ = **0.505**.
-- **TR Score (0-5):** Fleiss' $\kappa$ = **0.223**.
+| Score | Studies | Fleiss' κ | Observed agreement |
+|---|---:|---:|---:|
+| LMIC Relevance (1–5) | 48 | 0.505 | 0.648 |
+| Translational Readiness (0–5) | 48 | 0.223 | 0.451 |
 
-The calculation is the standard nominal-category Fleiss statistic, as requested
-for the inter-rater analysis. The aggregate outputs are
-`tables/analysis_fleiss_kappa_summary.csv` and
-`tables/analysis_fleiss_kappa_item_agreement.csv`. The workbook containing
-individual ratings is private and is supplied to the runner externally through
-`scripts/analysis/statistical/run_fleiss_kappa_from_private_xlsx.py`.
+The historical κ=0.728 from 10 papers and two reviewers is not the full-pool reliability estimate and is not used as the primary result. The individual-rating workbook remains private; the runners read it externally and write aggregate outputs only.
 
-For context, the average observed agreement was 0.648 for LMIC and 0.451 for
-TR. The values should not be combined into one kappa or interpreted as clinical
-validity of either score.
+### Ordinal-weighted agreement
 
-- **Interpretation**: Landis & Koch (1977) scale:
-    - 0.21 - 0.40: **Fair Agreement**.
-    - 0.41 - 0.60: **Moderate Agreement**.
-    - 0.61 - 0.80: **Substantial Agreement**.
+Generalized multi-rater weighted Fleiss estimates are supplementary. Linear and quadratic weights give:
 
-## 4. Ordinal Weighted Agreement (Supplementary)
+| Score | Linear κ | Quadratic κ |
+|---|---:|---:|
+| LMIC Relevance | 0.528 | 0.544 |
+| Translational Readiness | 0.393 | 0.559 |
 
-Because both reviewer scores are ordinal, a supplementary distance-weighted
-analysis was calculated after the standard Fleiss analysis. The primary
-multi-rater implementation is a generalized weighted Fleiss statistic: for
-each paper, agreement is averaged across all ordered reviewer pairs using
-pre-specified category-distance weights, and expected agreement is computed
-from the pooled category proportions. All 55 reviewer pairs are also summarized
-with pairwise weighted Cohen kappas; those pairwise summaries are descriptive
-and are not mislabeled as a second Fleiss statistic.
+Pairwise weighted Cohen summaries across 55 reviewer pairs are descriptive and are not a second multi-rater Fleiss statistic. Weighting gives partial credit to near-category disagreements; it does not replace the prespecified unweighted κ and must not be selected simply because it is larger.
 
-Two sensitivity schemes were prespecified:
+### Intraclass correlation
 
-- **Linear weights**: adjacent scores receive partial credit proportional to
-  their ordinal distance.
-- **Quadratic weights**: larger disagreements are penalized more strongly.
+The supplementary ICC model is two-way random effects with absolute agreement. ICC(2,1) is single-rater reliability; ICC(2,k) is reliability of the mean of 11 raters.
 
-Results for the 48 papers and 11 reviewers were:
+| Score | ICC(2,1) | ICC(2,k) |
+|---|---:|---:|
+| LMIC Relevance | 0.553 | 0.932 |
+| Translational Readiness | 0.570 | 0.936 |
 
-| Analysis | Linear weighted Fleiss κ | Quadratic weighted Fleiss κ |
-| :--- | ---: | ---: |
-| LMIC Relevance Score (1–5) | 0.528 | 0.544 |
-| TR Score (0–5) | 0.393 | 0.559 |
+ICC treats ordinal categories as equally spaced and is not a substitute for Fleiss' κ or the ordinal-weighted analysis. Neither statistic establishes construct validity or clinical effectiveness.
 
-The corresponding mean pairwise weighted Cohen κ values were 0.547 and 0.569
-for LMIC (linear and quadratic) and 0.408 and 0.577 for TR. The range across
-the 55 pairs is retained in the CSV output. These values show how agreement
-changes when adjacent ordinal disagreements are treated as less severe than
-widely separated disagreements; they do not prove validity, clinical utility,
-or agreement with an external ground truth.
+## LMIC–TR Spearman association
 
-The standard Fleiss κ remains the primary inter-rater result because it was the
-prespecified statistic for the 11-reviewer analysis. The weighted analysis must
-not be selected solely because it produces a larger coefficient. Aggregate
-outputs are stored in `tables/analysis_weighted_kappa_summary.csv` and
-`tables/analysis_weighted_kappa_item_agreement.csv`; the private input is read
-by `scripts/analysis/statistical/run_weighted_kappa_from_private_xlsx.py` and
-is never written to the public repository.
+The primary study-level analysis uses the canonical LMIC extraction and evidence-coded TR score. Tied values receive average ranks. Two-sided permutation tests and paired paper-level percentile bootstrap intervals use 10,000 iterations and seed 42.
 
-## 5. Intraclass Correlation (Supplementary)
+| Cohort / score source | n | Spearman ρ | Permutation p | Bootstrap 95% CI |
+|---|---:|---:|---:|---:|
+| All eligible studies, canonical scores | 45 | 0.374 | 0.0114 | [0.096, 0.586] |
+| Strict primary-SR sensitivity | 24 | 0.578 | 0.0029 | [0.239, 0.794] |
+| Pure SR or SR + denoising sensitivity | 22 | 0.654 | 0.0012 | [0.340, 0.842] |
+| All eligible studies, median of 11 author ratings | 45 | −0.328 | 0.0297 | [−0.601, −0.024] |
 
-As an additional sensitivity analysis, intraclass correlation coefficients were
-calculated on the numeric 1–5 LMIC and 0–5 TR scores. The prespecified ICC
-model is ICC(2,1), a two-way random-effects model with absolute agreement for a
-single reviewer measurement. ICC(2,k) reports the reliability of the mean score
-across all 11 reviewers. Consistency ICCs are retained only as diagnostics.
+The author-median estimate is a score-source sensitivity, not a replacement for the canonical analysis. Its direction differs from the canonical estimate, so the association is sensitive to scoring source and must not be described as robust across scoring methods or as causal evidence. Alternative TR weighting schemes test sensitivity to criterion weights, not to variability among raters.
 
-| Analysis | ICC(2,1) absolute agreement | ICC(2,k) absolute agreement |
-| :--- | ---: | ---: |
-| LMIC Relevance Score (1–5) | 0.553 | 0.932 |
-| TR Score (0–5) | 0.570 | 0.936 |
+## TR weighting sensitivity
 
-ICC treats the ordinal labels as equally spaced numeric values, so it is not a
-replacement for the weighted ordinal analysis. The single-reviewer ICC is the
-more conservative quantity for agreement of an individual rating; ICC(2,k) is
-high because averaging 11 reviewers reduces measurement noise. Neither ICC nor
-weighted κ establishes clinical validity or agreement with an external ground
-truth. The aggregate output is stored in `tables/analysis_icc_summary.csv` and
-is generated by `scripts/analysis/statistical/run_icc_from_private_xlsx.py`.
+Three alternative schemes produce mean TR scores of 1.35, 1.18, and 1.33, versus 1.20 under equal weights. Their study-score rank correlations with the equal-weight score range from 0.942 to 1.000; the 2:2:2:1:2 scheme is numerically identical to equal weights because Hardware Awareness is 0/45. LMIC–TR correlations remain positive but vary from 0.312 to 0.386. This is a criterion-weight sensitivity analysis, not evidence that the LMIC–TR association is robust to scoring source or that the rubric is validated.
 
-## 6. LMIC--TR Spearman Correlation
+## Dataset and metric characterization
 
-The primary analysis is study-level and uses the 48 canonical papers. LMIC
-scores come from `data/data-clean.csv`; TR scores come from the final binary
-criterion decisions in `data/tr_criteria_evidence.csv`. The all-study estimate
-is primary, while the two existing SR-primary restrictions are reported as
-cohort sensitivities in `tables/analysis_lmic_tr_correlation.csv`.
+General descriptive field-strength categories use explicit numeric values only: ultra-low `<0.05 T`, low-field `0.05-0.5 T`, intermediate `>0.5-<1.5 T`, standard `1.5-3 T`, and high-field `>3 T`. Generic labels such as “low-field” without a reported tesla value remain in a separate threshold-unspecified category; studies spanning numeric bins are classified as mixed. The input and target fields are characterized separately in the dataset evidence table. This descriptive taxonomy is distinct from the TR low-field criterion of `<=64 mT` and from the separate binary indicator for whether an article mentions low-field MRI.
 
-For every cohort, Spearman rho is Pearson correlation of average ranks, so ties
-receive average ranks. Uncertainty is calculated deterministically with seed
-42 using:
+PSNR and SSIM are summarized descriptively because acquisition pathways and reference construction differ across studies. In the final 45-study corpus, 18 studies report parseable PSNR, 17 report parseable SSIM, and 19 report at least one metric. Eight of the 19 metric-reporting studies meet the explicit paired/reference evidence rule; 11 do not. Studies with neither metric are not included in that comparison. No pooled performance effect is estimated.
 
-- a two-sided 10,000-permutation test that permutes the TR ranks and reports
-  `(extreme + 1) / (10,000 + 1)`; and
-- 10,000 paired paper-level bootstrap resamples with the percentile 2.5th and
-  97.5th quantiles as the 95% confidence interval.
+Target-field status is reported as explicitly reported (20), not applicable (14), not reported (6), and not available from the accessible source text (5). These states are not collapsed into a heuristic `Unknown` category. Dataset details and evidence are in `tables/table_dataset_characterization.csv` and `data/dataset_characterization_evidence.csv`.
 
-For all 48 studies, rho = 0.4059228847, permutation p = 0.0032996700, and the
-bootstrap 95% CI is 0.1639207818 to 0.6065349303.
+## Geographic metadata
 
-The private-workbook sensitivity first requires the exact canonical 48-title
-order and complete LMIC and TR ratings from all 11 raters, with integer ranges
-1--5 and 0--5 respectively. It takes the median of the 11 ratings for each
-paper and applies the same rank, permutation, bootstrap, and seed rules. Only
-the aggregate summary is promoted to
-`tables/analysis_lmic_tr_correlation_reviewer_consensus.csv`; names, individual
-ratings, private paths, and paper-level medians are not exported. The resulting
-reviewer-median estimate is rho = -0.2576999801, permutation p = 0.0786921308,
-with bootstrap 95% CI -0.5397196933 to 0.0397231367.
-
-The reviewer-median result is a scorer-source sensitivity and does not replace
-the canonical primary estimate. Weighting robustness is not scorer-dependence
-robustness: changing weights among the five canonical TR criteria tests the
-score definition, whereas replacing canonical scores with independent-rater
-medians tests sensitivity to who supplied the scores. Neither analysis is
-causal evidence or proof of score validity.
-
-## 7. Geographic & Socioeconomic Mapping
-
-- **Country Identification**: Pulled from OpenAlex affiliation metadata.
-- **Economic Classification**: Mapped via ISO-2 country codes to **World Bank Income Groups** (HIC, UMIC, LMIC, LIC).
-- **Equity Analysis**: Binary classification into "HIC (High-Income / Parachute Risk)" vs "Global South (Local Research)" based on the primary/corresponding author's institution.
-
----
-
-*The corrected analysis uses deterministic seeds where applicable and records
-the seed, inputs, outputs, and hashes in each analysis manifest.*
+Country and World Bank income-group summaries use the reconciled multi-source publication-affiliation evidence. Author employment, education, nationality, or name alone is insufficient to assign a publication country. For the final 45-study corpus, first-author affiliation country is available for all 45 studies; income-group counts are HIC 25, UMC 10, LMC 7, and not available 3. Income-group metadata describes institutional geography, not clinical deployment. Corresponding-author country is not treated as resolved unless the article explicitly identifies that author's publication affiliation.

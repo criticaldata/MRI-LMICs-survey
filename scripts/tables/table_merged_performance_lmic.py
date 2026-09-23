@@ -41,7 +41,7 @@ def create_merged_table():
 
         # LMIC scores
         lmic = subset["LMIC_Score"].dropna()
-        lmic_median = f"{lmic.median():.0f}" if len(lmic) > 0 else "N/A"
+        lmic_median = f"{lmic.median():.1f}" if len(lmic) > 0 else "N/A"
         lmic_high = (lmic >= 4).sum()
         lmic_high_pct = lmic_high / len(lmic) * 100 if len(lmic) > 0 else 0
 
@@ -86,7 +86,7 @@ def create_merged_table():
         "PSNR n": len(total_psnr),
         "SSIM, median (range)": f"{total_ssim.median():.3f} ({total_ssim.min():.3f}\u2013{total_ssim.max():.3f})",
         "SSIM n": len(total_ssim),
-        "LMIC Score median": f"{total_lmic.median():.0f}",
+        "LMIC Score median": f"{total_lmic.median():.1f}",
         "LMIC >= 4, n (%)": f"{(total_lmic >= 4).sum()} ({(total_lmic >= 4).sum()/len(total_lmic)*100:.0f}%)",
         "Low-field": (df["Low_Field_Norm"] == "Yes").sum(),
         "Code Avail.": (df["Code_Available_Norm"] == "Yes").sum(),

@@ -40,6 +40,7 @@ from run_random_forest_reanalysis_20260804 import (
     code_available,
     dataset_type,
     field_type,
+    has_reported_low_field_strength,
     low_field_mentioned,
     psnr_reported,
 )
@@ -78,8 +79,9 @@ def make_input() -> tuple[pd.DataFrame, np.ndarray, pd.DataFrame]:
     x["Is_Transformer"] = (arch == "Transformer").astype(int)
     x["Is_Clinical_Data"] = (df["Dataset_Type"].map(dataset_type) == "Clinical").astype(int)
     x["Code_Available"] = df["Code_Available"].map(code_available)
-    fields = df["Field_Strength_Type"].map(field_type)
-    x["Is_LowField_Hardware"] = fields.isin(["Low_Field", "Mixed"]).astype(int)
+    x["Has_Numeric_Low_Field_Data"] = df["Field_Strength_Type"].map(
+        has_reported_low_field_strength
+    ).astype(int)
     x["Low_Field_Mentioned"] = df["Low_Field_Mentioned"].map(low_field_mentioned)
     x["Has_Clinical_Validation"] = df["Clinical_Validation_Type"].map(clinical_validation)
     x["Has_PSNR"] = df["PSNR_Value"].map(psnr_reported)
@@ -95,7 +97,10 @@ def constrained_forest() -> RandomForestRegressor:
         min_samples_leaf=4,
         max_features=0.7,
         random_state=SEED,
-        n_jobs=-1,
+        # Small data and repeated resampling do not benefit from spawning a
+        # worker process per available CPU. A single worker is deterministic
+        # and avoids resource exhaustion on high-core Windows hosts.
+        n_jobs=1,
     )
 
 
@@ -162,7 +167,7 @@ def evaluate(x: pd.DataFrame, y: np.ndarray) -> tuple[pd.DataFrame, pd.DataFrame
             scoring="neg_mean_absolute_error",
             n_repeats=10,
             random_state=SEED + split_number,
-            n_jobs=-1,
+            n_jobs=1,
         )
         for feature, value in zip(FEATURES, perm.importances_mean):
             permutation_rows.append({"Split": split_number, "Feature": feature, "MAE_Increase_On_Permutation": float(value)})
@@ -208,6 +213,21 @@ def main() -> None:
         "Positive_Splits": int((paired["Baseline_MAE"] > paired["Forest_MAE"]).sum()),
         "Total_Splits": int(len(paired)),
     }
+    public_summary = summary.rename(columns={"Splits": "Resampling_Splits"}).copy()
+    public_summary.insert(0, "Analysis", "Repeated holdout model comparison")
+    public_summary.insert(2, "N_Studies", int(len(x)))
+    public_summary.insert(5, "Seed", SEED)
+    public_summary["MAE_Improvement_vs_Mean_Baseline"] = np.nan
+    public_summary["Positive_MAE_Improvement_Splits"] = np.nan
+    public_summary["Total_Holdout_Splits"] = int(len(paired))
+    forest_row = public_summary["Model"].eq("Constrained Random Forest")
+    public_summary.loc[forest_row, "MAE_Improvement_vs_Mean_Baseline"] = forest_delta["Mean_Improvement"]
+    public_summary.loc[forest_row, "Positive_MAE_Improvement_Splits"] = forest_delta["Positive_Splits"]
+    public_summary.to_csv(
+        REPO / "tables" / "analysis_random_forest_robustness_summary.csv",
+        index=False,
+        encoding="utf-8",
+    )
     permutation_summary = (
         permutation.groupby("Feature", as_index=False)
         .agg(Permutation_MAE_Increase_Mean=("MAE_Increase_On_Permutation", "mean"), Permutation_MAE_Increase_SD=("MAE_Increase_On_Permutation", "std"), Splits=("Split", "count"))
@@ -238,6 +258,7 @@ def main() -> None:
         "apparent_train_r2_constrained_forest": apparent_r2,
         "software": {"python": sys.version, "platform": platform.platform(), "pandas": pd.__version__, "numpy": np.__version__, "scipy": scipy.__version__, "scikit_learn": sklearn.__version__, "mord": mord.__version__},
         "outputs": {path.name: sha256(path) for path in OUTPUT.iterdir() if path.is_file() and path.name != "rf_robustness_manifest.json"},
+        "public_summary_sha256": sha256(REPO / "tables" / "analysis_random_forest_robustness_summary.csv"),
     }
     (OUTPUT / "rf_robustness_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"summary": summary.to_dict(orient="records"), "forest_baseline_comparison": forest_delta, "apparent_train_r2": apparent_r2, "output": str(OUTPUT)}, indent=2))

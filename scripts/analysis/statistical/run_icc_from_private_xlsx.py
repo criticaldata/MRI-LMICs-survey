@@ -1,8 +1,8 @@
 """Calculate intraclass correlation coefficients from a private score workbook.
 
-The input contains the 48 papers and 11 individual reviewer ratings. It remains
-outside the public repository. The public output contains aggregate ANOVA
-components and ICC estimates only.
+The input contains the 48 scored form records and 11 individual reviewer
+ratings. It remains outside the public repository. The public output contains
+aggregate ANOVA components and ICC estimates for all 48 scored form records.
 
 The primary model is ICC(2,1): two-way random effects, absolute agreement,
 single measurement. ICC(2,k) is also reported for the reliability of the mean
@@ -124,11 +124,14 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--output-xlsx", type=Path)
     parser.add_argument("--canonical-data", type=Path)
+    parser.add_argument("--scoring-order", type=Path)
     args = parser.parse_args()
 
     lmic, tr = _read_matrix(
         args.input_xlsx.resolve(),
         args.canonical_data.resolve() if args.canonical_data else None,
+        include_excluded_items=True,
+        scoring_order_path=args.scoring_order.resolve() if args.scoring_order else None,
     )
     rows = [
         _icc_summary(lmic, analysis="LMIC_Relevance_Score"),
@@ -143,7 +146,10 @@ def main() -> None:
     print(
         json.dumps(
             {
-                "items": 48,
+                "items": int(lmic.shape[0]),
+                "form_items": 48,
+                "final_eligible_items": 45,
+                "excluded_from_final_synthesis_after_scoring": 48 - 45,
                 "raters": 11,
                 "summary": str(summary_path),
                 "xlsx": str(args.output_xlsx.resolve()) if args.output_xlsx else None,

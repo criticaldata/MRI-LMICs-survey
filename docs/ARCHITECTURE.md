@@ -40,7 +40,7 @@ MRI-LMICs-survey/
 
 ## 2. Integrated Data Flow
 
-1.  **Normalization**: All statistical modules import `utils.py` to ensure architectures, field strengths, and metrics are normalized identically across the repo. Also, data loading logic explicitly shares definitions under `mapper.load_data()` allowing for a triple-aligned path mapping (mapper / RF / Mann-Whitney), which is enforced by the `tests/test_data_consistency.py` CI pipeline.
+1.  **Normalization**: Field-strength categories are defined once in `scripts/field_taxonomy.py`; `mapper.py`, `review_metrics.py`, and the statistical `utils.py` wrapper use that function. Numeric bins are assigned only when T/mT is reported, while generic labels remain unquantified. The TR low-field criterion (`<=64 mT`) is a separate rule, and input/target field strengths remain separate evidence fields. Shared data-loading logic is provided by `mapper.load_data()`.
 2.  **Enrichment**: `world_bank_fetcher.py` queries OpenAlex for author affiliations and maps them to World Bank income groups using `world_bank_mapper.py`.
 3.  **Synthesis**: `table5` and `table6` act as orchestrators, calling the analysis modules and generating publication-ready CSVs in the `tables/` directory.
 

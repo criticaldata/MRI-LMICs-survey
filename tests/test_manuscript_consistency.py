@@ -9,7 +9,7 @@ TABLES_DIR = PROJECT_ROOT / "tables"
 DATA_DIR = PROJECT_ROOT / "data"
 
 def test_primary_studies_count():
-    """Verify Table 1 reports exactly 48 primary studies."""
+    """Verify Table 1 reports the 45 eligible MRI studies."""
     table1_path = TABLES_DIR / "table1_study_characteristics.csv"
     assert table1_path.exists(), "Table 1 is missing."
     
@@ -18,7 +18,7 @@ def test_primary_studies_count():
     assert not total_row.empty, "Total papers row missing from Table 1."
     
     n_papers = int(total_row['n'].iloc[0])
-    assert n_papers == 48, f"Expected 48 papers, found {n_papers}."
+    assert n_papers == 45, f"Expected 45 papers, found {n_papers}."
 
 def test_historical_calibration_is_archived_not_active():
     """The 10-study/two-rater exercise cannot appear as final IRR output."""
@@ -34,12 +34,12 @@ def test_full_irr_is_aggregate_only():
     assert manifest["fleiss_kappa_status"] == "aggregate_summary_published_private_input"
 
 def test_data_integrity():
-    """Verify data-clean.csv has exactly 48 rows."""
+    """Verify data-clean.csv has exactly 45 eligible study rows."""
     data_path = DATA_DIR / "data-clean.csv"
     assert data_path.exists(), "data-clean.csv is missing."
     
     df = pd.read_csv(data_path)
-    assert len(df) == 48, f"Expected 48 rows in data-clean.csv, found {len(df)}."
+    assert len(df) == 45, f"Expected 45 rows in data-clean.csv, found {len(df)}."
 
 if __name__ == "__main__":
     pytest.main([__file__])

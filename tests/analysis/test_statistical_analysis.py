@@ -15,9 +15,9 @@ from mapper import load_data
 
 
 def test_data_loads_correctly():
-    """Test that load_data returns 48 papers."""
+    """Test that load_data returns 45 eligible papers."""
     df = load_data()
-    assert len(df) == 48, f"Expected 48 papers, got {len(df)}"
+    assert len(df) == 45, f"Expected 45 papers, got {len(df)}"
     assert "LMIC_Score" in df.columns
 
 
@@ -42,9 +42,9 @@ def test_random_forest_preparation():
     log_file = io.StringIO()
     X, y, features, _ = engineer_features(df, log_file)
     
-    assert X.shape[0] == 48, f"Expected 48 samples, got {X.shape[0]}"
+    assert X.shape[0] == 45, f"Expected 45 samples, got {X.shape[0]}"
     assert len(features) > 0, "No features identified"
-    assert len(y) == 48, "Target vector length mismatch"
+    assert len(y) == 45, "Target vector length mismatch"
 
 
 if __name__ == "__main__":

@@ -28,6 +28,13 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import LeaveOneOut, cross_val_predict
 
+if str(Path(__file__).resolve().parents[3]) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from scripts.field_taxonomy import (  # noqa: E402
+    has_reported_low_field_strength,
+    normalize_field_category,
+)
+
 
 REPO = Path(__file__).resolve().parents[3]
 SOURCE = REPO / "data" / "data-clean.csv"
@@ -40,7 +47,7 @@ FEATURES = [
     "Is_Transformer",
     "Is_Clinical_Data",
     "Code_Available",
-    "Is_LowField_Hardware",
+    "Has_Numeric_Low_Field_Data",
     "Low_Field_Mentioned",
     "Has_Clinical_Validation",
     "Has_PSNR",
@@ -90,12 +97,7 @@ def dataset_type(value: object) -> str:
 
 
 def field_type(value: object) -> str:
-    value = text(value).lower()
-    if "low" in value:
-        return "Low_Field"
-    if "mixed" in value:
-        return "Mixed"
-    return "Other"
+    return normalize_field_category(value)
 
 
 def code_available(value: object) -> int:
@@ -134,8 +136,9 @@ def main() -> None:
     model_input["Is_Transformer"] = (arch == "Transformer").astype(int)
     model_input["Is_Clinical_Data"] = (df["Dataset_Type"].map(dataset_type) == "Clinical").astype(int)
     model_input["Code_Available"] = df["Code_Available"].map(code_available)
-    fields = df["Field_Strength_Type"].map(field_type)
-    model_input["Is_LowField_Hardware"] = fields.isin(["Low_Field", "Mixed"]).astype(int)
+    model_input["Has_Numeric_Low_Field_Data"] = df["Field_Strength_Type"].map(
+        has_reported_low_field_strength
+    ).astype(int)
     model_input["Low_Field_Mentioned"] = df["Low_Field_Mentioned"].map(low_field_mentioned)
     model_input["Has_Clinical_Validation"] = df["Clinical_Validation_Type"].map(clinical_validation)
     model_input["Has_PSNR"] = df["PSNR_Value"].map(psnr_reported)

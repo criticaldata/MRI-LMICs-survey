@@ -10,13 +10,17 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from scipy.stats import spearmanr
 from openpyxl import Workbook
 
 
 REPO = Path(__file__).resolve().parents[2]
+STATISTICAL_SCRIPTS = REPO / "scripts" / "analysis" / "statistical"
 sys.path.insert(0, str(REPO / "scripts" / "analysis"))
+sys.path.insert(0, str(STATISTICAL_SCRIPTS))
 
 from review_metrics import build_analysis, load_data  # noqa: E402
+from run_fleiss_kappa_from_private_xlsx import _read_matrix  # noqa: E402
 
 
 CANONICAL_DATA = REPO / "data" / "data-clean.csv"
@@ -34,18 +38,18 @@ CONSENSUS_RUNNER = (
 PUBLIC_MANIFEST = REPO / "data" / "public_release_manifest.json"
 
 EXPECTED_ALL = {
-    "n": 48,
-    "rho": 0.40592288472740023,
-    "p_permutation": 0.0032996700329967,
-    "bootstrap_ci_2_5": 0.16392078177387287,
-    "bootstrap_ci_97_5": 0.606534930261319,
+    "n": 45,
+    "rho": 0.3743574587892138,
+    "p_permutation": 0.0113988601139886,
+    "bootstrap_ci_2_5": 0.0959785172829493,
+    "bootstrap_ci_97_5": 0.5864907688888084,
 }
 EXPECTED_CONSENSUS = {
-    "n": 48,
-    "rho": -0.25769998006564165,
-    "p_permutation": 0.0786921307869213,
-    "bootstrap_ci_2_5": -0.5397196933433509,
-    "bootstrap_ci_97_5": 0.03972313668026812,
+    "n": 45,
+    "rho": -0.3279545624817394,
+    "p_permutation": 0.0296970302969703,
+    "bootstrap_ci_2_5": -0.6008659728285588,
+    "bootstrap_ci_97_5": -0.0235719355750614,
 }
 INFERENCE_COLUMNS = {
     "n",
@@ -62,7 +66,7 @@ INFERENCE_COLUMNS = {
 
 
 def _canonical_titles() -> list[str]:
-    return pd.read_csv(CANONICAL_DATA)["Title"].tolist()
+    return pd.read_csv(REPO / "data" / "reviewer_scoring_order.csv")["Title"].tolist()
 
 
 def _write_workbook(
@@ -131,7 +135,7 @@ def test_canonical_correlation_has_expected_deterministic_inference():
         "SR primary pure/denoising",
     ]
     assert INFERENCE_COLUMNS.issubset(correlation.columns)
-    assert correlation["n"].tolist() == [48, 30, 23]
+    assert correlation["n"].tolist() == [45, 24, 22]
     assert (correlation["permutations"] == 10_000).all()
     assert (correlation["bootstrap_replicates"] == 10_000).all()
     assert (correlation["seed"] == 42).all()
@@ -150,7 +154,7 @@ def test_reviewer_consensus_output_matches_approved_current_result():
     consensus = pd.read_csv(CONSENSUS_CORRELATION)
 
     assert len(consensus) == 1
-    assert consensus.loc[0, "Cohort"] == "All included studies: reviewer median"
+    assert consensus.loc[0, "Cohort"] == "All eligible included studies: reviewer median"
     assert INFERENCE_COLUMNS.issubset(consensus.columns)
     assert consensus.loc[0, "aggregation"] == "per-paper median of 11 complete raters"
     for column, expected in EXPECTED_CONSENSUS.items():
@@ -212,8 +216,13 @@ def test_private_runner_accepts_exact_48_title_order_and_writes_only_summary(tmp
     output = output_dir / CONSENSUS_CORRELATION.name
     summary = pd.read_csv(output)
     assert len(summary) == 1
-    assert summary.loc[0, "n"] == 48
-    assert summary.loc[0, "rho"] == pytest.approx(-0.023814705373955962, abs=1e-15)
+    assert summary.loc[0, "n"] == 45
+    included_form_ids = [paper for paper in range(1, 49) if paper not in {11, 22, 37}]
+    expected_rho = spearmanr(
+        [(paper - 1) % 5 + 1 for paper in included_form_ids],
+        [(paper - 1) % 6 for paper in included_form_ids],
+    ).statistic
+    assert summary.loc[0, "rho"] == pytest.approx(expected_rho, abs=1e-15)
     assert summary.loc[0, "aggregation"] == "per-paper median of 11 complete raters"
     assert INFERENCE_COLUMNS.issubset(summary.columns)
 
@@ -230,11 +239,29 @@ def test_private_runner_accepts_exact_48_title_order_and_writes_only_summary(tmp
     assert str(private_input) not in result.stdout
 
 
+def test_agreement_matrix_can_retain_all_48_scored_candidates(tmp_path):
+    private_input = tmp_path / "private-ratings.xlsx"
+    _write_workbook(private_input)
+
+    eligible_lmic, eligible_tr = _read_matrix(private_input, CANONICAL_DATA)
+    all_lmic, all_tr, titles = _read_matrix(
+        private_input,
+        CANONICAL_DATA,
+        include_titles=True,
+        include_excluded_items=True,
+    )
+
+    assert eligible_lmic.shape == eligible_tr.shape == (45, 11)
+    assert all_lmic.shape == all_tr.shape == (48, 11)
+    assert len(titles) == 48
+    assert titles == _canonical_titles()
+
+
 @pytest.mark.parametrize(
     ("mutation", "expected_error"),
     [
-        ("reordered", "Paper 24 title does not match canonical study order"),
-        ("missing_title", "Paper 18 title does not match canonical study order"),
+        ("reordered", "Paper 24 title does not match reviewer form order"),
+        ("missing_title", "Paper 18 title does not match reviewer form order"),
         ("missing_row", "Expected 48 papers plus two header rows"),
         ("ten_raters", "Expected 11 reviewer pairs"),
         ("missing_lmic", "Missing or non-numeric LMIC score"),
@@ -322,6 +349,8 @@ def test_pipeline_keeps_public_only_mode_and_groups_all_private_analyses(tmp_pat
     assert public_result.returncode == 0, public_result.stderr
     public_calls = (public_shim.parent / "invocations.txt").read_text(encoding="utf-8")
     assert "run_reproducible_review_analysis.py" in public_calls
+    assert "finalize_corpus.py" in public_calls
+    assert "build_primary_sr_scope_evidence.py" in public_calls
     assert "run_lmic_tr_correlation_from_private_xlsx.py" not in public_calls
 
     private_dir = tmp_path / "private"

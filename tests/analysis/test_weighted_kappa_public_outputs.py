@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 
 REPO = Path(__file__).resolve().parents[2]
@@ -35,10 +36,13 @@ def test_public_weighted_outputs_are_aggregate_only():
     assert (summary["Raters"] == 11).all()
     assert summary["Weighted_Fleiss_kappa"].between(-1, 1).all()
     assert summary["Pairwise_Cohen_kappa_mean"].between(-1, 1).all()
+    expected = [0.5277717161902787, 0.5443474538700254, 0.39267010269126407, 0.5592799831081077]
+    assert summary["Weighted_Fleiss_kappa"].tolist() == pytest.approx(expected)
     assert len(item_agreement) == 192
     assert set(item_agreement["Analysis"]) == {"LMIC_Relevance_Score", "TR_Score"}
     assert set(item_agreement["Weighting"]) == {"linear", "quadratic"}
-    assert item_agreement["Paper_ID"].between(1, 48).all()
+    assert item_agreement["Scoring_Form_ID"].between(1, 48).all()
+    assert "Paper_ID" not in item_agreement.columns
     assert "Title" in item_agreement.columns
     assert not any("Reviewer" in column or "Rating" in column for column in summary.columns)
     assert not any("Reviewer" in column or "Rating" in column for column in item_agreement.columns)

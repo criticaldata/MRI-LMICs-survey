@@ -127,9 +127,15 @@ def run_public_release_audit() -> None:
     """Validate the versioned scientometric release without private API caches."""
     results_headers, results_rows = read_csv(PUBLIC_RESULTS)
     coverage_headers, coverage_rows = read_csv(PUBLIC_COVERAGE)
+    canonical = read_csv(REPO / "data" / "data-clean.csv")[1]
+    alignment_manifest_path = REPO / "tables" / "mri_scientometric_export_manifest.json"
+    alignment_manifest = json.loads(alignment_manifest_path.read_text(encoding="utf-8"))
     forbidden_headers = {"Reviewer_Name", "Assigned_Reviewer", "Notes_Questions"}
     methodology_prefixes = ("Corpus_", "Dataset_", "Field_")
     dois = [str(row.get("DOI", "")).strip().casefold() for row in results_rows]
+    expected_dois = [str(row.get("DOI", "")).strip().casefold() for row in canonical]
+    expected_titles = [str(row.get("Title", "")).strip().casefold() for row in canonical]
+    actual_titles = [str(row.get("Title", "")).strip().casefold() for row in results_rows]
     blank_cells = [
         f"{row.get('Paper_ID', '')}:{header}"
         for row in results_rows
@@ -137,11 +143,16 @@ def run_public_release_audit() -> None:
         if not str(row.get(header, "")).strip()
     ]
     checks = {
-        "results_have_48_unique_dois": len(results_rows) == 48 and len(dois) == len(set(dois)) and all(dois),
+        "results_match_final_canonical_doi_order": len(results_rows) == len(canonical) == 45
+        and len(dois) == len(set(dois)) and all(dois) and dois == expected_dois,
+        "results_match_final_canonical_title_order": actual_titles == expected_titles,
         "results_exclude_private_and_methodology_fields": not forbidden_headers.intersection(results_headers)
         and not any(header.startswith(methodology_prefixes) for header in results_headers),
         "results_use_explicit_missing_values": not blank_cells,
         "coverage_is_present_and_structured": bool(coverage_rows) and {"Source", "Requests", "Status_Breakdown"}.issubset(coverage_headers),
+        "coverage_reference_scope_is_explicit": alignment_manifest.get("final_rows") == len(canonical)
+        and alignment_manifest.get("source_acquisition_rows") == 48
+        and "original 48-record scored form" in alignment_manifest.get("source_coverage_reference", {}).get("meaning", ""),
     }
     status = "PASS" if all(checks.values()) else "FAIL"
     print(json.dumps({
@@ -199,7 +210,7 @@ def main() -> None:
     expected_serpapi_rows = len(role_rows) if serpapi_all_dois else 2
 
     check(
-        "corpus_has_48_studies",
+        "source_acquisition_has_48_studies",
         manifest.get("source_studies") == 48 and len(role_rows) == 48,
         {"manifest": manifest.get("source_studies"), "role_audit_rows": len(role_rows)},
     )

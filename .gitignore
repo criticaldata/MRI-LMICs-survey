@@ -5,9 +5,14 @@ data/*
 !data/data-clean.csv
 !data/tr_criteria_evidence.csv
 !data/field_characterization_evidence.csv
+!data/dataset_characterization_evidence.csv
+!data/post_extraction_exclusions.csv
+!data/primary_sr_scope_evidence.csv
 !data/public_release_manifest.json
 !data/included_study_order.csv
+!data/reviewer_scoring_order.csv
 data/private/
+06_processing_outputs/
 __pycache__/
 *.pyc
 *.pyo
@@ -17,6 +22,7 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+.lo_reconcile_*/
 .DS_Store
 .claude/
 *.xlsx

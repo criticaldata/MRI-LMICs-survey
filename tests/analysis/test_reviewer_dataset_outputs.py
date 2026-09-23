@@ -29,8 +29,8 @@ def test_verified_tr_evidence_is_complete_and_binary():
     """The frozen full-text evidence layer must contain final decisions, not a review queue."""
     evidence = pd.read_csv(TR_EVIDENCE_PATH)
 
-    assert len(evidence) == 48
-    assert evidence["Paper_ID"].nunique() == 48
+    assert len(evidence) == 45
+    assert evidence["Paper_ID"].nunique() == 45
     assert evidence["DOI"].str.strip().ne("").all()
     assert not any("human" in column.casefold() or "provisional" in column.casefold() for column in evidence.columns)
     for criterion in TR_CRITERIA:
@@ -59,7 +59,7 @@ def test_dataset_characterization_has_reviewer_required_columns():
     """The derived table must expose reviewer-requested fields without editing source data."""
     table = build_analysis(load_data())['dataset_characterization']
 
-    assert len(table) == 48
+    assert len(table) == 45
     assert {
         "Input_Resolution",
         "Target_Resolution",
@@ -83,13 +83,13 @@ def test_verified_field_evidence_is_complete_and_canonical():
     evidence = pd.read_csv(FIELD_EVIDENCE_PATH)
     canonical = pd.read_csv(REPO / "data" / "included_study_order.csv")
 
-    assert len(evidence) == 48
-    assert evidence["Paper_ID"].tolist() == list(range(1, 49))
+    assert len(evidence) == 45
+    assert evidence["Paper_ID"].tolist() == list(range(1, 46))
     assert evidence["Title"].tolist() == canonical["Title"].tolist()
     assert evidence["DOI"].str.casefold().tolist() == canonical["DOI"].str.casefold().tolist()
     assert evidence["Target_Field_Status"].value_counts().to_dict() == {
-        "Explicitly reported": 22,
-        "Not applicable": 15,
+        "Explicitly reported": 20,
+        "Not applicable": 14,
         "Not reported": 6,
         "Not available": 5,
     }
@@ -108,21 +108,18 @@ def test_dataset_characterization_uses_verified_target_field_evidence():
     table = build_analysis(load_data())["dataset_characterization"]
 
     assert table["Target_Field_Status"].value_counts().to_dict() == {
-        "Explicitly reported": 22,
-        "Not applicable": 15,
+        "Explicitly reported": 20,
+        "Not applicable": 14,
         "Not reported": 6,
         "Not available": 5,
     }
     assert "Unknown" not in set(table["Target_Field_Category"])
-    pushing_limits = table.loc[
-        table["Title"].eq(
-            "Pushing the limits of low-cost ultra-low-field MRI by dual-acquisition deep learning 3D superresolution"
-        )
-    ].iloc[0]
-    assert pushing_limits["Target_Field_Status"] == "Explicitly reported"
-    assert pushing_limits["Target_Field_Category"] == "≤64 mT"
-    assert pushing_limits["Field_Pair_Category"] == "low-field → low-field"
-    assert pushing_limits["Target_Field_Evidence_Page"] == "1,3,5,6"
+    assert table["Target_Field_Status"].value_counts().to_dict() == {
+        "Explicitly reported": 20,
+        "Not applicable": 14,
+        "Not reported": 6,
+        "Not available": 5,
+    }
 
 
 def test_analysis_manifest_pins_the_field_evidence_input(tmp_path):
@@ -133,7 +130,7 @@ def test_analysis_manifest_pins_the_field_evidence_input(tmp_path):
     assert manifest["field_evidence"] == {
         "logical_path": "data/field_characterization_evidence.csv",
         "sha256": sha256_file(FIELD_EVIDENCE_PATH),
-        "rows": 48,
+        "rows": 45,
     }
 
 
@@ -152,8 +149,10 @@ def test_metric_suitability_has_one_conservative_row_per_included_study():
     """Metric eligibility must never infer paired ground truth from PSNR/SSIM alone."""
     table = build_analysis(load_data())['metric_suitability']
 
-    assert len(table) == 48
-    assert table["Paper_ID"].nunique() == 48
+    assert len(table) == 45
+    assert table["Paper_ID"].nunique() == 45
+    canonical = pd.read_csv(REPO / "data" / "included_study_order.csv")
+    assert table["DOI"].str.casefold().tolist() == canonical["DOI"].str.casefold().tolist()
     assert set(table["PSNR_SSIM_Comparison_Eligibility"]).issubset(
         {"Eligible", "Not eligible", "Not reported"}
     )
@@ -261,8 +260,8 @@ def test_hardware_evidence_table_is_flat_final_and_has_no_review_queue():
         "Rubric_Version",
     }
 
-    assert len(table) == 48
-    assert table["Paper_ID"].nunique() == 48
+    assert len(table) == 45
+    assert table["Paper_ID"].nunique() == 45
     assert required.issubset(table.columns)
     assert table["Decision"].eq("No").all()
     assert table["TR_HardwareAwareness"].eq(0).all()

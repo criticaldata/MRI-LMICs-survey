@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
@@ -21,15 +20,19 @@ import pandas as pd
 REPO = Path(__file__).resolve().parents[2]
 TRACKED_PUBLIC_DATA = REPO / "data" / "data-clean.csv"
 FIELD_EVIDENCE = REPO / "data" / "field_characterization_evidence.csv"
+DATASET_EVIDENCE = REPO / "data" / "dataset_characterization_evidence.csv"
+PRIMARY_SR_SCOPE = REPO / "data" / "primary_sr_scope_evidence.csv"
 PRIVATE_DATA = REPO / "data" / "private" / "data-clean_internal.csv"
-SOURCE_SCREENING = REPO / "analysis" / "reproducibility" / "screening_log_183.csv"
-SOURCE_ASSIGNMENTS = (
-    REPO / "analysis" / "reproducibility" / "included_studies_assignments_48.csv"
-)
+POST_EXTRACTION_EXCLUSIONS = REPO / "data" / "post_extraction_exclusions.csv"
+STUDY_CONTRACT = REPO / "data" / "included_study_order.csv"
+REVIEWER_SCORING_ORDER = REPO / "data" / "reviewer_scoring_order.csv"
 OUTPUT = REPO / "analysis" / "reproducibility" / "public_package"
 SPEARMAN_OUTPUTS = (
     REPO / "tables" / "analysis_lmic_tr_correlation.csv",
     REPO / "tables" / "analysis_lmic_tr_correlation_reviewer_consensus.csv",
+)
+PUBLIC_ANALYSIS_OUTPUTS = SPEARMAN_OUTPUTS + (
+    REPO / "tables" / "analysis_random_forest_robustness_summary.csv",
 )
 
 
@@ -95,30 +98,30 @@ def build_package() -> dict:
     for path in (
         TRACKED_PUBLIC_DATA,
         FIELD_EVIDENCE,
-        SOURCE_SCREENING,
-        SOURCE_ASSIGNMENTS,
-        *SPEARMAN_OUTPUTS,
+        DATASET_EVIDENCE,
+        PRIMARY_SR_SCOPE,
+        POST_EXTRACTION_EXCLUSIONS,
+        STUDY_CONTRACT,
+        REVIEWER_SCORING_ORDER,
+        *PUBLIC_ANALYSIS_OUTPUTS,
     ):
         if not path.exists():
             raise FileNotFoundError(path)
 
-    PRIVATE_DATA.parent.mkdir(parents=True, exist_ok=True)
-    if not PRIVATE_DATA.exists():
-        shutil.copy2(TRACKED_PUBLIC_DATA, PRIVATE_DATA)
-
-    internal_data = pd.read_csv(PRIVATE_DATA)
+    internal_source_exists = PRIVATE_DATA.exists()
+    internal_data = pd.read_csv(PRIVATE_DATA if internal_source_exists else TRACKED_PUBLIC_DATA)
     field_evidence = pd.read_csv(FIELD_EVIDENCE)
-    internal_screening = pd.read_csv(SOURCE_SCREENING)
-    internal_assignments = pd.read_csv(SOURCE_ASSIGNMENTS)
+    dataset_evidence = pd.read_csv(DATASET_EVIDENCE)
+    primary_sr_scope = pd.read_csv(PRIMARY_SR_SCOPE)
+    internal_screening = pd.read_csv(POST_EXTRACTION_EXCLUSIONS)
+    internal_assignments = pd.read_csv(STUDY_CONTRACT)
+    reviewer_scoring_order = pd.read_csv(REVIEWER_SCORING_ORDER)
 
     reviewer_name_column = "Reviewer_Name"
     reviewer_assignment_columns = {"Assigned_Reviewer", "Reviewer", "Reviewer_Name"}
-    if reviewer_name_column not in internal_data.columns:
-        raise ValueError("The internal canonical data no longer contains Reviewer_Name")
-
     reviewer_names = {
         str(value).strip().casefold()
-        for value in internal_data[reviewer_name_column].dropna()
+        for value in internal_data.get(reviewer_name_column, pd.Series(dtype=object)).dropna()
         if str(value).strip()
     }
     reviewer_tokens = reviewer_names | {
@@ -159,7 +162,15 @@ def build_package() -> dict:
 
     public_text = "\n".join(
         frame.fillna("").astype(str).agg(" | ".join, axis=1).str.cat(sep="\n")
-        for frame in (public_data, public_screening, public_assignments, field_evidence)
+        for frame in (
+            public_data,
+            public_screening,
+            public_assignments,
+            reviewer_scoring_order,
+            field_evidence,
+            dataset_evidence,
+            primary_sr_scope,
+        )
     ).casefold()
     leaked_tokens = sorted(token for token in reviewer_tokens if token in public_text)
     if leaked_tokens:
@@ -177,8 +188,8 @@ def build_package() -> dict:
 
     OUTPUT.mkdir(parents=True, exist_ok=True)
     data_path = OUTPUT / "data-clean_public.csv"
-    screening_path = OUTPUT / "screening_log_183_public.csv"
-    assignments_path = OUTPUT / "included_studies_public_48.csv"
+    screening_path = OUTPUT / "post_extraction_exclusions_public.csv"
+    assignments_path = OUTPUT / "included_studies_public.csv"
     write_csv(public_data, data_path)
     write_csv(public_data, TRACKED_PUBLIC_DATA)
     write_csv(public_screening, screening_path)
@@ -186,9 +197,9 @@ def build_package() -> dict:
 
     readme = """# Public reproducibility package (local, not published)
 
-This directory contains derivatives prepared for a future public release of
-the MRI-LMICs review. The internal canonical CSV is not copied here because it
-contains reviewer names and assignment fields.
+This directory contains public, aggregate derivatives of the MRI-LMICs review.
+The pipeline can run from a clean clone; optional internal sources are never
+required for the public analysis.
 
 Removed from the public canonical derivative:
 
@@ -214,10 +225,10 @@ are included. This package was generated locally and was not pushed to GitHub.
         "published": False,
         "github_modified": False,
         "privacy": {
-            "internal_source_contains_reviewer_names": True,
-            "removed_columns_from_public_canonical": sorted(
-                reviewer_assignment_columns & set(internal_data.columns)
+            "internal_source_contains_reviewer_names": bool(
+                internal_source_exists and reviewer_name_column in internal_data.columns
             ),
+            "removed_columns_from_public_canonical": ["Assigned_Reviewer", "Reviewer_Name"],
             "reviewer_identifiers_detected_after_scrub": leaked_tokens,
             "independent_reviewer_ratings_included": False,
             "url_query_parameters_removed": int(url_query_parameters_removed),
@@ -225,19 +236,19 @@ are included. This package was generated locally and was not pushed to GitHub.
             "query_tokens_detected_after_scrub": remaining_query_tokens,
         },
         "source_files": {
-            "internal_data": {
-                "logical_path": "data/private/data-clean_internal.csv",
-                "sha256": sha256_file(PRIVATE_DATA),
+            "canonical_data": {
+                "logical_path": "data/data-clean.csv",
+                "sha256": sha256_file(TRACKED_PUBLIC_DATA),
                 "rows": int(len(internal_data)),
             },
-            "screening_log": {
-                "logical_path": "analysis/reproducibility/screening_log_183.csv",
-                "sha256": sha256_file(SOURCE_SCREENING),
+            "post_extraction_exclusions": {
+                "logical_path": "data/post_extraction_exclusions.csv",
+                "sha256": sha256_file(POST_EXTRACTION_EXCLUSIONS),
                 "rows": int(len(internal_screening)),
             },
-            "assignments": {
-                "logical_path": "analysis/reproducibility/included_studies_assignments_48.csv",
-                "sha256": sha256_file(SOURCE_ASSIGNMENTS),
+            "study_contract": {
+                "logical_path": "data/included_study_order.csv",
+                "sha256": sha256_file(STUDY_CONTRACT),
                 "rows": int(len(internal_assignments)),
             },
         },
@@ -249,12 +260,12 @@ are included. This package was generated locally and was not pushed to GitHub.
                 "columns": int(len(public_data.columns)),
             },
             "screening": {
-                "logical_path": "analysis/reproducibility/public_package/screening_log_183_public.csv",
+                "logical_path": "analysis/reproducibility/public_package/post_extraction_exclusions_public.csv",
                 "sha256": sha256_file(screening_path),
                 "rows": int(len(public_screening)),
             },
             "assignments": {
-                "logical_path": "analysis/reproducibility/public_package/included_studies_public_48.csv",
+                "logical_path": "analysis/reproducibility/public_package/included_studies_public.csv",
                 "sha256": sha256_file(assignments_path),
                 "rows": int(len(public_assignments)),
             },
@@ -280,7 +291,41 @@ are included. This package was generated locally and was not pushed to GitHub.
                 "sha256_normalization": "utf8_lf",
                 "rows": int(len(field_evidence)),
                 "columns": int(len(field_evidence.columns)),
-            }
+            },
+            "dataset_characterization": {
+                "logical_path": "data/dataset_characterization_evidence.csv",
+                "sha256": sha256_utf8_lf(DATASET_EVIDENCE),
+                "sha256_normalization": "utf8_lf",
+                "rows": int(len(dataset_evidence)),
+                "columns": int(len(dataset_evidence.columns)),
+            },
+            "primary_sr_scope": {
+                "logical_path": "data/primary_sr_scope_evidence.csv",
+                "sha256": sha256_utf8_lf(PRIMARY_SR_SCOPE),
+                "sha256_normalization": "utf8_lf",
+                "rows": int(len(primary_sr_scope)),
+                "columns": int(len(primary_sr_scope.columns)),
+            },
+        },
+        "study_identity_contracts": {
+            "included_study_order": {
+                "logical_path": "data/included_study_order.csv",
+                "sha256": sha256_utf8_lf(STUDY_CONTRACT),
+                "sha256_normalization": "utf8_lf",
+                "rows": int(len(internal_assignments)),
+            },
+            "reviewer_scoring_order": {
+                "logical_path": "data/reviewer_scoring_order.csv",
+                "sha256": sha256_utf8_lf(REVIEWER_SCORING_ORDER),
+                "sha256_normalization": "utf8_lf",
+                "rows": int(len(reviewer_scoring_order)),
+            },
+            "post_extraction_exclusions": {
+                "logical_path": "data/post_extraction_exclusions.csv",
+                "sha256": sha256_utf8_lf(POST_EXTRACTION_EXCLUSIONS),
+                "sha256_normalization": "utf8_lf",
+                "rows": int(len(internal_screening)),
+            },
         },
         "privacy": manifest["privacy"],
         "independent_reviewer_ratings_included": False,
@@ -292,7 +337,7 @@ are included. This package was generated locally and was not pushed to GitHub.
                 "sha256_normalization": "utf8_lf",
                 "rows": int(len(pd.read_csv(path))),
             }
-            for path in SPEARMAN_OUTPUTS
+            for path in PUBLIC_ANALYSIS_OUTPUTS
         },
     }
     (REPO / "data" / "public_release_manifest.json").write_text(
