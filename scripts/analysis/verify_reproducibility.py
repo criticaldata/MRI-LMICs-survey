@@ -268,6 +268,8 @@ def main() -> None:
         analysis / "tr_weighting_sensitivity_20260804" / "analysis_tr_primary_leave_one_out.csv",
         analysis / "ground_truth_metric_audit_20260804" / "ground_truth_metric_audit_metric_studies.csv",
         analysis / "random_forest_robustness_20260804" / "rf_heldout_permutation_summary.csv",
+        REPO / "figures" / "main" / "png" / "fig3_lmic_relevance.png",
+        REPO / "figures" / "main" / "pdf" / "fig3_lmic_relevance.pdf",
         REPO / "figures" / "main" / "png" / "fig4_performance_comparison.png",
         REPO / "figures" / "main" / "pdf" / "fig4_performance_comparison.pdf",
         REPO / "figures" / "supplementary" / "png" / "figS1_temporal_trends.png",

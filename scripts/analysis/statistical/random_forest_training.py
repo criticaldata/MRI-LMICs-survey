@@ -127,7 +127,7 @@ def save_results(importances, feature_names, metrics, log_file):
     fi_df = pd.DataFrame({
         'Feature': feature_names,
         'Importance': importances,
-        'Rank': np.argsort(-importances) + 1
+        'Rank': np.argsort(np.argsort(-importances)) + 1  # rank, not sort index
     }).sort_values('Importance', ascending=False)
 
     fi_path = os.path.join(RESULTS_DIR, 'module1_feature_importance.csv')

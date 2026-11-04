@@ -35,6 +35,7 @@ def test_documented_master_runner_regenerates_and_verifies_complete_package():
         "extract_metric_ground_truth_from_cached_fulltext.py",
         "run_random_forest_robustness_20260804.py",
         "analysis_temporal_trends.py",
+        "fig3_lmic_relevance.py",
         "fig4_performance_comparison.py",
         "figS1_temporal_trends.py",
         "verify_reproducibility.py",

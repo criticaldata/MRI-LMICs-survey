@@ -54,17 +54,17 @@ Field_Strength_Type,Mixed,Mixed,5,Recognized
 Field_Strength_Type,Low-field,Low-field,3,Recognized
 Field_Strength_Type,standard field,Standard-field,1,Recognized
 Field_Strength_Type,High-field,High-field,1,Recognized
-Field_Strength_Type,Low field (64 mT) and Standard field (3 T),Mixed,1,Recognized
+Field_Strength_Type,Low field (64 mT) and Standard field (3 T),Low-field,1,Recognized
 Field_Strength_Type,Low-Field,Low-field,1,Recognized
-Field_Strength_Type,1.5 and 3T MRI,Mixed,1,Recognized
-Field_Strength_Type,1.5T and 3T MRI scanners,Mixed,1,Recognized
-Field_Strength_Type,1.5T and 3T,Mixed,1,Recognized
-Field_Strength_Type,Low-field (0.4T) + High-field reference (3T),Mixed,1,Recognized
+Field_Strength_Type,1.5 and 3T MRI,Standard-field,1,Recognized
+Field_Strength_Type,1.5T and 3T MRI scanners,Standard-field,1,Recognized
+Field_Strength_Type,1.5T and 3T,Standard-field,1,Recognized
+Field_Strength_Type,Low-field (0.4T) + High-field reference (3T),Low-field,1,Recognized
 Field_Strength_Type,Mixed (0.36 T and 1.5 T),Mixed,1,Recognized
 Field_Strength_Type,Low_field (0.1T),Low-field,1,Recognized
-Field_Strength_Type,3T MRI,Mixed,1,Recognized
+Field_Strength_Type,3T MRI,Standard-field,1,Recognized
 Field_Strength_Type,Portable Ultra-Low Field (0.064 Tesla),Low-field,1,Recognized
-Field_Strength_Type,Ultra-low-field (64 mT / 0.064 T) vs. High-field (3.0 T),Mixed,1,Recognized
+Field_Strength_Type,Ultra-low-field (64 mT / 0.064 T) vs. High-field (3.0 T),Low-field,1,Recognized
 Primary_Focus,Pure_SR,Pure SR,13,Recognized
 Primary_Focus,SR+Classification,SR + Classification,6,Recognized
 Primary_Focus,SR+Diagnosis,SR + Diagnosis,5,Recognized

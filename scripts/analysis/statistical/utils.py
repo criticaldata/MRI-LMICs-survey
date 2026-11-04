@@ -1,6 +1,15 @@
 import os
 import sys
 import pandas as pd
+
+import sys
+from pathlib import Path
+
+_ANALYSIS = Path(__file__).resolve().parent.parent
+if str(_ANALYSIS) not in sys.path:
+    sys.path.insert(0, str(_ANALYSIS))
+from field_strength import normalize_legacy as _normalize_legacy
+
 from datetime import datetime
 
 # Project root calculation: scripts/analysis/statistical/utils.py -> root
@@ -50,13 +59,9 @@ def normalize_dataset_type(dtype):
     return 'Other'
 
 def normalize_field_strength(field):
-    if pd.isna(field): return 'Not_Specified'
-    field_lower = str(field).lower().strip()
-    if 'low' in field_lower: return 'Low_Field'
-    if 'high' in field_lower: return 'High_Field'
-    if 'mixed' in field_lower: return 'Mixed'
-    if 'standard' in field_lower: return 'Standard_Field'
-    return 'Not_Specified'
+    """Delegates to the shared taxonomy in scripts/analysis/field_strength.py."""
+    return _normalize_legacy(field)
+
 
 def normalize_clinical_validation(val):
     if pd.isna(val): return 'None'
@@ -78,7 +83,18 @@ def normalize_low_field_mentioned(val):
     return 1 if str(val).lower().strip() in ['yes', 'true', '1'] else 0
 
 def has_metric_reported(val):
+    """Return 1 when the extraction records that the paper reports the metric.
+
+    Free-text negatives such as "Not reported (uses PVNR ...)", "Not reported.
+    Paper uses MAE instead of PSNR." or "Not explicitly reported in the
+    provided text ..." are non-reporting, so any value starting with "not
+    reported" or "not explicitly reported" (case insensitive) returns 0.
+    A bare "Reported" (extractor confirmed the metric is reported but did not
+    copy the value) still returns 1: this flag measures reporting, not
+    whether a numeric value could be parsed.
+    """
     if pd.isna(val): return 0
     val_str = str(val).lower().strip()
-    if val_str in ['not reported', 'n/a', 'na', '', 'not reported.']: return 0
+    if val_str in ['n/a', 'na', '', 'nan']: return 0
+    if val_str.startswith(('not reported', 'not explicitly reported')): return 0
     return 1

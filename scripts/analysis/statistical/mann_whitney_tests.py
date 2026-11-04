@@ -59,7 +59,10 @@ def run_mann_whitney(df, log_file):
     if len(score_a) > 0 and len(score_b) > 0:
         stat, p_val = mannwhitneyu(score_a, score_b, alternative='two-sided')
         n1, n2 = len(score_a), len(score_b)
-        effect_size = 1 - (2 * stat) / (n1 * n2)
+        # Rank-biserial correlation for the reported U (group A against group B):
+        # positive means group A ranks higher. The 1 - 2U/(n1 n2) form has the
+        # opposite sign convention and read as if reporters scored lower.
+        effect_size = (2 * stat) / (n1 * n2) - 1
         results.append({
             'Variable': 'LMIC_Relevance_Score',
             'Group_A_n': n1,
@@ -82,7 +85,10 @@ def run_mann_whitney(df, log_file):
     if len(year_a) > 0 and len(year_b) > 0:
         stat, p_val = mannwhitneyu(year_a, year_b, alternative='two-sided')
         n1, n2 = len(year_a), len(year_b)
-        effect_size = 1 - (2 * stat) / (n1 * n2)
+        # Rank-biserial correlation for the reported U (group A against group B):
+        # positive means group A ranks higher. The 1 - 2U/(n1 n2) form has the
+        # opposite sign convention and read as if reporters scored lower.
+        effect_size = (2 * stat) / (n1 * n2) - 1
         results.append({
             'Variable': 'Publication_Year',
             'Group_A_n': n1,
