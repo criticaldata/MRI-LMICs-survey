@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-23T04:04:02.642470+00:00",
+  "generated_at_utc": "2026-11-04T02:21:00.541241+00:00",
   "status": "PASS",
   "alignment_key": "normalized DOI; Paper_ID assigned from final canonical corpus",
   "source_rows": 45,
@@ -16,5 +16,5 @@
     "path": "tables/mri_scientometric_source_coverage.csv",
     "meaning": "coverage counts refer to the prior API acquisition over the original 48-record scored form, not the final eligible 45-study export"
   },
-  "sha256_utf8_lf": "bd7a17a2112eda13578c09aaaf64e1c8c3f2d4dff88b3627deb4c0c03dbb3ded"
+  "sha256_utf8_lf": "ba30a470cdc4accf8c01515f29d84f9d89289e3dd57b50a5349940feecdd11bb"
 }

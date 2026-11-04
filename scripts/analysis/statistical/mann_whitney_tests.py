@@ -25,19 +25,24 @@ from utils import (has_metric_reported, normalize_code_available,
                    normalize_low_field_mentioned, normalize_field_strength, 
                    normalize_dataset_type, BASE_DIR, DATA_DIR, RESULTS_DIR, 
                    FIGURES_DIR, PROCESSING_DIR, CSV_PATH, setup_logging, log)
-from scripts.figures.mapper import LMIC_SCORE_MAP
+from scripts.figures.mapper import LMIC_SCORE_MAP, load_data
+
+
+def rank_biserial(u, n1, n2):
+    """Positive values indicate higher scores in the reporting group A."""
+    return 2 * u / (n1 * n2) - 1
 
 
 def load_and_prepare(log_file):
     """Loads CSV extraction file and filters data similarly to Module 1."""
-    df = pd.read_csv(CSV_PATH, encoding='utf-8')
+    df = load_data(CSV_PATH)
     first_col = df.columns[0]
     df = df.rename(columns={first_col: 'Study_ID'})
     df = df.dropna(subset=['Title'], how='all')
     df = df[df['Title'].notna() & (df['Title'].str.strip() != '')]
 
-    df['Reports_PSNR'] = df['PSNR_Value'].apply(lambda value: has_metric_reported(value, "PSNR"))
-    df['Reports_SSIM'] = df['SSIM_Value'].apply(lambda value: has_metric_reported(value, "SSIM"))
+    df['Reports_PSNR'] = df['PSNR_Numeric'].notna().astype(int)
+    df['Reports_SSIM'] = df['SSIM_Numeric'].notna().astype(int)
     df['Reports_Any_Metric'] = ((df['Reports_PSNR'] == 1) | (df['Reports_SSIM'] == 1)).astype(int)
 
     df['LMIC_Relevance_Score'] = df['LMIC_Relevance_Score'].astype(str).map(LMIC_SCORE_MAP).fillna(df['LMIC_Relevance_Score'])
@@ -62,7 +67,7 @@ def run_mann_whitney(df, log_file):
     if len(score_a) > 0 and len(score_b) > 0:
         stat, p_val = mannwhitneyu(score_a, score_b, alternative='two-sided')
         n1, n2 = len(score_a), len(score_b)
-        effect_size = 1 - (2 * stat) / (n1 * n2)
+        effect_size = rank_biserial(stat, n1, n2)
         results.append({
             'Variable': 'LMIC_Relevance_Score',
             'Group_A_n': n1,
@@ -85,7 +90,7 @@ def run_mann_whitney(df, log_file):
     if len(year_a) > 0 and len(year_b) > 0:
         stat, p_val = mannwhitneyu(year_a, year_b, alternative='two-sided')
         n1, n2 = len(year_a), len(year_b)
-        effect_size = 1 - (2 * stat) / (n1 * n2)
+        effect_size = rank_biserial(stat, n1, n2)
         results.append({
             'Variable': 'Publication_Year',
             'Group_A_n': n1,

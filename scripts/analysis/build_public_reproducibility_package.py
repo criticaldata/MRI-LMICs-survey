@@ -33,7 +33,13 @@ SPEARMAN_OUTPUTS = (
 )
 PUBLIC_ANALYSIS_OUTPUTS = SPEARMAN_OUTPUTS + (
     REPO / "tables" / "analysis_random_forest_robustness_summary.csv",
+    REPO / "tables" / "analysis_sr_vs_other_enhancement.csv",
+    REPO / "tables" / "analysis_lmic_tr_correlation_by_scope.csv",
+    REPO / "tables" / "analysis_psnr_ssim_correlation.csv",
+    REPO / "tables" / "analysis_sr_scope_smir_sensitivity.csv",
 )
+ADDITIONAL_EVIDENCE = ('lmic_relevance_evidence.csv', 'publication_affiliation_evidence.csv',
+                       'affiliation_country_income_groups.csv', 'performance_metric_evidence.csv')
 
 
 def sha256_file(path: Path) -> str:
@@ -109,7 +115,8 @@ def build_package() -> dict:
             raise FileNotFoundError(path)
 
     internal_source_exists = PRIVATE_DATA.exists()
-    internal_data = pd.read_csv(PRIVATE_DATA if internal_source_exists else TRACKED_PUBLIC_DATA)
+    internal_data = pd.read_csv(TRACKED_PUBLIC_DATA)
+    private_names = pd.read_csv(PRIVATE_DATA, usecols=lambda c: c == "Reviewer_Name") if internal_source_exists else pd.DataFrame()
     field_evidence = pd.read_csv(FIELD_EVIDENCE)
     dataset_evidence = pd.read_csv(DATASET_EVIDENCE)
     primary_sr_scope = pd.read_csv(PRIMARY_SR_SCOPE)
@@ -121,7 +128,7 @@ def build_package() -> dict:
     reviewer_assignment_columns = {"Assigned_Reviewer", "Reviewer", "Reviewer_Name"}
     reviewer_names = {
         str(value).strip().casefold()
-        for value in internal_data.get(reviewer_name_column, pd.Series(dtype=object)).dropna()
+        for value in private_names.get(reviewer_name_column, pd.Series(dtype=object)).dropna()
         if str(value).strip()
     }
     reviewer_tokens = reviewer_names | {
@@ -170,6 +177,8 @@ def build_package() -> dict:
             field_evidence,
             dataset_evidence,
             primary_sr_scope,
+            *(pd.read_csv(REPO / "data" / name) for name in ADDITIONAL_EVIDENCE),
+            pd.read_csv(REPO / "tables/mri_scientometric_results.csv"),
         )
     ).casefold()
     leaked_tokens = sorted(token for token in reviewer_tokens if token in public_text)
@@ -191,7 +200,6 @@ def build_package() -> dict:
     screening_path = OUTPUT / "post_extraction_exclusions_public.csv"
     assignments_path = OUTPUT / "included_studies_public.csv"
     write_csv(public_data, data_path)
-    write_csv(public_data, TRACKED_PUBLIC_DATA)
     write_csv(public_screening, screening_path)
     write_csv(public_assignments, assignments_path)
 
@@ -226,7 +234,7 @@ are included. This package was generated locally and was not pushed to GitHub.
         "github_modified": False,
         "privacy": {
             "internal_source_contains_reviewer_names": bool(
-                internal_source_exists and reviewer_name_column in internal_data.columns
+                internal_source_exists and reviewer_name_column in private_names.columns
             ),
             "removed_columns_from_public_canonical": ["Assigned_Reviewer", "Reviewer_Name"],
             "reviewer_identifiers_detected_after_scrub": leaked_tokens,
@@ -340,6 +348,12 @@ are included. This package was generated locally and was not pushed to GitHub.
             for path in PUBLIC_ANALYSIS_OUTPUTS
         },
     }
+    for name in ADDITIONAL_EVIDENCE:
+        path = REPO / 'data' / name
+        frame = pd.read_csv(path)
+        public_manifest['tracked_public_evidence'][path.stem] = {
+            'logical_path': f'data/{name}', 'sha256': sha256_utf8_lf(path),
+            'sha256_normalization': 'utf8_lf', 'rows': len(frame), 'columns': len(frame.columns)}
     (REPO / "data" / "public_release_manifest.json").write_text(
         json.dumps(public_manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )

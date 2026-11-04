@@ -1,9 +1,16 @@
-"""Offline validation of the final MRI-LMICs reproducibility package."""
+"""Offline validation of public artifacts and available local analysis details.
+
+The documented pipeline regenerates detailed analyses under ignored review_*
+directories. Their public promotions are versioned in tables/ and suffice for
+a clean-checkout verification. This verifier does not rerun RF resampling or
+claim that absent local detail outputs have been independently reproduced.
+"""
 
 from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 import sys
 import unicodedata
@@ -61,11 +68,20 @@ def sha256_utf8_lf(path: Path) -> str:
 
 def main() -> None:
     from review_metrics import build_analysis, load_data
+    from run_tr_weighting_sensitivity import SCHEMES
 
     data_dir = REPO / "data"
     tables_dir = REPO / "tables"
     analysis_dir = REPO / "analysis" / "review_20260803"
     repro_dir = REPO / "analysis" / "reproducibility"
+    local_details_checked = []
+
+    def local_detail(relative: str) -> pd.DataFrame | None:
+        path = analysis_dir / relative
+        if not path.is_file():
+            return None
+        local_details_checked.append(path.relative_to(REPO).as_posix())
+        return pd.read_csv(path)
 
     form = pd.read_csv(data_dir / "reviewer_scoring_order.csv")
     contract = pd.read_csv(data_dir / "included_study_order.csv")
@@ -102,11 +118,21 @@ def main() -> None:
     dataset_evidence = pd.read_csv(data_dir / "dataset_characterization_evidence.csv")
     tr_evidence = pd.read_csv(data_dir / "tr_criteria_evidence.csv")
     scope_evidence = pd.read_csv(data_dir / "primary_sr_scope_evidence.csv")
+    lmic_evidence = pd.read_csv(data_dir / "lmic_relevance_evidence.csv")
+    affiliations = pd.read_csv(data_dir / "publication_affiliation_evidence.csv")
+    from apply_lmic_relevance_evidence import apply_verified_scores
+    reapplied = apply_verified_scores(data, lmic_evidence)
+    require(reapplied.LMIC_Relevance_Score.tolist() == data.LMIC_Relevance_Score.tolist(),
+            "Public LMIC scores disagree with DOI-keyed evidence")
+    require(affiliations.LMIC_Coauthorship_Status.tolist() == lmic_evidence.LMIC_Coauthorship_Status.tolist(),
+            "Affiliation and Level 5 decisions disagree")
     for name, frame in (
         ("field evidence", field),
         ("dataset evidence", dataset_evidence),
         ("TR evidence", tr_evidence),
         ("primary SR scope evidence", scope_evidence),
+        ("LMIC relevance evidence", lmic_evidence),
+        ("publication affiliation evidence", affiliations),
     ):
         verify_identity(frame, contract, name)
 
@@ -179,27 +205,44 @@ def main() -> None:
     require(temporal_2025["Year"].astype(int).tolist() == [2025], "2025 must be reported separately")
     require(temporal_2025["Status"].tolist() == ["Preliminary and incomplete"], "2025 scope must be marked preliminary")
 
-    tr_weights = pd.read_csv(analysis_dir / "tr_weighting_sensitivity_20260804" / "analysis_tr_weighting_sensitivity.csv")
-    tr_loo = pd.read_csv(analysis_dir / "tr_weighting_sensitivity_20260804" / "analysis_tr_primary_leave_one_out.csv")
+    tr_weights = pd.read_csv(tables_dir / "analysis_tr_weighting_sensitivity.csv")
     require(len(tr_weights) == 4, "four prespecified TR weighting schemes are required")
-    require(len(tr_loo) == 45, "TR leave-one-out output must cover all 45 eligible studies")
-    ground_truth_summary = pd.read_csv(analysis_dir / "ground_truth_metric_audit_20260804" / "ground_truth_metric_audit_summary.csv")
-    require(not ground_truth_summary.empty, "ground-truth/metric audit summary is missing")
-    rf = pd.read_csv(
-        analysis_dir / "random_forest_robustness_20260804" / "rf_repeated_cv_summary.csv"
+    require(tr_weights["Scheme"].tolist() == list(SCHEMES), "TR weighting schemes differ from the prespecified definitions")
+    require((tr_weights["N"] == 45).all(), "TR weighting schemes must cover all 45 eligible studies")
+    for column in ("Permutations", "Bootstrap_Replicates"):
+        require((tr_weights[column] == 10_000).all(), f"TR {column} must remain 10,000")
+    for column in ("Seed", "Bootstrap_Seed"):
+        require((tr_weights[column] == 42).all(), f"TR {column} must remain 42")
+    detailed_weights = local_detail("tr_weighting_sensitivity_20260804/analysis_tr_weighting_sensitivity.csv")
+    if detailed_weights is not None:
+        pd.testing.assert_frame_equal(tr_weights, detailed_weights, check_dtype=False, atol=1e-12, rtol=1e-12)
+    tr_loo = local_detail("tr_weighting_sensitivity_20260804/analysis_tr_primary_leave_one_out.csv")
+    if tr_loo is not None:
+        require(len(tr_loo) == 45, "TR leave-one-out output must cover all 45 eligible studies")
+    # The study-level ground-truth audit is already regenerated above from
+    # frozen public evidence (metric_suitability and dataset_characterization).
+    ground_truth_summary = local_detail("ground_truth_metric_audit_20260804/ground_truth_metric_audit_summary.csv")
+    if ground_truth_summary is not None:
+        require(not ground_truth_summary.empty, "ground-truth/metric audit summary is missing")
+    rf = local_detail(
+        "random_forest_robustness_20260804/rf_repeated_cv_summary.csv"
     )
-    require((rf["Splits"] == 50).all(), "RF robustness must preserve 50 repeated held-out splits")
     public_rf = pd.read_csv(tables_dir / "analysis_random_forest_robustness_summary.csv")
+    require(len(public_rf) == 4 and public_rf["Model"].is_unique,
+            "public RF summary must contain the four distinct benchmark models")
     require((public_rf["N_Studies"] == 45).all(), "public RF summary must cover all 45 eligible studies")
     require((public_rf["Resampling_Splits"] == 50).all(), "public RF summary must cover all 50 held-out splits")
     require((public_rf["Seed"] == 42).all(), "public RF summary must retain seed 42")
-    for _, row in rf.iterrows():
-        public_row = public_rf.loc[public_rf["Model"] == row["Model"]]
-        require(len(public_row) == 1, f"public RF summary is missing model {row['Model']}")
-        public_row = public_row.iloc[0]
-        for column in ("MAE_Mean", "MAE_SD", "R2_Mean", "R2_SD"):
-            require(abs(float(public_row[column]) - float(row[column])) < 1e-12,
-                    f"public RF summary disagrees with reproducibility output for {row['Model']} {column}")
+    require(public_rf[["MAE_Mean", "MAE_SD", "R2_Mean", "R2_SD"]].map(math.isfinite).all().all(),
+            "public RF performance summaries must be finite")
+    if rf is not None:
+        require((rf["Splits"] == 50).all(), "RF robustness must preserve 50 repeated held-out splits")
+        require(set(rf["Model"]) == set(public_rf["Model"]), "public and detailed RF model sets differ")
+        for _, row in rf.iterrows():
+            public_row = public_rf.loc[public_rf["Model"] == row["Model"]].iloc[0]
+            for column in ("MAE_Mean", "MAE_SD", "R2_Mean", "R2_SD"):
+                require(abs(float(public_row[column]) - float(row[column])) < 1e-12,
+                        f"public RF summary disagrees with reproducibility output for {row['Model']} {column}")
 
     public_manifest = json.loads((data_dir / "public_release_manifest.json").read_text(encoding="utf-8"))
     corpus_entry = public_manifest["tracked_public_corpus"]
@@ -210,6 +253,10 @@ def main() -> None:
         ("field_characterization", data_dir / "field_characterization_evidence.csv", field),
         ("dataset_characterization", data_dir / "dataset_characterization_evidence.csv", dataset_evidence),
         ("primary_sr_scope", data_dir / "primary_sr_scope_evidence.csv", scope_evidence),
+        ("lmic_relevance_evidence", data_dir / "lmic_relevance_evidence.csv", lmic_evidence),
+        ("publication_affiliation_evidence", data_dir / "publication_affiliation_evidence.csv", affiliations),
+        ("affiliation_country_income_groups", data_dir / "affiliation_country_income_groups.csv", pd.read_csv(data_dir / "affiliation_country_income_groups.csv")),
+        ("performance_metric_evidence", data_dir / "performance_metric_evidence.csv", pd.read_csv(data_dir / "performance_metric_evidence.csv")),
     ):
         entry = evidence_manifest[key]
         require(entry["rows"] == len(frame), f"manifest row count is stale for {key}")
@@ -242,13 +289,19 @@ def main() -> None:
     ]
     require(all(path.exists() for path in output_paths), "one or more current figure outputs are missing")
 
-    quality = pd.read_csv(analysis_dir / "analysis_quality_summary_rerun.csv")
+    quality = pd.read_csv(tables_dir / "analysis_quality_summary.csv")
+    pd.testing.assert_frame_equal(quality, analysis["quality_summary"], check_dtype=False, atol=1e-12, rtol=1e-12)
+    detailed_quality = local_detail("analysis_quality_summary_rerun.csv")
+    if detailed_quality is not None:
+        pd.testing.assert_frame_equal(quality, detailed_quality, check_dtype=False, atol=1e-12, rtol=1e-12)
     total_quality = quality.loc[quality["Domain"] == "Total Quality"].iloc[0]
     canonical_all = correlation.loc[correlation["Cohort"] == "All included studies"].iloc[0]
     consensus_all = consensus.iloc[0]
     result = {
         "verified_at_utc": datetime.now(timezone.utc).isoformat(),
         "status": "PASS",
+        "verification_scope": "public artifacts and available local details",
+        "local_detail_outputs_checked": local_details_checked,
         "network_calls_made": False,
         "github_modified": False,
         "screening_flow": {

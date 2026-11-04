@@ -41,8 +41,6 @@ def _style_box_panel(ax, data, x_col, y_col, palette, ylabel, title, subtitle):
     """Style a box+strip panel consistently."""
     valid = data.dropna(subset=[y_col])
     counts = valid[x_col].value_counts()
-    valid_cats = counts[counts >= 2].index.tolist()
-    valid = valid[valid[x_col].isin(valid_cats)]
 
     if len(valid) == 0:
         ax.text(0.5, 0.5, "Insufficient data", ha="center", va="center",
@@ -53,9 +51,11 @@ def _style_box_panel(ax, data, x_col, y_col, palette, ylabel, title, subtitle):
     order = valid.groupby(x_col)[y_col].median().sort_values(ascending=False).index
     pal = {k: palette.get(k, "#95a5a6") for k in order}
 
-    bp = sns.boxplot(data=valid, x=x_col, y=y_col, order=order, palette=pal,
-                     ax=ax, width=0.5, fliersize=0, linewidth=1,
-                     boxprops=dict(alpha=0.7), medianprops=dict(color="white", linewidth=2))
+    boxed = valid[valid[x_col].isin(counts[counts >= 3].index)]
+    if not boxed.empty:
+        sns.boxplot(data=boxed, x=x_col, y=y_col, order=order, palette=pal,
+                    ax=ax, width=0.5, fliersize=0, linewidth=1,
+                    boxprops=dict(alpha=0.7), medianprops=dict(color="#222222", linewidth=2))
     sns.stripplot(data=valid, x=x_col, y=y_col, order=order,
                   color="#2C3E50", alpha=0.6, size=6, ax=ax, jitter=0.15,
                   edgecolor="white", linewidth=0.5)
@@ -63,7 +63,6 @@ def _style_box_panel(ax, data, x_col, y_col, palette, ylabel, title, subtitle):
     # Add n= labels below each box
     for i, cat in enumerate(order):
         n = counts.get(cat, 0)
-        med = valid[valid[x_col] == cat][y_col].median()
         ax.text(i, ax.get_ylim()[0] + (ax.get_ylim()[1] - ax.get_ylim()[0]) * 0.02,
                 f"n={n}", ha="center", fontsize=7, color="#7f8c8d")
 
@@ -111,7 +110,7 @@ def create_fig3():
     ax_c.set_xlabel("PSNR (dB)", fontsize=10)
     ax_c.set_ylabel("SSIM", fontsize=10)
     panel_title(ax_c, "C.  PSNR vs SSIM by Architecture",
-                f"{len(df_both)} report both; matched-reference eligibility is limited")
+                f"{len(df_both)} report both; same experiment not verified")
     ax_c.legend(fontsize=7.5, loc="lower right", frameon=True,
                 fancybox=True, edgecolor="#ddd")
     ax_c.spines["top"].set_visible(False)
@@ -123,13 +122,14 @@ def create_fig3():
     ax_d = fig.add_subplot(gs[1, 1])
     psnr_field = df.dropna(subset=["PSNR_Numeric"])
     field_counts = psnr_field["Field_Strength_Norm"].value_counts()
-    valid_fields = field_counts[field_counts >= 2].index.tolist()
-    psnr_field = psnr_field[psnr_field["Field_Strength_Norm"].isin(valid_fields)]
     if len(psnr_field):
         order = psnr_field.groupby("Field_Strength_Norm")["PSNR_Numeric"].median().sort_values(ascending=False).index
         palette = {field: FS_PALETTE.get(field, "#95a5a6") for field in order}
-        sns.boxplot(data=psnr_field, x="Field_Strength_Norm", y="PSNR_Numeric", order=order,
-                    palette=palette, ax=ax_d, width=0.5, fliersize=0)
+        boxed = psnr_field[psnr_field["Field_Strength_Norm"].isin(field_counts[field_counts >= 3].index)]
+        if not boxed.empty:
+            sns.boxplot(data=boxed, x="Field_Strength_Norm", y="PSNR_Numeric", order=order,
+                        palette=palette, ax=ax_d, width=0.5, fliersize=0,
+                        medianprops=dict(color="#222222", linewidth=2))
         sns.stripplot(data=psnr_field, x="Field_Strength_Norm", y="PSNR_Numeric", order=order,
                       color="#2C3E50", alpha=0.6, size=6, ax=ax_d, jitter=0.15,
                       edgecolor="white", linewidth=0.5)

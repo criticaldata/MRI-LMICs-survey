@@ -39,11 +39,11 @@ Standard nominal multi-rater Fleiss' kappa is the primary agreement statistic. A
 
 Ordinal-weighted generalized multi-rater kappa and ICC are supplementary; neither replaces the prespecified Fleiss statistic. For the 48 scored records, linear/quadratic weighted multi-rater kappa estimates are 0.528/0.544 for LMIC relevance and 0.393/0.559 for TR. Two-way random-effects absolute-agreement ICC(2,1) is 0.553 for LMIC and 0.570 for TR; ICC(2,k), for the mean of 11 raters, is 0.932 and 0.936, respectively. ICC treats these ordinal categories as equally spaced and should be interpreted alongside kappa.
 
-The canonical study-level LMIC–TR Spearman analysis uses the structured extraction and evidence-coded TR: n=45, ρ=0.374, two-sided 10,000-permutation p=0.0114, bootstrap 95% CI [0.096, 0.586]. A separate sensitivity using the per-study median of the 11 authors' scores is n=45, ρ=−0.328, p=0.0297, 95% CI [−0.601, −0.024]. The direction changes by score source; both results are retained and the association is not described as robust across scoring sources.
+The canonical study-level LMIC–TR Spearman analysis uses the [publication-verified LMIC extraction](docs/LMIC_LEVEL5_EVIDENCE.md) and evidence-coded TR: n=45, ρ=−0.258, two-sided 10,000-permutation p=0.0874, bootstrap 95% CI [−0.542, 0.046]. A separate sensitivity using the per-study median of the 11 authors' scores is n=45, ρ=−0.328, p=0.0297, 95% CI [−0.601, −0.024]. Both point estimates are negative, but the extraction-derived interval includes zero; the sensitivity is not independent validation.
 
 The five evidence-coded TR criterion counts are: low-field domain 3/45, open science 4/45, clinical evaluation 19/45, explicit inference-hardware requirements 0/45, and data diversity 28/45. Mean TR is 1.20/5 (median 1). This is a measure of reported evidence against the specified rubric, not clinical effectiveness.
 
-The three alternative TR weighting schemes produced mean scores of 1.35, 1.18, and 1.33 versus 1.20 under equal weights. Study-score rank correlations ranged from 0.942 to 1.000; the 2:2:2:1:2 scheme was numerically identical to equal weights because Hardware Awareness was 0/45. LMIC–TR correlations remained positive but varied from 0.312 to 0.386, so weighting sensitivity does not establish robustness of that association.
+The three alternative TR weighting schemes produced mean scores of 1.35, 1.18, and 1.33 versus 1.20 under equal weights. Study-score rank correlations ranged from 0.942 to 1.000. The 2:2:2:1:2 scheme preserved all ranks because Hardware Awareness was 0/45, although the rescaled scores differed. See the weighting table for the LMIC–TR estimates under each scheme.
 
 Field-strength categories use reported numeric strengths: ultra-low `<0.05 T`, low-field `0.05-0.5 T`, intermediate `>0.5-<1.5 T`, standard `1.5-3 T`, and high-field `>3 T`. A generic “low-field” label without a numeric tesla value is kept separate as threshold-unspecified; multi-bin studies are labeled mixed. This general descriptive taxonomy is distinct from the TR criterion (`<=64 mT`); input and target field strengths are characterized separately.
 
@@ -55,15 +55,16 @@ Field-strength categories use reported numeric strengths: ultra-low `<0.05 T`, l
 | Brain MRI application | 22/45 |
 | CNN architecture | 22/45 |
 | Studies reporting parseable PSNR | 18/45 |
-| Studies reporting parseable SSIM | 17/45 |
-| Median PSNR | 34.195 dB |
-| Median SSIM | 0.896 |
-| Mean quality score | 4.111/9 (sample SD 1.210) |
-| Metric-reporting studies meeting the paired/reference evidence rule | 8/19 |
+| Studies reporting parseable SSIM | 18/45 |
+| Median PSNR | 34.710 dB |
+| Median SSIM | 0.9045 |
+| Mean quality score | 4.133/9 (sample SD 1.198) |
+| Metric-reporting studies meeting the paired/reference evidence rule | 9/20 |
+| LMIC Relevance Level 5 | 23/45 |
 | Public source code | 4/45 |
 | Code available upon request | 2/45 |
 
-The supplementary constrained Random Forest has mean held-out MAE 0.679 and mean held-out R² 0.031 (SD 0.283) across 50 repeated 5-fold splits. The mean-baseline MAE is 0.782; the forest has lower MAE in 44/50 paired splits. Numeric low-field input is coded only when a 0.05-0.5 T value is explicitly reported; a generic “low-field” label is not treated as a measured value. This small-sample analysis is exploratory, not causal or a claim of deployable prediction. A public aggregate summary is in `tables/analysis_random_forest_robustness_summary.csv`; detailed reproducibility outputs are generated locally under `analysis/review_20260803/random_forest_robustness_20260804/`.
+The supplementary constrained Random Forest has mean held-out MAE 0.924 and mean held-out R² −0.430 (SD 1.367) across 50 repeated 5-fold splits. The mean-baseline MAE is 0.932; the forest has lower MAE in 33/50 paired splits. The small difference and negative mean held-out R² do not support a predictive claim. The model predicts the author-developed rubric, not an external clinical endpoint, and some inputs overlap with the evidence used to construct the label. See `tables/analysis_random_forest_robustness_summary.csv`.
 
 The primary temporal analysis covers full years 2020–2024 (n=43); the two 2025 records are shown separately as preliminary and incomplete.
 

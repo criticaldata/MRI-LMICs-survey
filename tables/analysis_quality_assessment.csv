@@ -37,7 +37,7 @@ Paper_ID,Title,Year,QA_PSNR,QA_SSIM,QA_OtherMetrics,Reporting_Quality,QA_ClinVal
 36,MRI Super-Resolution With Ensemble Learning and Complementary Priors,2020,1,1,0,2,0,0,0,0,0,1,1,2,4
 37,SRflow: Deep learning based super-resolution of 4D-flow MRI data,2022,0,0,1,1,0,0,1,1,0,0,1,1,3
 38,SMORE: A Self-Supervised Anti-Aliasing and Super-Resolution Algorithm for MRI Using Deep Learning,2021,1,1,1,3,0,0,1,1,0,0,1,1,5
-39,SMIR: A Transformer-Based Model for MRI super-resolution reconstruction,2021,0,0,1,1,0,0,0,0,0,1,1,2,3
+39,SMIR: A Transformer-Based Model for MRI super-resolution reconstruction,2021,0,1,1,2,0,0,0,0,0,1,1,2,4
 40,Autoencoder-Inspired Convolutional Network-Based Super-Resolution Method in MRI,2021,1,1,1,3,0,0,1,1,0,0,1,1,5
 41,A mass correlation based deep learning approach using deep Convolutional neural network to classify the brain tumor,2023,0,0,1,1,0,0,0,0,0,1,1,2,3
 42,Accuracy Enhancement in Detecting Pituitary Tumors using Deep Learning,2023,0,0,1,1,0,0,0,0,0,1,1,2,3

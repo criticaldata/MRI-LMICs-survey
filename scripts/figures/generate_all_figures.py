@@ -70,6 +70,7 @@ tables = [
     (tables_dir / "analysis_cross_field_generalization.py", "Analysis: Cross-Field Generalization"),
     (tables_dir / "analysis_edge_deployment.py", "Analysis: Edge Deployment Candidates"),
     (tables_dir / "analysis_temporal_trends.py", "Analysis: Temporal Trends"),
+    (tables_dir / "analysis_sr_vs_non_sr.py", "Analysis: Primary SR versus Other Enhancement"),
     (tables_dir / "analysis_translational_readiness.py", "Analysis: Translational Readiness"),
     (tables_dir / "analysis_dataset_diversity.py", "Analysis: Dataset Diversity"),
     (tables_dir / "analysis_quality_assessment.py", "Analysis: Quality Assessment"),

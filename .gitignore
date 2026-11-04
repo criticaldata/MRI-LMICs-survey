@@ -11,6 +11,10 @@ data/*
 !data/public_release_manifest.json
 !data/included_study_order.csv
 !data/reviewer_scoring_order.csv
+!data/lmic_relevance_evidence.csv
+!data/publication_affiliation_evidence.csv
+!data/affiliation_country_income_groups.csv
+!data/performance_metric_evidence.csv
 data/private/
 06_processing_outputs/
 __pycache__/

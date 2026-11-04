@@ -8,7 +8,6 @@ to ensure cross-figure consistency.
 import re
 import sys
 import pandas as pd
-import numpy as np
 from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -18,6 +17,7 @@ from scripts.field_taxonomy import (  # noqa: E402
     FIELD_CATEGORY_ORDER,
     normalize_field_category,
 )
+from scripts.metric_extraction import apply_metric_evidence, parse_metric_value  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -470,37 +470,16 @@ def load_data(data_path=None):
     df["Code_Available_Norm"] = df["Code_Available"].apply(normalize_code_available)
     df["Clinical_Validation_Norm"] = df["Clinical_Validation_Type"].map(CLINICAL_VALIDATION_MAP).fillna("None")
 
-    # Parse PSNR — extract first numeric value (dB)
-    df["PSNR_Numeric"] = df["PSNR_Value"].apply(_parse_first_numeric)
-
-    # Parse SSIM — extract first numeric value in [0, 1]
-    df["SSIM_Numeric"] = df["SSIM_Value"].apply(_parse_first_numeric)
-    # Filter out values > 1 (likely errors or dB-format values)
-    df.loc[df["SSIM_Numeric"] > 1, "SSIM_Numeric"] = np.nan
-
-    return df
+    # Reviewed proposed-model conditions override prose order. Raw values stay
+    # available, and unreviewed fallback values are explicitly labelled.
+    return apply_metric_evidence(
+        df, get_project_root() / "data" / "performance_metric_evidence.csv"
+    )
 
 
 def _parse_first_numeric(value):
-    """Extract the first plausible numeric value from a free-text metric string."""
-    if pd.isna(value):
-        return np.nan
-    s = str(value).strip()
-    # Skip obvious non-numeric entries
-    skip_patterns = ("not reported", "n/a", "reported", "not explicitly reported",
-                     "not reported.", "uses", "paper uses")
-    if s.lower().startswith(skip_patterns):
-        return np.nan
-    # Find first float-like pattern (at least two digits to avoid matching
-    # single-digit counts or IDs like "3D", "4D", "2×", etc.)
-    matches = re.findall(r"(\d+\.\d+|\d{2,}\.?\d*)", s)
-    for m in matches:
-        num = float(m)
-        # PSNR typically 15-60 dB, SSIM typically 0.4-1.0
-        # Reject values that are clearly not image quality metrics
-        if 10.0 <= num <= 80.0 or (0.4 <= num <= 1.0):
-            return num
-    return np.nan
+    """Compatibility fallback; proposed-model selection requires DOI evidence."""
+    return parse_metric_value(value)
 
 
 # ---------------------------------------------------------------------------

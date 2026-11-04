@@ -82,22 +82,22 @@ def create_fig6():
         ], "#F8F1DE"
     )
     _card(
-        ax, 0.12, 0.13, 0.22, 0.25, "Technical",
-        ["Cross-field/domain-shift testing", "External scanner/vendor validation", "Resource-aware model design"],
+        ax, 0.04, 0.12, 0.29, 0.29, "Technical priorities",
+        ["Top priority: cross-field\n   domain adaptation", "External scanner/vendor validation", "Resource-aware model design"],
         "#E7F2FC"
     )
     _card(
-        ax, 0.39, 0.13, 0.22, 0.25, "Clinical",
+        ax, 0.37, 0.12, 0.25, 0.29, "Clinical",
         ["Prospective LMIC cohorts", "Multi-reader diagnostic tasks", "Failure and uncertainty analysis"],
         "#E5F5EB"
     )
     _card(
-        ax, 0.66, 0.13, 0.22, 0.25, "Implementation",
-        ["Open code and model weights", "Local governance and maintenance", "Site-specific cost/workflow studies"],
+        ax, 0.66, 0.12, 0.30, 0.29, "Implementation",
+        ["Open code and model weights", "Federated learning depends on\n   local connectivity and governance", "Site-specific cost/workflow studies"],
         "#F1EAF8"
     )
     for x0, x1 in [(0.31, 0.365), (0.635, 0.69)]:
-        ax.annotate("", xy=(x1, 0.70), xytext=(x0, 0.70),
+        ax.annotate("", xy=(x1 - 0.016, 0.70), xytext=(x0 + 0.016, 0.70),
                     arrowprops={"arrowstyle": "-|>", "lw": 1.8, "color": "#56758A"})
     ax.text(0.5, 0.055,
             "Goal: evidence-based deployment readiness—not performance claims based solely on PSNR/SSIM.",

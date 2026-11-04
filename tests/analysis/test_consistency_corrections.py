@@ -29,6 +29,7 @@ from utils import normalize_field_strength as normalize_statistical_field  # noq
 from scripts.field_taxonomy import has_reported_low_field_strength  # noqa: E402
 from table1_study_characteristics import create_table1  # noqa: E402
 from table6_geographic_equity import create_table6  # noqa: E402
+from run_random_forest_robustness_20260804 import make_input  # noqa: E402
 import fig1_year_distribution as fig1_year_distribution  # noqa: E402
 
 
@@ -100,12 +101,12 @@ def test_psnr_reporting_test_uses_parseable_values(tmp_path):
     row = result.loc[result["Variable"].eq("LMIC_Relevance_Score")].iloc[0]
     assert int(row["Group_A_n"]) == 18
     assert int(row["Group_B_n"]) == 27
-    assert float(row["U_statistic"]) == pytest.approx(277.5)
+    assert float(row["U_statistic"]) == pytest.approx(283)
     # SciPy's asymptotic-tail implementation can vary by sub-micro precision
     # across supported versions; the inferential result is unchanged.
-    assert float(row["p_value"]) == pytest.approx(0.407294, abs=1e-6)
-    assert int(prepared["Reports_SSIM"].sum()) == 17
-    assert int(prepared["Reports_Any_Metric"].sum()) == 19
+    assert float(row["p_value"]) == pytest.approx(0.320784659, abs=1e-6)
+    assert int(prepared["Reports_SSIM"].sum()) == 18
+    assert int(prepared["Reports_Any_Metric"].sum()) == 20
 
 
 def test_main_performance_table_preserves_half_step_lmic_medians():
@@ -113,7 +114,9 @@ def test_main_performance_table_preserves_half_step_lmic_medians():
     gan = table.loc[table["Architecture"].eq("GAN")].iloc[0]
     cnn = table.loc[table["Architecture"].eq("CNN")].iloc[0]
 
-    assert gan["LMIC Score median"] == "3.0"
+    source = load_data()
+    gan_scores = source.loc[source["Architecture_Norm"].eq("GAN"), "LMIC_Score"]
+    assert gan["LMIC Score median"] == f"{gan_scores.median():.1f}"
     assert str(cnn["SSIM, median (range)"]).startswith("0.916")
 
 
@@ -124,9 +127,21 @@ def test_random_forest_public_summary_matches_current_45_study_run():
     assert int(forest["N_Studies"]) == 45
     assert int(forest["Resampling_Splits"]) == 50
     assert int(forest["Seed"]) == 42
-    assert float(forest["MAE_Mean"]) == pytest.approx(0.678696, abs=1e-6)
-    assert float(forest["R2_Mean"]) == pytest.approx(0.031143, abs=1e-6)
-    assert int(forest["Positive_MAE_Improvement_Splits"]) == 44
+    baseline = summary.loc[summary["Model"].eq("Mean baseline")].iloc[0]
+    assert float(baseline["MAE_Mean"]) == pytest.approx(0.9324691358024692)
+    assert float(forest["MAE_Mean"]) == pytest.approx(0.9235157636030367)
+    assert float(forest["R2_Mean"]) == pytest.approx(-0.4302986053498138)
+    assert float(forest["MAE_Improvement_vs_Mean_Baseline"]) == pytest.approx(
+        baseline["MAE_Mean"] - forest["MAE_Mean"])
+    assert int(forest["Positive_MAE_Improvement_Splits"]) == 33
+
+
+def test_random_forest_uses_the_same_psnr_reporting_definition():
+    x, _, ids = make_input()
+    parsed = load_data().set_index("Paper_ID")["PSNR_Numeric"].notna()
+    assert ids["Paper_ID"].is_unique
+    assert x["Has_PSNR"].astype(bool).tolist() == parsed.loc[ids["Paper_ID"]].tolist()
+    assert int(x["Has_PSNR"].sum()) == 18
 
 
 def test_geographic_income_table_uses_multisource_affiliation_resolution():
@@ -136,7 +151,7 @@ def test_geographic_income_table_uses_multisource_affiliation_resolution():
     scientometric = pd.read_csv(REPO / "tables" / "mri_scientometric_results.csv")
 
     assert scientometric["Suggested_First_Country"].fillna("").str.strip().ne("").all()
-    assert actual == {"HIC": 25, "UMC": 10, "LMC": 7, "Not available": 3}
+    assert actual == {"HIC": 28, "UMC": 10, "LMC": 7, "Not available": 0}
 
 
 def test_canonical_figure_sources_replace_misnumbered_legacy_names():

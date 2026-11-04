@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from affiliation_income import classify_countries
+
 
 REPO = Path(__file__).resolve().parents[2]
 DEFAULT_INPUT = REPO / "tables" / "mri_scientometric_results.csv"
@@ -58,6 +60,7 @@ def align_export(
     output_path: Path,
     contract_path: Path,
     manifest_path: Path = DEFAULT_MANIFEST,
+    affiliation_evidence_path: Path | None = None,
 ) -> dict[str, object]:
     previous_manifest = {}
     if manifest_path.exists():
@@ -125,6 +128,22 @@ def align_export(
             "First_Author_WB_Group_Current"
         ].map(normalize_world_bank_group)
     aligned = aligned.drop(columns=["_doi"]).reset_index(drop=True)
+    if affiliation_evidence_path is not None:
+        evidence = pd.read_csv(affiliation_evidence_path, keep_default_na=False)
+        if len(evidence) != len(aligned) or evidence['DOI'].map(normalize_doi).tolist() != aligned['DOI'].map(normalize_doi).tolist():
+            raise ValueError('Publication-affiliation evidence must match the entire canonical DOI order')
+        countries = evidence['First_Author_Publication_Country'].map(classify_countries)
+        aligned['Verified_First_Publication_Country'] = [v[0] for v in countries]
+        aligned['Verified_First_Publication_WB_Group'] = [v[1] for v in countries]
+        aligned['Suggested_First_Country'] = aligned['Verified_First_Publication_Country']
+        aligned['Suggested_First_WB_Group'] = aligned['Verified_First_Publication_WB_Group']
+        aligned['LMIC_Coauthorship_Verified'] = evidence['LMIC_Coauthorship_Status'].tolist()
+        aligned['Publication_Affiliation_Evidence_Source'] = evidence['Evidence_Source_URL'].tolist()
+        aligned['Publication_Affiliation_Evidence_Page'] = evidence['Evidence_Page'].tolist()
+        aligned = aligned.fillna('Not available').replace('', 'Not available')
+        aligned = aligned.drop(columns=['SerpAPI_Contacts'], errors='ignore')
+        email = r'(?i)[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}'
+        aligned = aligned.replace(email, '[contact removed]', regex=True)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     aligned.to_csv(output_path, index=False, encoding="utf-8-sig", lineterminator="\n")
@@ -170,12 +189,14 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--contract", type=Path, default=REPO / "data" / "included_study_order.csv")
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    parser.add_argument('--affiliation-evidence', type=Path, default=REPO / 'data/publication_affiliation_evidence.csv')
     args = parser.parse_args()
     result = align_export(
         args.input.resolve(),
         args.output.resolve(),
         args.contract.resolve(),
         args.manifest.resolve(),
+        args.affiliation_evidence.resolve() if args.affiliation_evidence.exists() else None,
     )
     print(json.dumps(result, indent=2))
 

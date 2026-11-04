@@ -39,10 +39,10 @@ PUBLIC_MANIFEST = REPO / "data" / "public_release_manifest.json"
 
 EXPECTED_ALL = {
     "n": 45,
-    "rho": 0.3743574587892138,
-    "p_permutation": 0.0113988601139886,
-    "bootstrap_ci_2_5": 0.0959785172829493,
-    "bootstrap_ci_97_5": 0.5864907688888084,
+    "rho": -0.25773836252564347,
+    "p_permutation": 0.08739126087391261,
+    "bootstrap_ci_2_5": -0.542471591215388,
+    "bootstrap_ci_97_5": 0.04635336228250313,
 }
 EXPECTED_CONSENSUS = {
     "n": 45,

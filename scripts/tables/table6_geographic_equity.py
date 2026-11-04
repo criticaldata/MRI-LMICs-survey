@@ -31,13 +31,13 @@ def create_table6() -> None:
     groups = scientometric[group_column].fillna("Not available").replace(
         {"": "Not available", "UNKNOWN": "Not available"}
     )
-    allowed_groups = {"HIC", "UMC", "LMC", "Not available"}
+    allowed_groups = {"HIC", "UMC", "LMC", "LIC", "Mixed income groups", "Not available"}
     unexpected_groups = set(groups) - allowed_groups
     if unexpected_groups:
         raise ValueError(f"Unexpected first-author income groups: {sorted(unexpected_groups)}")
     income = groups.value_counts(dropna=False).rename_axis("First_Author_WB_Group").reset_index(name="Studies")
     income = income.set_index("First_Author_WB_Group").reindex(
-        ["HIC", "UMC", "LMC", "Not available"], fill_value=0
+        [g for g in ["HIC", "UMC", "LMC", "LIC", "Mixed income groups", "Not available"] if g in {"HIC", "UMC", "LMC", "Not available"} or groups.eq(g).any()], fill_value=0
     ).rename_axis("First_Author_WB_Group").reset_index()
     income["Percentage"] = (income["Studies"] / len(scientometric) * 100).round(1)
     income.to_csv(tables / "table6a_income_distribution.csv", index=False)

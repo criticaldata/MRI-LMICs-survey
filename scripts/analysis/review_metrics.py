@@ -508,12 +508,12 @@ def _metric_suitability_table(derived: pd.DataFrame) -> pd.DataFrame:
             "not available",
             "not applicable",
         }
-        if (
-            not field_pathway
-            or field_pathway.casefold() in unresolved_pathways
-            or "unresolved" in field_pathway.casefold()
-        ):
+        if not field_pathway:
             field_pathway = "Not reported"
+        resolved_pathway = (
+            field_pathway.casefold() not in unresolved_pathways
+            and "unresolved" not in field_pathway.casefold()
+        )
         pairedness = _text(row.get("Paired_Unpaired")) or "Not reported"
         ground_truth = _text(row.get("Ground_Truth_Type")) or "Not reported"
         if not metric_reported:
@@ -521,8 +521,8 @@ def _metric_suitability_table(derived: pd.DataFrame) -> pd.DataFrame:
             reason = "Neither PSNR nor SSIM was reported."
         elif (
             pairedness in {"Paired", "Paired by construction"}
-            and ground_truth != "Not reported"
-            and field_pathway != "Not reported"
+            and ground_truth.casefold() not in unresolved_pathways
+            and resolved_pathway
         ):
             eligibility = "Eligible"
             reason = "Reported metric has explicit paired/reference and field-pathway evidence."
@@ -963,8 +963,9 @@ def unknown_audit(df: pd.DataFrame) -> pd.DataFrame:
 def _metric_summary(subset: pd.DataFrame, column: str, prefix: str) -> dict[str, object]:
     """Return descriptive per-study metric summaries for one sensitivity cohort.
 
-    ``PSNR_Numeric`` and ``SSIM_Numeric`` are the first parseable values from
-    each paper's extraction field.  These summaries are therefore descriptive
+    ``PSNR_Numeric`` and ``SSIM_Numeric`` use DOI-keyed proposed-model evidence
+    where reviewed, with explicitly labelled legacy extraction fallback elsewhere.
+    These summaries are therefore descriptive
     sensitivity results, not a pooled meta-analysis across heterogeneous
     datasets, scales, sequences, or test protocols.
     """
@@ -1236,7 +1237,7 @@ def write_analysis_outputs(analysis: dict, output_dir: Path, source_path: Path) 
         },
         "performance_sensitivity": {
             "source_columns": ["PSNR_Numeric", "SSIM_Numeric"],
-            "metric_extraction": "first parseable value recorded per paper",
+            "metric_extraction": "DOI-keyed proposed-model and operating-condition evidence where supplied; legacy numeric parsing retained for other source fields",
             "interpretation": "descriptive sensitivity summaries; not a pooled meta-analysis",
             "metric_suitability_table": output_files["metric_suitability"],
         },

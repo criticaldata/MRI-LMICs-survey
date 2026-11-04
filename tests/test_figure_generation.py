@@ -65,7 +65,7 @@ def test_master_generator_survives_legacy_windows_console_encoding():
         timeout=180,
     )
     assert result.returncode == 0, f"Full generation failed:\n{result.stdout[-4000:]}\n{result.stderr[-4000:]}"
-    assert "Tables: 15/15 successful" in result.stdout
+    assert "Tables: 16/16 successful" in result.stdout
     assert "Figures: 8/8 successful" in result.stdout
 
 

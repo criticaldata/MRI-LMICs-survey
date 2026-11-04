@@ -149,6 +149,10 @@ def run_public_release_audit() -> None:
         "results_exclude_private_and_methodology_fields": not forbidden_headers.intersection(results_headers)
         and not any(header.startswith(methodology_prefixes) for header in results_headers),
         "results_use_explicit_missing_values": not blank_cells,
+        "results_exclude_direct_contact_addresses": "SerpAPI_Contacts" not in results_headers and not any(
+            re.search(r"(?i)[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}", str(cell))
+            for row in results_rows for cell in row.values()
+        ),
         "coverage_is_present_and_structured": bool(coverage_rows) and {"Source", "Requests", "Status_Breakdown"}.issubset(coverage_headers),
         "coverage_reference_scope_is_explicit": alignment_manifest.get("final_rows") == len(canonical)
         and alignment_manifest.get("source_acquisition_rows") == 48

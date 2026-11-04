@@ -12,6 +12,7 @@ from scripts.field_taxonomy import (  # noqa: E402
     has_reported_low_field_strength,
     normalize_field_category,
 )
+from scripts.metric_extraction import parse_metric_value
 
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 RESULTS_DIR = os.path.join(BASE_DIR, 'tables')
@@ -81,19 +82,4 @@ def normalize_low_field_mentioned(val):
 
 def has_metric_reported(val, metric=None):
     """Count only values containing a parseable PSNR/SSIM-like number."""
-    if pd.isna(val):
-        return 0
-    val_str = str(val).strip()
-    if val_str.casefold().startswith(
-        ("not reported", "n/a", "reported", "not explicitly reported", "uses", "paper uses")
-    ):
-        return 0
-    for match in re.findall(r"(\d+\.\d+|\d{2,}\.?\d*)", val_str):
-        number = float(match)
-        if 10.0 <= number <= 80.0 or 0.4 <= number <= 1.0:
-            if metric == "PSNR":
-                return int(10.0 <= number <= 80.0)
-            if metric == "SSIM":
-                return int(0.4 <= number <= 1.0)
-            return 1
-    return 0
+    return int(pd.notna(parse_metric_value(val, metric)))

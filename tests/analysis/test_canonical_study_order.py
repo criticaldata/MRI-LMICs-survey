@@ -1,5 +1,6 @@
 """Regression tests for the 48-row scoring contract and 45-study corpus."""
 
+import hashlib
 import sys
 from pathlib import Path
 
@@ -12,11 +13,15 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "scripts" / "analysis"))
 sys.path.insert(0, str(REPO / "scripts" / "analysis" / "statistical"))
 
-from canonical_study_ids import normalize_doi, normalize_title, read_git_csv  # noqa: E402
+from canonical_study_ids import normalize_doi, normalize_title  # noqa: E402
 from run_fleiss_kappa_from_private_xlsx import _read_matrix  # noqa: E402
 
 
 EXPECTED_IDS = list(range(1, 46))
+# SHA-256 of normalized ordered titles from the 48-row pre-reconciliation
+# data-clean.csv at ab6231e57a81d1ce351f91f4ddede2f0180f08d6.
+# Do not depend on origin/main, which will itself contain 45 rows after merge.
+EXPECTED_FORM_TITLE_SHA256 = "db39193c10ac354de9e74d44f64900b12d44abdec21ca084a00940aca23f8f9e"
 EXPECTED_PAPER_22_TITLE = (
     "Pushing the limits of low-cost ultra-low-field MRI by dual-acquisition "
     "deep learning 3D superresolution"
@@ -41,16 +46,14 @@ def test_final_corpus_is_contiguous_and_scoring_form_mapping_is_stable():
     ]
 
 
-def test_canonical_contract_matches_origin_titles_and_evidence_dois():
-    origin = read_git_csv(REPO, "origin/main:data/data-clean.csv")
+def test_canonical_contract_matches_frozen_form_titles_and_evidence_dois():
     form = pd.read_csv(REPO / "data" / "reviewer_scoring_order.csv")
     contract = pd.read_csv(REPO / "data" / "included_study_order.csv")
     evidence = pd.read_csv(REPO / "data" / "tr_criteria_evidence.csv")
 
-    assert origin["Paper_ID"].tolist() == list(range(1, 49))
-    assert [normalize_title(value) for value in origin["Title"]] == [
-        normalize_title(value) for value in form["Title"]
-    ]
+    assert form["Form_Paper_ID"].tolist() == list(range(1, 49))
+    title_bytes = "\n".join(form["Title"].map(normalize_title)).encode("utf-8")
+    assert hashlib.sha256(title_bytes).hexdigest() == EXPECTED_FORM_TITLE_SHA256
     eligible_form = form.loc[form["Include_In_Final_Corpus"]].sort_values("Final_Paper_ID")
     assert [normalize_title(value) for value in eligible_form["Title"]] == [
         normalize_title(value) for value in contract["Title"]

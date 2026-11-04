@@ -49,6 +49,7 @@ function Invoke-MriPython {
 Push-Location $repoRoot
 try {
     Invoke-MriPython "scripts/analysis/finalize_corpus.py"
+    Invoke-MriPython "scripts/analysis/apply_lmic_relevance_evidence.py"
     Invoke-MriPython "scripts/analysis/build_primary_sr_scope_evidence.py"
     Invoke-MriPython "scripts/analysis/align_mri_scientometric_export.py"
     Invoke-MriPython "scripts/analysis/run_reproducible_review_analysis.py" @("--promote", "--run-date", $RunDate)
@@ -56,6 +57,7 @@ try {
     Invoke-MriPython "scripts/analysis/build_metric_ground_truth_audit.py"
     Invoke-MriPython "scripts/analysis/statistical/run_random_forest_robustness_20260804.py"
     Invoke-MriPython "scripts/analysis/statistical/mann_whitney_tests.py"
+    Invoke-MriPython "scripts/tables/analysis_sr_vs_non_sr.py"
     Invoke-MriPython "scripts/tables/analysis_temporal_trends.py"
     Invoke-MriPython "scripts/tables/abstract_numbers.py"
 

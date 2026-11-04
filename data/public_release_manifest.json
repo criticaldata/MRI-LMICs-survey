@@ -1,12 +1,12 @@
 {
-  "generated_at_utc": "2026-09-23T04:08:54.732010+00:00",
+  "generated_at_utc": "2026-11-04T02:27:09.911447+00:00",
   "repository": "MRI-LMICs-survey",
   "tracked_public_corpus": {
     "logical_path": "data/data-clean.csv",
-    "sha256": "6ea9a1776bbce516aee933a38595817276e440dcaceea54f3a4990d800b9af6d",
+    "sha256": "8734eaaa96f57d259480a63efde2f930abfacb821392111011af67218cb12975",
     "sha256_normalization": "utf8_lf",
     "rows": 45,
-    "columns": 31
+    "columns": 34
   },
   "tracked_public_evidence": {
     "field_characterization": {
@@ -29,6 +29,34 @@
       "sha256_normalization": "utf8_lf",
       "rows": 45,
       "columns": 10
+    },
+    "lmic_relevance_evidence": {
+      "logical_path": "data/lmic_relevance_evidence.csv",
+      "sha256": "7eea5ba6c27a7a523b039c76c6ef881ee1e7a08fb20c25a5137557a3a3e2d064",
+      "sha256_normalization": "utf8_lf",
+      "rows": 45,
+      "columns": 16
+    },
+    "publication_affiliation_evidence": {
+      "logical_path": "data/publication_affiliation_evidence.csv",
+      "sha256": "401e02d45276ce3d7c8209122f02f6007b959c28d796847abd41259ccd7baa52",
+      "sha256_normalization": "utf8_lf",
+      "rows": 45,
+      "columns": 21
+    },
+    "affiliation_country_income_groups": {
+      "logical_path": "data/affiliation_country_income_groups.csv",
+      "sha256": "808d2dd807506b84311cd23e0ef1c373aff15f5aecadb3a53c4c07fcec15c3be",
+      "sha256_normalization": "utf8_lf",
+      "rows": 217,
+      "columns": 6
+    },
+    "performance_metric_evidence": {
+      "logical_path": "data/performance_metric_evidence.csv",
+      "sha256": "f7b2f94dd295861bc645027073aaba35ed83f3646c46c7243b95a91c7159bb39",
+      "sha256_normalization": "utf8_lf",
+      "rows": 10,
+      "columns": 16
     }
   },
   "study_identity_contracts": {
@@ -70,7 +98,7 @@
   "analysis_outputs": {
     "analysis_lmic_tr_correlation.csv": {
       "logical_path": "tables/analysis_lmic_tr_correlation.csv",
-      "sha256": "3578ee2fafe44c314ffeebb9c4dc0cc222f16b4cce426b9bc2df9c369def0a0c",
+      "sha256": "aca44e2bcc182c72a40021eefee91418f113f9c0d732487b996da2b6bd25cf4e",
       "sha256_normalization": "utf8_lf",
       "rows": 3
     },
@@ -82,9 +110,33 @@
     },
     "analysis_random_forest_robustness_summary.csv": {
       "logical_path": "tables/analysis_random_forest_robustness_summary.csv",
-      "sha256": "47c0357cd7c172c59af6ebd8716ef594d73a607a5736aad319c7344f4a822f09",
+      "sha256": "689d53a68b6fd53867a3f50a66d2f6dce5ebdbb0b5b36628ea240c1cea043627",
       "sha256_normalization": "utf8_lf",
       "rows": 4
+    },
+    "analysis_sr_vs_other_enhancement.csv": {
+      "logical_path": "tables/analysis_sr_vs_other_enhancement.csv",
+      "sha256": "9ee22aa565a9c6be3648feef1bf3ecf1339cf8a85d27ce23b82aa0427ceb1294",
+      "sha256_normalization": "utf8_lf",
+      "rows": 8
+    },
+    "analysis_lmic_tr_correlation_by_scope.csv": {
+      "logical_path": "tables/analysis_lmic_tr_correlation_by_scope.csv",
+      "sha256": "3b09d84e7bcb87eb8fb3b8d15d218dabc75da3cd7f0dc00690b224c222784f0c",
+      "sha256_normalization": "utf8_lf",
+      "rows": 3
+    },
+    "analysis_psnr_ssim_correlation.csv": {
+      "logical_path": "tables/analysis_psnr_ssim_correlation.csv",
+      "sha256": "31db152791c8f983808bf97624e9d8a8fdfe9b73908615494afd332f83dc1870",
+      "sha256_normalization": "utf8_lf",
+      "rows": 2
+    },
+    "analysis_sr_scope_smir_sensitivity.csv": {
+      "logical_path": "tables/analysis_sr_scope_smir_sensitivity.csv",
+      "sha256": "b69435504bc61bb5e500efe8700b9b2ab5398d1ca9e58302377e07b41ef28ea1",
+      "sha256_normalization": "utf8_lf",
+      "rows": 8
     }
   }
 }

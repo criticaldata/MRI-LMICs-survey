@@ -5,6 +5,7 @@ repeated held-out permutations; reviewer agreement is read from the public
 aggregate summaries generated from the private workbook.
 """
 
+from math import isfinite
 from pathlib import Path
 
 import pandas as pd
@@ -19,11 +20,42 @@ def _read_required(path: Path) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+def _read_permutation_importance(rf_dir: Path, tables: Path) -> pd.DataFrame:
+    """Prefer regenerated details; a public checkout already has their promotion.
+
+    Never reconstruct held-out importance from impurity importance. If neither
+    real summary is available, the existing analysis must be run explicitly.
+    """
+    detail = rf_dir / "rf_heldout_permutation_summary.csv"
+    public = tables / "table5a_random_forest_features.csv"
+    source = detail if detail.is_file() else public
+    regenerate = "Run scripts/analysis/statistical/run_random_forest_robustness_20260804.py"
+    if not source.is_file():
+        raise FileNotFoundError(f"Held-out permutation summary is missing. {regenerate}")
+    frame = pd.read_csv(source)
+    numeric = ["Permutation_MAE_Increase_Mean", "Permutation_MAE_Increase_SD", "Splits"]
+    if not {"Feature", *numeric}.issubset(frame.columns):
+        raise ValueError(f"Not a held-out permutation summary: {source}. {regenerate}")
+    values = frame[numeric].apply(pd.to_numeric, errors="coerce")
+    # The prespecified model has ten features, each assessed on fifty splits.
+    if (
+        len(frame) != 10
+        or frame["Feature"].isna().any()
+        or not frame["Feature"].is_unique
+        or not values.map(isfinite).all().all()
+        or not values["Splits"].eq(50).all()
+        or not values["Permutation_MAE_Increase_SD"].ge(0).all()
+    ):
+        raise ValueError(f"Invalid held-out permutation summary: {source}. {regenerate}")
+    frame[numeric] = values
+    return frame
+
+
 def create_table5() -> None:
     tables = PROJECT_ROOT / "tables"
     rf_dir = PROJECT_ROOT / "analysis" / "review_20260803" / "random_forest_robustness_20260804"
 
-    importance = _read_required(rf_dir / "rf_heldout_permutation_summary.csv")
+    importance = _read_permutation_importance(rf_dir, tables)
     importance = importance.sort_values(
         "Permutation_MAE_Increase_Mean", ascending=False
     ).reset_index(drop=True)

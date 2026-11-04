@@ -288,6 +288,9 @@ def finalize() -> dict[str, object]:
     primary_scope_evidence = data_dir / "primary_sr_scope_evidence.csv"
     if primary_scope_evidence.exists():
         study_files.append(primary_scope_evidence)
+    for name in ['lmic_relevance_evidence.csv', 'publication_affiliation_evidence.csv']:
+        if (data_dir / name).exists():
+            study_files.append(data_dir / name)
     remapped = {
         path: remap_study_table(pd.read_csv(path), contract)
         for path in study_files
