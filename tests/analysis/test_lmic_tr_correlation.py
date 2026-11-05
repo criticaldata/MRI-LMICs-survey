@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -312,16 +314,28 @@ def test_private_runner_rejects_invalid_workbook_before_output(
 
 
 def _write_python_shim(path: Path) -> Path:
-    shim = path / "record-python-invocations.cmd"
-    shim.write_text(
-        '@echo %*>> "%~dp0invocations.txt"\n@exit /b 0\n', encoding="utf-8"
-    )
+    if os.name == "nt":
+        shim = path / "record-python-invocations.cmd"
+        script = '@echo %*>> "%~dp0invocations.txt"\n@exit /b 0\n'
+    else:
+        shim = path / "record-python-invocations"
+        script = '#!/bin/sh\nprintf "%s\\n" "$*" >> "$(dirname "$0")/invocations.txt"\nexit 0\n'
+    shim.write_text(script, encoding="utf-8")
+    if os.name != "nt":
+        shim.chmod(0o755)
     return shim
+
+
+def _powershell_executable():
+    executable = shutil.which("pwsh") or shutil.which("powershell")
+    if executable is None:
+        pytest.skip("PowerShell (pwsh or powershell) is not installed")
+    return executable
 
 
 def _run_pipeline(shim: Path, private_workbook: Path | None = None):
     command = [
-        "powershell",
+        _powershell_executable(),
         "-NoProfile",
         "-ExecutionPolicy",
         "Bypass",
@@ -337,6 +351,19 @@ def _run_pipeline(shim: Path, private_workbook: Path | None = None):
     return subprocess.run(
         command, cwd=REPO, capture_output=True, text=True, check=False
     )
+
+
+def test_pipeline_skips_when_powershell_is_unavailable(monkeypatch, tmp_path):
+    monkeypatch.setattr(shutil, "which", lambda name: None)
+    with pytest.raises(pytest.skip.Exception, match="PowerShell"):
+        _run_pipeline(_write_python_shim(tmp_path))
+
+
+@pytest.mark.parametrize("available_engine", ["pwsh", "powershell"])
+def test_pipeline_resolves_an_available_powershell_engine(monkeypatch, available_engine):
+    executable = str(Path("test-tools") / available_engine)
+    monkeypatch.setattr(shutil, "which", lambda name: executable if name == available_engine else None)
+    assert _powershell_executable() == executable
 
 
 def test_pipeline_keeps_public_only_mode_and_groups_all_private_analyses(tmp_path):
