@@ -18,9 +18,13 @@ warnings.filterwarnings('ignore')
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, SCRIPTS_DIR)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPTS_DIR)))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 from utils import (normalize_architecture, normalize_dataset_type,
                    normalize_field_strength, normalize_clinical_validation,
                    normalize_code_available, normalize_low_field_mentioned,
+                   has_reported_low_field_strength,
                    has_metric_reported, BASE_DIR, DATA_DIR, RESULTS_DIR, 
                    FIGURES_DIR, PROCESSING_DIR, CSV_PATH, setup_logging, log)
 from scripts.figures.mapper import LMIC_SCORE_MAP
@@ -63,15 +67,16 @@ def engineer_features(df, log_file):
 
     X['Code_Available'] = df['Code_Available'].apply(normalize_code_available)
 
-    df['Field_Strength_Clean'] = df['Field_Strength_Type'].apply(normalize_field_strength)
-    X['Is_LowField_Hardware'] = (df['Field_Strength_Clean'].isin(['Low_Field', 'Mixed'])).astype(int)
+    X['Has_Numeric_Low_Field_Data'] = df['Field_Strength_Type'].apply(
+        has_reported_low_field_strength
+    ).astype(int)
 
     X['Low_Field_Mentioned'] = df['Low_Field_Mentioned'].apply(normalize_low_field_mentioned)
 
     df['Clinical_Validation_Clean'] = df['Clinical_Validation_Type'].apply(normalize_clinical_validation)
     X['Has_Clinical_Validation'] = (df['Clinical_Validation_Clean'] != 'None').astype(int)
 
-    X['Has_PSNR'] = df['PSNR_Value'].apply(has_metric_reported)
+    X['Has_PSNR'] = df['PSNR_Value'].apply(lambda value: has_metric_reported(value, "PSNR"))
 
     y = df['LMIC_Relevance_Score'].values
     feature_names = list(X.columns)

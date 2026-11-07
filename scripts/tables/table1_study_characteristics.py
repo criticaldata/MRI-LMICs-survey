@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "figures"))
 
 import pandas as pd
-from mapper import load_data, get_project_root
+from mapper import apply_primary_sr_scope_evidence, load_data, get_project_root
 
 
 def create_table1():
@@ -52,7 +52,8 @@ def create_table1():
 
     # Primary Focus
     rows.append(("Primary Focus", "n", "%"))
-    pf_counts = df["Primary_Focus_Norm"].value_counts()
+    df = apply_primary_sr_scope_evidence(df)
+    pf_counts = df["Primary_Focus_Corrected"].value_counts()
     for pf, count in pf_counts.items():
         rows.append((f"  {pf}", str(count), f"{count/n*100:.1f}%"))
 

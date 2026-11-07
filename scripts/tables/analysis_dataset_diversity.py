@@ -18,18 +18,39 @@ np.random.seed(42)
 
 def analyze_dataset_diversity():
     df = load_data()
+    project_root = get_project_root()
+    evidence = pd.read_csv(project_root / "data" / "dataset_characterization_evidence.csv")
+    required = {"Paper_ID", "DOI", "Title", "Dataset_Real_Simulated"}
+    if not required.issubset(evidence.columns):
+        raise ValueError(f"Dataset evidence lacks required columns: {sorted(required - set(evidence.columns))}")
+    if evidence["Paper_ID"].duplicated().any() or evidence["DOI"].duplicated().any():
+        raise ValueError("Dataset characterization evidence must have unique study identities")
 
-    out_dir = get_project_root() / "tables"
+    df = df.merge(
+        evidence[["Paper_ID", "DOI", "Title", "Dataset_Real_Simulated"]],
+        on="DOI",
+        how="left",
+        validate="one_to_one",
+        suffixes=("", "_evidence"),
+    )
+    if df["Dataset_Real_Simulated"].isna().any():
+        raise ValueError("Dataset characterization evidence does not cover every included study")
+    if df["Title"].astype(str).str.strip().tolist() != df["Title_evidence"].astype(str).str.strip().tolist():
+        raise ValueError("Dataset characterization evidence titles do not match the canonical DOI order")
+    df = df.drop(columns=["Title_evidence"])
+
+    out_dir = project_root / "tables"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # --- Overall dataset type counts ---
-    dt_counts = df["Dataset_Type_Norm"].value_counts()
+    # --- Full-text-verified dataset provenance counts ---
+    dataset_column = "Dataset_Real_Simulated"
+    dt_counts = df[dataset_column].value_counts()
 
-    # --- Cross-tab: Dataset_Type_Norm x Architecture_Norm ---
-    ct_arch = pd.crosstab(df["Dataset_Type_Norm"], df["Architecture_Norm"], margins=True)
+    # --- Cross-tab: verified dataset provenance x architecture ---
+    ct_arch = pd.crosstab(df[dataset_column], df["Architecture_Norm"], margins=True)
 
-    # --- Cross-tab: Dataset_Type_Norm x Application_Norm ---
-    ct_app = pd.crosstab(df["Dataset_Type_Norm"], df["Application_Norm"], margins=True)
+    # --- Cross-tab: verified dataset provenance x application ---
+    ct_app = pd.crosstab(df[dataset_column], df["Application_Norm"], margins=True)
 
     # Combine into one CSV with labeled sections
     rows = []

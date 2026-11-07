@@ -1,19 +1,19 @@
 import os
+import re
 import sys
 import pandas as pd
-
-import sys
-from pathlib import Path
-
-_ANALYSIS = Path(__file__).resolve().parent.parent
-if str(_ANALYSIS) not in sys.path:
-    sys.path.insert(0, str(_ANALYSIS))
-from field_strength import normalize_legacy as _normalize_legacy
-
 from datetime import datetime
 
 # Project root calculation: scripts/analysis/statistical/utils.py -> root
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+from scripts.field_taxonomy import (  # noqa: E402
+    has_reported_low_field_strength,
+    normalize_field_category,
+)
+from scripts.metric_extraction import parse_metric_value
+
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 RESULTS_DIR = os.path.join(BASE_DIR, 'tables')
 FIGURES_DIR = os.path.join(BASE_DIR, 'figures')
@@ -59,9 +59,7 @@ def normalize_dataset_type(dtype):
     return 'Other'
 
 def normalize_field_strength(field):
-    """Delegates to the shared taxonomy in scripts/analysis/field_strength.py."""
-    return _normalize_legacy(field)
-
+    return normalize_field_category(field)
 
 def normalize_clinical_validation(val):
     if pd.isna(val): return 'None'
@@ -82,19 +80,6 @@ def normalize_low_field_mentioned(val):
     if pd.isna(val): return 0
     return 1 if str(val).lower().strip() in ['yes', 'true', '1'] else 0
 
-def has_metric_reported(val):
-    """Return 1 when the extraction records that the paper reports the metric.
-
-    Free-text negatives such as "Not reported (uses PVNR ...)", "Not reported.
-    Paper uses MAE instead of PSNR." or "Not explicitly reported in the
-    provided text ..." are non-reporting, so any value starting with "not
-    reported" or "not explicitly reported" (case insensitive) returns 0.
-    A bare "Reported" (extractor confirmed the metric is reported but did not
-    copy the value) still returns 1: this flag measures reporting, not
-    whether a numeric value could be parsed.
-    """
-    if pd.isna(val): return 0
-    val_str = str(val).lower().strip()
-    if val_str in ['n/a', 'na', '', 'nan']: return 0
-    if val_str.startswith(('not reported', 'not explicitly reported')): return 0
-    return 1
+def has_metric_reported(val, metric=None):
+    """Count only values containing a parseable PSNR/SSIM-like number."""
+    return int(pd.notna(parse_metric_value(val, metric)))

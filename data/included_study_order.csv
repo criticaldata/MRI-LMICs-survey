@@ -9,41 +9,38 @@ Paper_ID,Title,DOI
 8,Deep learning methods for automatic evaluation of delayed enhancement-MRI. The results of the EMIDEC challenge,10.1016/j.media.2022.102428
 9,Deep learning-based super-resolution gradient echo imaging of the pancreas: Improvement of image quality and reduction of acquisition time,10.1016/j.diii.2022.06.006
 10,Super-resolution and denoising of 4D-Flow MRI using physics-Informed deep neural nets,10.1016/j.cmpb.2020.105729
-11,Multi-contrast high-field quality image synthesis for portable low-field MRI using generative adversarial networks and paired data,10.1101/2023.12.28.23300409
-12,Super-resolution of brain MRI images based on denoising diffusion probabilistic model,10.1016/j.bspc.2023.104901
-13,Fine-tuning deep learning model parameters for improved super-resolution of dynamic MRI with prior-knowledge,10.1016/j.artmed.2021.102196
-14,3D-MRI super-resolution reconstruction using multi-modality based on multi-resolution CNN,10.1016/j.cmpb.2024.108110
-15,Super-resolution reconstruction of knee magnetic resonance imaging based on deep learning,10.1016/j.cmpb.2019.105059
-16,Deep learning super-resolution reconstruction for fast and high-quality cine cardiovascular magnetic resonance,10.1007/s00330-024-11145-0
-17,Convolutional Neural Network-based Enhancement Method of 3D MRI,10.1109/icrest51555.2021.9331123
-18,"Cerebrovascular super-resolution 4D Flow MRI - Sequential combination of resolution enhancement by deep learning and physics-informed image processing to non-invasively quantify intracranial velocity, flow, and relative pressure",10.1016/j.media.2023.102831
-19,Deep Learning based Early Detection of Alzheimer’s Disease using Image Enhancement Filters,10.1109/icaect57570.2023.10117880
-20,Deep Learning-based Method for Denoising and Image Enhancement in Low-Field MRI,10.1109/ist50367.2021.9651441
-21,Deep Transfer Learning-Based Multi-Modal Digital Twins for Enhancement and Diagnostic Analysis of Brain MRI Image,10.1109/tcbb.2022.3168189
-22,Digital Image Enhancement using Conventional Neural Network,10.1109/inocon57975.2023.10100995
-23,MRI super-resolution using similarity distance and multi-scale receptive field based feature fusion GAN and pre-trained slice interpolation network,10.1016/j.mri.2024.04.021
-24,Pushing the limits of low-cost ultra-low-field MRI by dual-acquisition deep learning 3D superresolution,10.1002/mrm.29642
-25,Joint B0B0​ and Image Reconstruction in Low-Field MRI by Physics-Informed Deep-Learning,10.1109/tbme.2024.3396223
-26,Multi-Contrast Super-Resolution MRI Through a Progressive Network,10.1109/tmi.2020.2974858
-27,FA-GAN: Fused attentive generative adversarial networks for MRI image super-resolution,10.1016/j.compmedimag.2021.101969
-28,Deep learning myocardial infarction segmentation framework from cardiac magnetic resonance images,10.1016/j.bspc.2023.105710
-29,ShuffleUNet: Super resolution of diffusion-weighted MRIs using deep learning,10.23919/eusipco54536.2021.9615963
-30,Transfer learning in deep neural network based under-sampled MR image reconstruction,10.1016/j.mri.2020.09.018
-31,Enhancement of Image Quality in Low-Field Knee MR Imaging Using Deep Learning,10.7759/cureus.71277
-32,Multisequence 3-T Image Synthesis from 64-mT Low-Field-Strength MRI Using Generative Adversarial Networks in Multiple Sclerosis,10.1148/radiol.233529
-33,Evaluation of epilepsy lesion visualisation enhancement in low-field MRI using image quality transfer: a preliminary investigation of clinical potential for applications in developing countries,10.1007/s00234-024-03448-2
-34,Deep learning-based single image super-resolution for low-field MR brain images,10.1038/s41598-022-10298-6
-35,Deep learning for fast low-field MRI acquisitions,10.1038/s41598-022-14039-7
-36,Deep Learning Super-Resolution Reconstruction for Fast and Motion-Robust T2-weighted Prostate MRI,10.1148/radiol.230427
-37,Super resolution using sparse sampling at portable ultra-low field MR,10.3389/fneur.2024.1330203
-38,Bridging the gap: improving correspondence between low-field and high-field magnetic resonance images in young people,10.3389/fneur.2024.1339223
-39,MRI Super-Resolution With Ensemble Learning and Complementary Priors,10.1109/tci.2020.2964201
-40,SRflow: Deep learning based super-resolution of 4D-flow MRI data,10.3389/frai.2022.928181
-41,SMORE: A Self-Supervised Anti-Aliasing and Super-Resolution Algorithm for MRI Using Deep Learning,10.1109/tmi.2020.3037187
-42,SMIR: A Transformer-Based Model for MRI super-resolution reconstruction,10.1109/icmipe53131.2021.9698880
-43,Autoencoder-Inspired Convolutional Network-Based Super-Resolution Method in MRI,10.1109/jtehm.2021.3076152
-44,A mass correlation based deep learning approach using deep Convolutional neural network to classify the brain tumor,10.1016/j.bspc.2022.104395
-45,Accuracy Enhancement in Detecting Pituitary Tumors using Deep Learning,10.1109/icscna58489.2023.10370139
-46,A deep convolutional neural network based computer aided diagnosis system for the prediction of Alzheimer's disease in MRI images,10.1016/j.measurement.2020.108838
-47,A Novel Deep Learning Approach for Brain Tumors Classification Using MRI Images,10.18280/ts.400329
-48,Automatic myocardial segmentation in dynamic contrast enhanced perfusion MRI using Monte Carlo dropout in an encoder-decoder convolutional neural network,10.1016/j.cmpb.2019.105150
+11,Super-resolution of brain MRI images based on denoising diffusion probabilistic model,10.1016/j.bspc.2023.104901
+12,Fine-tuning deep learning model parameters for improved super-resolution of dynamic MRI with prior-knowledge,10.1016/j.artmed.2021.102196
+13,3D-MRI super-resolution reconstruction using multi-modality based on multi-resolution CNN,10.1016/j.cmpb.2024.108110
+14,Super-resolution reconstruction of knee magnetic resonance imaging based on deep learning,10.1016/j.cmpb.2019.105059
+15,Deep learning super-resolution reconstruction for fast and high-quality cine cardiovascular magnetic resonance,10.1007/s00330-024-11145-0
+16,Convolutional Neural Network-based Enhancement Method of 3D MRI,10.1109/icrest51555.2021.9331123
+17,"Cerebrovascular super-resolution 4D Flow MRI - Sequential combination of resolution enhancement by deep learning and physics-informed image processing to non-invasively quantify intracranial velocity, flow, and relative pressure",10.1016/j.media.2023.102831
+18,Deep Learning based Early Detection of Alzheimer’s Disease using Image Enhancement Filters,10.1109/icaect57570.2023.10117880
+19,Deep Learning-based Method for Denoising and Image Enhancement in Low-Field MRI,10.1109/ist50367.2021.9651441
+20,Deep Transfer Learning-Based Multi-Modal Digital Twins for Enhancement and Diagnostic Analysis of Brain MRI Image,10.1109/tcbb.2022.3168189
+21,MRI super-resolution using similarity distance and multi-scale receptive field based feature fusion GAN and pre-trained slice interpolation network,10.1016/j.mri.2024.04.021
+22,Pushing the limits of low-cost ultra-low-field MRI by dual-acquisition deep learning 3D superresolution,10.1002/mrm.29642
+23,Joint B0B0​ and Image Reconstruction in Low-Field MRI by Physics-Informed Deep-Learning,10.1109/tbme.2024.3396223
+24,Multi-Contrast Super-Resolution MRI Through a Progressive Network,10.1109/tmi.2020.2974858
+25,FA-GAN: Fused attentive generative adversarial networks for MRI image super-resolution,10.1016/j.compmedimag.2021.101969
+26,Deep learning myocardial infarction segmentation framework from cardiac magnetic resonance images,10.1016/j.bspc.2023.105710
+27,ShuffleUNet: Super resolution of diffusion-weighted MRIs using deep learning,10.23919/eusipco54536.2021.9615963
+28,Transfer learning in deep neural network based under-sampled MR image reconstruction,10.1016/j.mri.2020.09.018
+29,Enhancement of Image Quality in Low-Field Knee MR Imaging Using Deep Learning,10.7759/cureus.71277
+30,Multisequence 3-T Image Synthesis from 64-mT Low-Field-Strength MRI Using Generative Adversarial Networks in Multiple Sclerosis,10.1148/radiol.233529
+31,Evaluation of epilepsy lesion visualisation enhancement in low-field MRI using image quality transfer: a preliminary investigation of clinical potential for applications in developing countries,10.1007/s00234-024-03448-2
+32,Deep learning-based single image super-resolution for low-field MR brain images,10.1038/s41598-022-10298-6
+33,Deep learning for fast low-field MRI acquisitions,10.1038/s41598-022-14039-7
+34,Deep Learning Super-Resolution Reconstruction for Fast and Motion-Robust T2-weighted Prostate MRI,10.1148/radiol.230427
+35,Bridging the gap: improving correspondence between low-field and high-field magnetic resonance images in young people,10.3389/fneur.2024.1339223
+36,MRI Super-Resolution With Ensemble Learning and Complementary Priors,10.1109/tci.2020.2964201
+37,SRflow: Deep learning based super-resolution of 4D-flow MRI data,10.3389/frai.2022.928181
+38,SMORE: A Self-Supervised Anti-Aliasing and Super-Resolution Algorithm for MRI Using Deep Learning,10.1109/tmi.2020.3037187
+39,SMIR: A Transformer-Based Model for MRI super-resolution reconstruction,10.1109/icmipe53131.2021.9698880
+40,Autoencoder-Inspired Convolutional Network-Based Super-Resolution Method in MRI,10.1109/jtehm.2021.3076152
+41,A mass correlation based deep learning approach using deep Convolutional neural network to classify the brain tumor,10.1016/j.bspc.2022.104395
+42,Accuracy Enhancement in Detecting Pituitary Tumors using Deep Learning,10.1109/icscna58489.2023.10370139
+43,A deep convolutional neural network based computer aided diagnosis system for the prediction of Alzheimer's disease in MRI images,10.1016/j.measurement.2020.108838
+44,A Novel Deep Learning Approach for Brain Tumors Classification Using MRI Images,10.18280/ts.400329
+45,Automatic myocardial segmentation in dynamic contrast enhanced perfusion MRI using Monte Carlo dropout in an encoder-decoder convolutional neural network,10.1016/j.cmpb.2019.105150

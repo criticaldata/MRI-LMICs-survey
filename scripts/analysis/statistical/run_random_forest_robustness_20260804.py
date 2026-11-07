@@ -22,6 +22,7 @@ import numpy as np
 import pandas as pd
 import scipy
 import sklearn
+from joblib import Parallel, delayed
 from scipy.optimize import OptimizeWarning
 from sklearn.dummy import DummyRegressor
 from sklearn.ensemble import RandomForestRegressor
@@ -40,12 +41,15 @@ from run_random_forest_reanalysis_20260804 import (
     code_available,
     dataset_type,
     field_type,
+    has_reported_low_field_strength,
     low_field_mentioned,
-    psnr_reported,
 )
 
 
 REPO = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(REPO))
+from scripts.metric_extraction import apply_metric_evidence
+
 SOURCE = REPO / "data" / "data-clean.csv"
 OUTPUT = REPO / "analysis" / "review_20260803" / "random_forest_robustness_20260804"
 SEED = 42
@@ -78,11 +82,12 @@ def make_input() -> tuple[pd.DataFrame, np.ndarray, pd.DataFrame]:
     x["Is_Transformer"] = (arch == "Transformer").astype(int)
     x["Is_Clinical_Data"] = (df["Dataset_Type"].map(dataset_type) == "Clinical").astype(int)
     x["Code_Available"] = df["Code_Available"].map(code_available)
-    fields = df["Field_Strength_Type"].map(field_type)
-    x["Is_LowField_Hardware"] = fields.isin(["Low_Field", "Mixed"]).astype(int)
+    x["Has_Numeric_Low_Field_Data"] = df["Field_Strength_Type"].map(
+        has_reported_low_field_strength
+    ).astype(int)
     x["Low_Field_Mentioned"] = df["Low_Field_Mentioned"].map(low_field_mentioned)
     x["Has_Clinical_Validation"] = df["Clinical_Validation_Type"].map(clinical_validation)
-    x["Has_PSNR"] = df["PSNR_Value"].map(psnr_reported)
+    x["Has_PSNR"] = apply_metric_evidence(df)["PSNR_Numeric"].notna().astype(int)
     identifiers = df[["Paper_ID", "Title", "LMIC_Score_Numeric"]].reset_index(drop=True)
     return x.reset_index(drop=True), df["LMIC_Score_Numeric"].to_numpy(dtype=float), identifiers
 
@@ -95,7 +100,10 @@ def constrained_forest() -> RandomForestRegressor:
         min_samples_leaf=4,
         max_features=0.7,
         random_state=SEED,
-        n_jobs=-1,
+        # Small data and repeated resampling do not benefit from spawning a
+        # worker process per available CPU. A single worker is deterministic
+        # and avoids resource exhaustion on high-core Windows hosts.
+        n_jobs=1,
     )
 
 
@@ -154,7 +162,7 @@ def evaluate(x: pd.DataFrame, y: np.ndarray) -> tuple[pd.DataFrame, pd.DataFrame
                 "N_Train": int(len(train_idx)),
                 "N_Test": int(len(test_idx)),
             })
-        forest = constrained_forest().fit(x_train, y_train)
+        forest = specs["Constrained Random Forest"]
         perm = permutation_importance(
             forest,
             x_test,
@@ -162,7 +170,7 @@ def evaluate(x: pd.DataFrame, y: np.ndarray) -> tuple[pd.DataFrame, pd.DataFrame
             scoring="neg_mean_absolute_error",
             n_repeats=10,
             random_state=SEED + split_number,
-            n_jobs=-1,
+            n_jobs=1,
         )
         for feature, value in zip(FEATURES, perm.importances_mean):
             permutation_rows.append({"Split": split_number, "Feature": feature, "MAE_Increase_On_Permutation": float(value)})
@@ -171,13 +179,10 @@ def evaluate(x: pd.DataFrame, y: np.ndarray) -> tuple[pd.DataFrame, pd.DataFrame
 
 def bootstrap_importance(x: pd.DataFrame, y: np.ndarray) -> pd.DataFrame:
     rng = np.random.default_rng(SEED)
-    values = []
-    for iteration in range(BOOTSTRAPS):
-        indices = rng.integers(0, len(x), size=len(x))
-        model = constrained_forest()
-        model.set_params(random_state=SEED + iteration)
-        model.fit(x.iloc[indices], y[indices])
-        values.append(model.feature_importances_)
+    samples = [rng.integers(0, len(x), size=len(x)) for _ in range(BOOTSTRAPS)]
+    # Preserve the serial RNG stream, fixed model seeds and result order.
+    values = Parallel(n_jobs=4)(delayed(_bootstrap_fit)(x, y, indices, SEED + iteration)
+                                for iteration, indices in enumerate(samples))
     frame = pd.DataFrame(values, columns=FEATURES)
     return pd.DataFrame({
         "Feature": FEATURES,
@@ -186,6 +191,11 @@ def bootstrap_importance(x: pd.DataFrame, y: np.ndarray) -> pd.DataFrame:
         "Bootstrap_CI_97_5": frame.quantile(0.975).to_numpy(),
         "Bootstrap_Replicates": BOOTSTRAPS,
     }).sort_values("Bootstrap_Mean_Importance", ascending=False, kind="stable").reset_index(drop=True)
+
+
+def _bootstrap_fit(x, y, indices, seed):
+    model = constrained_forest().set_params(random_state=seed)
+    return model.fit(x.iloc[indices], y[indices]).feature_importances_
 
 
 def main() -> None:
@@ -208,6 +218,21 @@ def main() -> None:
         "Positive_Splits": int((paired["Baseline_MAE"] > paired["Forest_MAE"]).sum()),
         "Total_Splits": int(len(paired)),
     }
+    public_summary = summary.rename(columns={"Splits": "Resampling_Splits"}).copy()
+    public_summary.insert(0, "Analysis", "Repeated holdout model comparison")
+    public_summary.insert(2, "N_Studies", int(len(x)))
+    public_summary.insert(5, "Seed", SEED)
+    public_summary["MAE_Improvement_vs_Mean_Baseline"] = np.nan
+    public_summary["Positive_MAE_Improvement_Splits"] = np.nan
+    public_summary["Total_Holdout_Splits"] = int(len(paired))
+    forest_row = public_summary["Model"].eq("Constrained Random Forest")
+    public_summary.loc[forest_row, "MAE_Improvement_vs_Mean_Baseline"] = forest_delta["Mean_Improvement"]
+    public_summary.loc[forest_row, "Positive_MAE_Improvement_Splits"] = forest_delta["Positive_Splits"]
+    public_summary.to_csv(
+        REPO / "tables" / "analysis_random_forest_robustness_summary.csv",
+        index=False,
+        encoding="utf-8",
+    )
     permutation_summary = (
         permutation.groupby("Feature", as_index=False)
         .agg(Permutation_MAE_Increase_Mean=("MAE_Increase_On_Permutation", "mean"), Permutation_MAE_Increase_SD=("MAE_Increase_On_Permutation", "std"), Splits=("Split", "count"))
@@ -238,6 +263,7 @@ def main() -> None:
         "apparent_train_r2_constrained_forest": apparent_r2,
         "software": {"python": sys.version, "platform": platform.platform(), "pandas": pd.__version__, "numpy": np.__version__, "scipy": scipy.__version__, "scikit_learn": sklearn.__version__, "mord": mord.__version__},
         "outputs": {path.name: sha256(path) for path in OUTPUT.iterdir() if path.is_file() and path.name != "rf_robustness_manifest.json"},
+        "public_summary_sha256": sha256(REPO / "tables" / "analysis_random_forest_robustness_summary.csv"),
     }
     (OUTPUT / "rf_robustness_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"summary": summary.to_dict(orient="records"), "forest_baseline_comparison": forest_delta, "apparent_train_r2": apparent_r2, "output": str(OUTPUT)}, indent=2))

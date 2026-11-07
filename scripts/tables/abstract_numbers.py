@@ -7,19 +7,28 @@ Run this whenever the dataset changes to get the numbers to copy into the text.
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "figures"))
 
-from mapper import load_data, get_project_root, N_PRIMARY_SR, N_ALL
+from mapper import load_data, N_INCLUDED_STUDIES, N_ALL
 
 def print_abstract_numbers():
     df = load_data()
     n = len(df)
+    repo_root = Path(__file__).resolve().parents[2]
+    n_excluded_after_extraction = len(
+        pd.read_csv(repo_root / "data" / "post_extraction_exclusions.csv")
+    )
 
-    assert n == N_PRIMARY_SR, f"Data has {n} rows but N_PRIMARY_SR={N_PRIMARY_SR}"
+    assert n == N_INCLUDED_STUDIES, f"Data has {n} rows but N_INCLUDED_STUDIES={N_INCLUDED_STUDIES}"
 
     print(f"\n{'='*60}")
-    print(f"ABSTRACT / MANUSCRIPT NUMBERS (n={n} primary SR studies)")
-    print(f"(Note: {N_ALL} papers initially screened-in; {N_ALL - n} excluded)")
+    print(f"ABSTRACT / MANUSCRIPT NUMBERS (n={n} eligible MRI enhancement/SR studies)")
+    print(
+        f"(Search identified {N_ALL} records; 56 entered structured extraction; "
+        f"{n_excluded_after_extraction} were excluded after extraction.)"
+    )
     print(f"{'='*60}\n")
 
     # Architecture

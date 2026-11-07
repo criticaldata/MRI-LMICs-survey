@@ -18,7 +18,7 @@ SCORE_LABELS = {
     2: "Score 2 (Low relevance)",
     3: "Score 3 (Moderate relevance)",
     4: "Score 4 (High relevance)",
-    5: "Score 5 (Direct LMIC application)",
+    5: "Score 5 (Highest rubric level)",
 }
 
 

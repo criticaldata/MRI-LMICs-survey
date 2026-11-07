@@ -1,3 +1,3 @@
 Variable,Test,Statistic,p_value,Min_Expected_Cell,Significant,Note,q_value_fdr
-Code_Available,Fisher_Exact,3.90625,0.21497143139329528,3.0625,No,OR=3.91,0.2866285751910604
-Low_Field_Mentioned,Fisher_Exact,4.0,0.08052519546401651,4.375,No,OR=4.00,0.2866285751910604
+Code_Available,Fisher_Exact,7.428571428571429,0.1407135122393205,2.0,No,OR=7.43,0.313518804488145
+Low_Field_Mentioned,Fisher_Exact,3.076923076923077,0.23513910336610877,3.2,No,OR=3.08,0.313518804488145

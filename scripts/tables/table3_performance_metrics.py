@@ -15,6 +15,28 @@ import numpy as np
 from mapper import load_data, get_project_root
 
 
+def reporting_profile(df, metric):
+    """Partition the actual corpus using the same numeric metric as the summaries."""
+    rows = []
+    reported = df[f"{metric}_Numeric"].notna()
+    for label, mask in [(f"{metric} Reporter", reported), (f"{metric} Non-Reporter", ~reported)]:
+        group = df.loc[mask]
+        years = group.Year.dropna()
+        year_summary = (
+            f"{int(years.median())} ({int(years.min())}–{int(years.max())})"
+            if len(years) else "Not available"
+        )
+        rows.append({
+            "Group": label, "n": len(group), "Median_Year": year_summary,
+            "Top_Architecture": group.Architecture_Norm.mode().iloc[0] if len(group) else "Not available",
+            "Top_Field_Strength": group.Field_Strength_Norm.mode().iloc[0] if len(group) else "Not available",
+            "Median_LMIC_Score": group.LMIC_Score.median() if len(group) else np.nan,
+            "Clinical_Validation_pct": f"{group.Clinical_Validation_Norm.ne('None').mean()*100:.1f}%" if len(group) else "Not available",
+            "Low_Field_pct": f"{group.Low_Field_Norm.eq('Yes').mean()*100:.1f}%" if len(group) else "Not available",
+        })
+    return pd.DataFrame(rows)
+
+
 def create_table3():
     df = load_data()
     n = len(df)
@@ -123,6 +145,8 @@ def create_table3():
     df_b.to_csv(out_dir / "table3b_psnr_by_architecture.csv", index=False)
     df_c.to_csv(out_dir / "table3c_ssim_by_architecture.csv", index=False)
     df_d.to_csv(out_dir / "table3d_metrics_by_field_strength.csv", index=False)
+    reporting_profile(df, "PSNR").to_csv(out_dir / "table3e_psnr_reporting_bias.csv", index=False)
+    reporting_profile(df, "SSIM").to_csv(out_dir / "table3f_ssim_reporting_bias.csv", index=False)
 
     return df_a, df_b, df_c, df_d
 

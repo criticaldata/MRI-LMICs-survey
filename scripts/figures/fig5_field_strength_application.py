@@ -11,7 +11,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
-from mapper import load_data, save_figure, configure_matplotlib, panel_title, LMIC_SCORE_COLORS
+from mapper import (
+    FIELD_CATEGORY_ORDER,
+    load_data,
+    save_figure,
+    configure_matplotlib,
+    panel_title,
+    LMIC_SCORE_COLORS,
+)
 
 np.random.seed(42)
 
@@ -20,8 +27,8 @@ def create_fig5():
     configure_matplotlib()
     df = load_data()
 
-    fig = plt.figure(figsize=(15, 8))
-    gs = gridspec.GridSpec(1, 2, width_ratios=[1.3, 1], wspace=0.3)
+    fig = plt.figure(figsize=(17, 8.5))
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1.5, 1], wspace=0.3)
     fig.subplots_adjust(top=0.88)
 
     # ========================
@@ -31,7 +38,7 @@ def create_fig5():
 
     ct = pd.crosstab(df["Application_Norm"], df["Field_Strength_Norm"])
     row_order = ct.sum(axis=1).sort_values(ascending=False).index
-    col_order = ["Low-field", "Standard-field", "High-field", "Mixed", "Not specified"]
+    col_order = [category for category in FIELD_CATEGORY_ORDER if category in ct.columns]
     ct = ct.reindex(index=row_order)
     ct = ct.reindex(columns=[c for c in col_order if c in ct.columns], fill_value=0)
 
@@ -56,7 +63,23 @@ def create_fig5():
     ax_a.set_xlabel("Field Strength", fontsize=10)
     ax_a.set_ylabel("")
     ax_a.tick_params(length=0)
-    plt.setp(ax_a.get_xticklabels(), rotation=25, ha="right", fontsize=9)
+    short_labels = {
+        "Ultra-low-field (<0.05 T)": "Ultra-low\n<0.05 T",
+        "Low-field (0.05-0.5 T)": "Low\n0.05-0.5 T",
+        "Intermediate-field (>0.5-<1.5 T)": "Intermediate\n>0.5-<1.5 T",
+        "Standard-field (1.5-3 T)": "Standard\n1.5-3 T",
+        "High-field (>3 T)": "High\n>3 T",
+        "Ultra-low-field (strength unspecified)": "Ultra-low\nstrength n/r",
+        "Low-field (threshold unspecified)": "Low-field\nthreshold n/r",
+        "Standard-field (strength unspecified)": "Standard\nstrength n/r",
+        "High-field (threshold unspecified)": "High-field\nthreshold n/r",
+        "Not specified": "Not specified",
+        "Not reported": "Not reported",
+        "Unknown": "Unknown",
+        "Mixed": "Mixed",
+    }
+    ax_a.set_xticklabels([short_labels.get(label.get_text(), label.get_text()) for label in ax_a.get_xticklabels()])
+    plt.setp(ax_a.get_xticklabels(), rotation=35, ha="right", fontsize=8)
     plt.setp(ax_a.get_yticklabels(), fontsize=9.5)
 
     # ========================
@@ -111,8 +134,8 @@ def create_fig5():
 
     print("\n=== Figure 5 Summary ===")
     print(f"  Application areas: {df['Application_Norm'].nunique()}")
-    print(f"  Low-field papers: {(df['Field_Strength_Norm'] == 'Low-field').sum()}")
-    print(f"  Standard-field: {(df['Field_Strength_Norm'] == 'Standard-field').sum()}")
+    print(f"  Numerically classified low-field (0.05-0.5 T): {(df['Field_Strength_Norm'] == 'Low-field (0.05-0.5 T)').sum()}")
+    print(f"  Low-field label without numeric threshold: {(df['Field_Strength_Norm'] == 'Low-field (threshold unspecified)').sum()}")
     print(f"  Not specified: {(df['Field_Strength_Norm'] == 'Not specified').sum()}")
     print(f"  Brain (most common): {(df['Application_Norm'] == 'Brain').sum()} papers")
 

@@ -1,8 +1,11 @@
-"""Calculate the final reviewer agreement from a private scoring workbook.
+"""Calculate reviewer agreement from a private scoring workbook.
 
 The workbook contains individual reviewer ratings and must remain outside the
-public repository.  This command validates the 48-by-11 matrix and writes only
-aggregate Fleiss' kappa results and paper-level agreement summaries.
+public repository. This command validates the original 48-by-11 scoring form,
+checks every form row against a stable title/DOI contract, and writes aggregate
+agreement results for all 48 records scored by the 11 reviewers. Three records
+later excluded from the scientific synthesis remain in this reliability
+analysis because they were part of the completed scoring exercise.
 
 Example:
     python scripts/analysis/statistical/run_fleiss_kappa_from_private_xlsx.py \
@@ -28,6 +31,7 @@ EXPECTED_ITEMS = 48
 EXPECTED_RATERS = 11
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CANONICAL_DATA = REPO_ROOT / "data" / "data-clean.csv"
+DEFAULT_SCORING_ORDER = REPO_ROOT / "data" / "reviewer_scoring_order.csv"
 SUMMARY_NAME = "analysis_fleiss_kappa_summary.csv"
 ITEM_NAME = "analysis_fleiss_kappa_item_agreement.csv"
 
@@ -51,23 +55,82 @@ def _normalize_title(value: object) -> str:
     return " ".join(text.replace("\u00a0", " ").split()).casefold()
 
 
-def _canonical_titles(path: Path) -> list[str]:
+def _canonical_studies(path: Path):
     import pandas as pd
 
     if not path.exists():
         raise FileNotFoundError(f"Canonical study data not found: {path}")
     frame = pd.read_csv(path)
-    required = {"Paper_ID", "Title"}
+    required = {"Paper_ID", "Title", "DOI"}
     if not required.issubset(frame.columns):
         raise ValueError(f"Canonical study data must contain {sorted(required)}")
     frame = frame.copy()
     frame["Paper_ID"] = pd.to_numeric(frame["Paper_ID"], errors="raise").astype(int)
-    if len(frame) != EXPECTED_ITEMS or frame["Paper_ID"].tolist() != list(range(1, EXPECTED_ITEMS + 1)):
-        raise ValueError("Canonical study data must contain Paper_ID values 1-48 in order")
+    if frame.empty or frame["Paper_ID"].tolist() != list(range(1, len(frame) + 1)):
+        raise ValueError("Canonical study data must have contiguous Paper_ID values from 1")
     titles = [_normalize_title(value) for value in frame["Title"]]
-    if not all(titles) or len(set(titles)) != EXPECTED_ITEMS:
+    dois = [_normalize_doi(value) for value in frame["DOI"]]
+    if not all(titles) or len(set(titles)) != len(frame):
         raise ValueError("Canonical study titles must be non-empty and unique")
-    return titles
+    if not all(dois) or len(set(dois)) != len(frame):
+        raise ValueError("Canonical study DOIs must be non-empty and unique")
+    frame["_normalized_title"] = titles
+    frame["_normalized_doi"] = dois
+    return frame
+
+
+def _normalize_doi(value: object) -> str:
+    text = "" if value is None else str(value).strip().casefold()
+    text = text.removeprefix("https://doi.org/").removeprefix("http://doi.org/")
+    return text.split("?", 1)[0].rstrip("/ ")
+
+
+def _scoring_contract(path: Path, canonical_data: Path):
+    import pandas as pd
+
+    if not path.exists():
+        raise FileNotFoundError(f"Reviewer scoring-order contract not found: {path}")
+    contract = pd.read_csv(path)
+    required = {
+        "Form_Paper_ID", "Title", "DOI", "Include_In_Final_Corpus", "Final_Paper_ID"
+    }
+    if not required.issubset(contract.columns):
+        raise ValueError(f"Scoring-order contract must contain {sorted(required)}")
+    if len(contract) != EXPECTED_ITEMS:
+        raise ValueError(f"Scoring-order contract must contain {EXPECTED_ITEMS} form rows")
+    form_ids = pd.to_numeric(contract["Form_Paper_ID"], errors="raise").astype(int)
+    if form_ids.tolist() != list(range(1, EXPECTED_ITEMS + 1)):
+        raise ValueError("Form_Paper_ID must be contiguous 1-48 in scoring order")
+    contract["_normalized_title"] = contract["Title"].map(_normalize_title)
+    contract["_normalized_doi"] = contract["DOI"].map(_normalize_doi)
+    if contract["_normalized_title"].eq("").any() or contract["_normalized_title"].duplicated().any():
+        raise ValueError("Scoring-order titles must be unique and non-empty")
+    if contract["_normalized_doi"].eq("").any() or contract["_normalized_doi"].duplicated().any():
+        raise ValueError("Scoring-order DOIs must be unique and non-empty")
+    include = contract["Include_In_Final_Corpus"].map(_as_bool)
+    final_ids = pd.to_numeric(contract.loc[include, "Final_Paper_ID"], errors="raise").astype(int)
+    if final_ids.tolist() != list(range(1, int(include.sum()) + 1)):
+        raise ValueError("Included Final_Paper_ID values must be contiguous in form order")
+
+    canonical = _canonical_studies(canonical_data)
+    active = contract.loc[include].sort_values("Final_Paper_ID")
+    if active["_normalized_title"].tolist() != canonical["_normalized_title"].tolist():
+        raise ValueError("Scoring-order eligible titles do not match canonical corpus order")
+    if active["_normalized_doi"].tolist() != canonical["_normalized_doi"].tolist():
+        raise ValueError("Scoring-order eligible DOIs do not match canonical corpus order")
+    contract["_include"] = include
+    return contract, canonical
+
+
+def _as_bool(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    text = str(value).strip().casefold()
+    if text in {"true", "1", "yes"}:
+        return True
+    if text in {"false", "0", "no"}:
+        return False
+    raise ValueError(f"Invalid Include_In_Final_Corpus value: {value!r}")
 
 
 def _read_matrix(
@@ -75,6 +138,8 @@ def _read_matrix(
     canonical_data: Path | None = None,
     *,
     include_titles: bool = False,
+    include_excluded_items: bool = False,
+    scoring_order_path: Path | None = None,
 ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, list[str]]:
     if not path.exists():
         raise FileNotFoundError(f"Private reviewer workbook not found: {path}")
@@ -106,32 +171,41 @@ def _read_matrix(
             f"Expected {EXPECTED_RATERS} reviewer pairs; found {len(score_columns)}"
         )
 
-    canonical_titles = _canonical_titles(canonical_data or DEFAULT_CANONICAL_DATA)
+    canonical_path = canonical_data or DEFAULT_CANONICAL_DATA
+    contract_path = scoring_order_path or DEFAULT_SCORING_ORDER
+    contract, canonical = _scoring_contract(contract_path, canonical_path)
 
     lmic: list[list[int]] = []
     tr: list[list[int]] = []
+    selected_titles: list[str] = []
     for row_offset, row in enumerate(rows[2:], start=1):
         paper = row[0]
         if paper != row_offset:
             raise ValueError(f"Paper rows must be ordered 1-{EXPECTED_ITEMS}; found {paper}")
+        contract_row = contract.iloc[row_offset - 1]
         workbook_title = _normalize_title(row[1])
-        if workbook_title != canonical_titles[row_offset - 1]:
+        if workbook_title != contract_row["_normalized_title"]:
             raise ValueError(
-                f"Paper {row_offset} title does not match canonical study order: "
+                f"Paper {row_offset} title does not match reviewer form order: "
                 f"{row[1]!r}"
             )
-        lmic.append(
-            [
-                _as_int(row[lm_col], paper=row_offset, reviewer=i, scale="LMIC")
-                for i, (lm_col, _, _) in enumerate(score_columns, start=1)
-            ]
-        )
-        tr.append(
-            [
-                _as_int(row[tr_col], paper=row_offset, reviewer=i, scale="TR")
-                for i, (_, tr_col, _) in enumerate(score_columns, start=1)
-            ]
-        )
+        row_lmic = [
+            _as_int(row[lm_col], paper=row_offset, reviewer=i, scale="LMIC")
+            for i, (lm_col, _, _) in enumerate(score_columns, start=1)
+        ]
+        row_tr = [
+            _as_int(row[tr_col], paper=row_offset, reviewer=i, scale="TR")
+            for i, (_, tr_col, _) in enumerate(score_columns, start=1)
+        ]
+        if not all(1 <= score <= 5 for score in row_lmic):
+            raise ValueError("LMIC scores must be integers from 1 to 5")
+        if not all(0 <= score <= 5 for score in row_tr):
+            raise ValueError("TR scores must be integers from 0 to 5")
+
+        if _as_bool(contract_row["_include"]) or include_excluded_items:
+            lmic.append(row_lmic)
+            tr.append(row_tr)
+            selected_titles.append(str(contract_row["Title"]))
 
     lmic_array = np.asarray(lmic, dtype=int)
     tr_array = np.asarray(tr, dtype=int)
@@ -139,8 +213,11 @@ def _read_matrix(
         raise ValueError("LMIC scores must be integers from 1 to 5")
     if not np.all((0 <= tr_array) & (tr_array <= 5)):
         raise ValueError("TR scores must be integers from 0 to 5")
+    expected_items = EXPECTED_ITEMS if include_excluded_items else len(canonical)
+    if lmic_array.shape != (expected_items, EXPECTED_RATERS):
+        raise ValueError("Reviewer rating dimensions do not match the selected study set")
     if include_titles:
-        return lmic_array, tr_array, canonical_titles
+        return lmic_array, tr_array, selected_titles
     return lmic_array, tr_array
 
 
@@ -186,7 +263,7 @@ def _agreement_rows(
         ]
         item = {
                 "Analysis": analysis,
-                "Paper_ID": index,
+                "Scoring_Form_ID": index,
                 "Mean_pairwise_agreement": float(pair_agreement[index - 1]),
                 "Majority_share": float(majority[index - 1]),
                 "Modal_score": "/".join(modal),
@@ -214,10 +291,15 @@ def main() -> None:
     parser.add_argument("--input-xlsx", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--canonical-data", type=Path, default=DEFAULT_CANONICAL_DATA)
+    parser.add_argument("--scoring-order", type=Path, default=DEFAULT_SCORING_ORDER)
     args = parser.parse_args()
 
     lmic, tr, titles = _read_matrix(
-        args.input_xlsx.resolve(), args.canonical_data.resolve(), include_titles=True
+        args.input_xlsx.resolve(),
+        args.canonical_data.resolve(),
+        include_titles=True,
+        include_excluded_items=True,
+        scoring_order_path=args.scoring_order.resolve(),
     )
     summaries = []
     item_rows = []
@@ -237,7 +319,10 @@ def main() -> None:
     print(
         json.dumps(
             {
-                "items": EXPECTED_ITEMS,
+                "items": int(lmic.shape[0]),
+                "form_items": EXPECTED_ITEMS,
+                "final_eligible_items": int(len(_canonical_studies(args.canonical_data.resolve()))),
+                "excluded_from_final_synthesis_after_scoring": EXPECTED_ITEMS - int(len(_canonical_studies(args.canonical_data.resolve()))),
                 "raters": EXPECTED_RATERS,
                 "summary": str(summary_path),
                 "item_agreement": str(item_path),

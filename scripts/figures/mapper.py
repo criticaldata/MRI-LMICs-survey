@@ -6,17 +6,18 @@ to ensure cross-figure consistency.
 """
 
 import re
-import pandas as pd
-
 import sys
+import pandas as pd
 from pathlib import Path
 
-_ANALYSIS = Path(__file__).resolve().parent.parent / "analysis"
-if str(_ANALYSIS) not in sys.path:
-    sys.path.insert(0, str(_ANALYSIS))
-from field_strength import CURATED_LABELS, normalize as _normalize  # noqa: E402
-import numpy as np
-from pathlib import Path
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+from scripts.field_taxonomy import (  # noqa: E402
+    FIELD_CATEGORY_ORDER,
+    normalize_field_category,
+)
+from scripts.metric_extraction import apply_metric_evidence, parse_metric_value  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -48,11 +49,19 @@ ARCHITECTURE_COLORS = {
 }
 
 FIELD_STRENGTH_COLORS = {
-    "Low-field": "#e74c3c",
-    "Standard-field": "#3498db",
-    "High-field": "#2ecc71",
+    "Ultra-low-field (<0.05 T)": "#8e44ad",
+    "Low-field (0.05-0.5 T)": "#e74c3c",
+    "Intermediate-field (>0.5-<1.5 T)": "#f39c12",
+    "Standard-field (1.5-3 T)": "#3498db",
+    "High-field (>3 T)": "#2ecc71",
+    "Ultra-low-field (strength unspecified)": "#af7ac5",
+    "Low-field (threshold unspecified)": "#f1948a",
+    "Standard-field (strength unspecified)": "#85c1e9",
+    "High-field (threshold unspecified)": "#82e0aa",
     "Mixed": "#9b59b6",
     "Not specified": "#bdc3c7",
+    "Not reported": "#85929e",
+    "Unknown": "#566573",
 }
 
 LMIC_SCORE_COLORS = {
@@ -104,8 +113,6 @@ APPLICATION_MAP = {
     "Not MRI (Remote Sensing)": "Non-MRI",
 }
 
-FIELD_STRENGTH_MAP = CURATED_LABELS  # one taxonomy, see scripts/analysis/field_strength.py
-
 PRIMARY_FOCUS_MAP = {
     "Pure_SR": "Pure SR",
     "Denoising+SR": "SR + Denoising",
@@ -127,6 +134,47 @@ PRIMARY_FOCUS_MAP = {
     "2 step super-resolution framework for 4D MRI Flow": "Pure SR",
     "Assessing generalization and applying Transfer Learning": "SR + Other",
 }
+
+
+def normalize_primary_focus(value):
+    """Classify study focus without treating generic reconstruction as SR.
+
+    Strict SR sensitivity cohorts require an explicit SR label or a stated
+    low-to-high spatial-resolution task. Transfer learning, undersampled
+    reconstruction, denoising, and image enhancement alone are not sufficient.
+    """
+    if value is None or pd.isna(value):
+        return "Other"
+    text = " ".join(str(value).replace("\u00a0", " ").split()).casefold()
+    if not text:
+        return "Other"
+    if "review" in text or "survey" in text:
+        return "Review/Survey"
+
+    explicit_sr = (
+        text in {"pure_sr", "pure sr"}
+        or re.search(r"\bsr\b|super[ -]?resolution", text) is not None
+    )
+    explicit_resolution_gain = (
+        re.search(r"low[ -]?resolution", text) is not None
+        and re.search(r"high[ -]?resolution", text) is not None
+    )
+    if not explicit_sr and not explicit_resolution_gain:
+        return "Other"
+
+    if "denois" in text:
+        return "SR + Denoising"
+    if "classif" in text:
+        return "SR + Classification"
+    if "diagnos" in text:
+        return "SR + Diagnosis"
+    if "segment" in text:
+        return "SR + Segmentation"
+    if text in {"pure_sr", "pure sr"} or explicit_resolution_gain:
+        return "Pure SR"
+    if "acceleration" in text or "accelerated" in text or "image generation" in text:
+        return "SR + Other"
+    return "Pure SR"
 
 ARCHITECTURE_MAP = {
     "CNN": "CNN",
@@ -263,9 +311,8 @@ def normalize_code_available(value):
 
 
 def normalize_field_strength(value):
-    """Delegates to the shared taxonomy in scripts/analysis/field_strength.py."""
-    return _normalize(value)
-
+    """Use the shared field taxonomy; input and target are classified separately."""
+    return normalize_field_category(value)
 
 CLINICAL_VALIDATION_MAP = {
     "None": "None",
@@ -297,13 +344,75 @@ CLINICAL_VALIDATION_MAP = {
 # Constants
 # ---------------------------------------------------------------------------
 
-N_PRIMARY_SR = 48   # primary SR studies after all exclusions
-N_ALL = 183         # initial records identified in database search
+N_INCLUDED_STUDIES = 45  # eligible MRI enhancement/SR studies after screening reconciliation
+N_ALL = 183              # records identified in the database search
 
 
 def get_project_root():
     """Return the project root directory."""
     return Path(__file__).parent.parent.parent
+
+
+def apply_primary_sr_scope_evidence(df):
+    """Attach the evidence-reviewed focus labels to canonical study rows.
+
+    The extraction's normalized focus field remains available for traceability,
+    while summary tables and figures use the reconciled scope classification.
+    Matching is validated against Paper_ID, DOI, and title so reordered or
+    mismatched evidence cannot silently relabel a study.
+    """
+    evidence_path = get_project_root() / "data" / "primary_sr_scope_evidence.csv"
+    if not evidence_path.exists():
+        raise FileNotFoundError(
+            "Missing data/primary_sr_scope_evidence.csv; run the reproducibility "
+            "pipeline before generating study-focus summaries."
+        )
+
+    evidence = pd.read_csv(evidence_path)
+    required = {"Paper_ID", "DOI", "Title", "Primary_Focus_Corrected"}
+    missing = required.difference(evidence.columns)
+    if missing:
+        raise ValueError(
+            "Primary SR scope evidence is missing required columns: "
+            + ", ".join(sorted(missing))
+        )
+
+    if evidence["Paper_ID"].duplicated().any() or evidence["DOI"].duplicated().any():
+        raise ValueError("Primary SR scope evidence contains duplicate study keys")
+
+    if len(evidence) != len(df):
+        raise ValueError(
+            "Primary SR scope evidence must contain exactly one row per canonical study"
+        )
+
+    data_ids = pd.to_numeric(df["Paper_ID"], errors="raise").astype(int).tolist()
+    evidence_ids = pd.to_numeric(evidence["Paper_ID"], errors="raise").astype(int).tolist()
+    if data_ids != evidence_ids:
+        raise ValueError("Primary SR scope evidence Paper_ID order does not match canonical data")
+
+    def normalized_title(values):
+        return (
+            values.astype(str)
+            .str.replace(r"\s+", " ", regex=True)
+            .str.strip()
+            .str.casefold()
+            .tolist()
+        )
+
+    data_dois = df["DOI"].astype(str).str.strip().str.casefold().tolist()
+    evidence_dois = evidence["DOI"].astype(str).str.strip().str.casefold().tolist()
+    if data_dois != evidence_dois:
+        raise ValueError("Primary SR scope evidence DOI order does not match canonical data")
+    if normalized_title(df["Title"]) != normalized_title(evidence["Title"]):
+        raise ValueError("Primary SR scope evidence titles do not match canonical data")
+
+    focus = evidence["Primary_Focus_Corrected"].astype("string").str.strip()
+    if focus.isna().any() or focus.eq("").any():
+        raise ValueError("Primary SR scope evidence contains an empty corrected focus")
+
+    result = df.copy()
+    result["Primary_Focus_Corrected"] = focus.tolist()
+    return result
 
 
 def load_data(data_path=None):
@@ -320,20 +429,24 @@ def load_data(data_path=None):
     if "Paper_ID" not in df.columns:
         raise ValueError("Canonical MRI data must contain Paper_ID")
     df["Paper_ID"] = pd.to_numeric(df["Paper_ID"], errors="raise").astype(int)
-    expected_ids = list(range(1, N_PRIMARY_SR + 1))
-    if len(df) != N_PRIMARY_SR or df["Paper_ID"].tolist() != expected_ids:
-        raise ValueError("Canonical MRI data must contain Paper_ID values 1-48 in order")
     if "Title" not in df.columns or df["Title"].astype(str).str.strip().eq("").any():
         raise ValueError("Canonical MRI data must contain a non-empty Title for every study")
     contract_path = get_project_root() / "data" / "included_study_order.csv"
     if contract_path.exists():
         contract = pd.read_csv(contract_path)
-        if len(contract) != N_PRIMARY_SR or contract["Paper_ID"].tolist() != expected_ids:
-            raise ValueError("included_study_order.csv is not a contiguous 1-48 contract")
+        expected_ids = list(range(1, len(contract) + 1))
+        if contract.empty or contract["Paper_ID"].tolist() != expected_ids:
+            raise ValueError("included_study_order.csv must use contiguous IDs starting at 1")
+        if len(df) != len(contract) or df["Paper_ID"].tolist() != expected_ids:
+            raise ValueError("Canonical MRI data must match the contiguous included-study contract")
         data_titles = df["Title"].astype(str).str.replace(r"\s+", " ", regex=True).str.strip().str.casefold()
         contract_titles = contract["Title"].astype(str).str.replace(r"\s+", " ", regex=True).str.strip().str.casefold()
         if data_titles.tolist() != contract_titles.tolist():
             raise ValueError("Canonical data titles do not match included_study_order.csv")
+    else:
+        expected_ids = list(range(1, len(df) + 1))
+        if not len(df) or df["Paper_ID"].tolist() != expected_ids:
+            raise ValueError("Canonical MRI data must use contiguous Paper_ID values starting at 1")
 
     # Strip whitespace from string columns
     for col in df.select_dtypes(include=["object", "string"]).columns:
@@ -345,7 +458,7 @@ def load_data(data_path=None):
     # Normalize categorical columns
     df["Application_Norm"] = df["MRI_Application_Area"].map(APPLICATION_MAP).fillna("Other")
     df["Field_Strength_Norm"] = df["Field_Strength_Type"].apply(normalize_field_strength)
-    df["Primary_Focus_Norm"] = df["Primary_Focus"].map(PRIMARY_FOCUS_MAP).fillna("Other")
+    df["Primary_Focus_Norm"] = df["Primary_Focus"].apply(normalize_primary_focus)
     df["Architecture_Norm"] = df["AI_Architecture"].map(ARCHITECTURE_MAP).fillna("Other")
     df["Dataset_Type_Norm"] = df["Dataset_Type"].map(DATASET_TYPE_MAP).fillna("Other")
     df["LMIC_Score"] = df["LMIC_Relevance_Score"].astype(str).map(LMIC_SCORE_MAP)
@@ -357,37 +470,16 @@ def load_data(data_path=None):
     df["Code_Available_Norm"] = df["Code_Available"].apply(normalize_code_available)
     df["Clinical_Validation_Norm"] = df["Clinical_Validation_Type"].map(CLINICAL_VALIDATION_MAP).fillna("None")
 
-    # Parse PSNR — extract first numeric value (dB)
-    df["PSNR_Numeric"] = df["PSNR_Value"].apply(_parse_first_numeric)
-
-    # Parse SSIM — extract first numeric value in [0, 1]
-    df["SSIM_Numeric"] = df["SSIM_Value"].apply(_parse_first_numeric)
-    # Filter out values > 1 (likely errors or dB-format values)
-    df.loc[df["SSIM_Numeric"] > 1, "SSIM_Numeric"] = np.nan
-
-    return df
+    # Reviewed proposed-model conditions override prose order. Raw values stay
+    # available, and unreviewed fallback values are explicitly labelled.
+    return apply_metric_evidence(
+        df, get_project_root() / "data" / "performance_metric_evidence.csv"
+    )
 
 
 def _parse_first_numeric(value):
-    """Extract the first plausible numeric value from a free-text metric string."""
-    if pd.isna(value):
-        return np.nan
-    s = str(value).strip()
-    # Skip obvious non-numeric entries
-    skip_patterns = ("not reported", "n/a", "reported", "not explicitly reported",
-                     "not reported.", "uses", "paper uses")
-    if s.lower().startswith(skip_patterns):
-        return np.nan
-    # Find first float-like pattern (at least two digits to avoid matching
-    # single-digit counts or IDs like "3D", "4D", "2×", etc.)
-    matches = re.findall(r"(\d+\.\d+|\d{2,}\.?\d*)", s)
-    for m in matches:
-        num = float(m)
-        # PSNR typically 15-60 dB, SSIM typically 0.4-1.0
-        # Reject values that are clearly not image quality metrics
-        if 10.0 <= num <= 80.0 or (0.4 <= num <= 1.0):
-            return num
-    return np.nan
+    """Compatibility fallback; proposed-model selection requires DOI evidence."""
+    return parse_metric_value(value)
 
 
 # ---------------------------------------------------------------------------

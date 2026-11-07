@@ -5,39 +5,43 @@ Identifies papers that evaluate SR models across different MRI field strengths,
 specifically those targeting low-field to high-field translation, which is a key
 strategy for improving diagnostic quality in LMIC settings.
 
-Three categories:
-  1. True cross-field (low <-> high/standard): Field_Strength_Norm == "Low-field"
-     OR (Field_Strength_Norm == "Mixed" AND Low_Field_Norm == "Yes")
-  2. Multi-scanner standard (1.5T + 3T combos): Standard-field papers whose
-     Field_Strength_Type text contains "and", "vs", or "+"
-  3. Single field strength: all remaining papers
+Three categories based on explicit numeric field strengths:
+  1. True cross-field: at least one reported 0.05-0.5 T strength and at least
+     one reported strength outside that interval.
+  2. Multi-scanner standard: two or more distinct reported strengths, all in
+     the 1.5-3 T interval.
+  3. Single/unresolved field category: all remaining studies.
 """
 
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "figures"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import pandas as pd
 from mapper import load_data, get_project_root
+from scripts.field_taxonomy import (
+    reported_field_categories,
+    reported_field_strengths_tesla,
+)
 
 
 def classify_field_category(row):
-    """Return one of: 'True cross-field', 'Multi-scanner standard', 'Single field strength'."""
-    fs_norm = str(row.get("Field_Strength_Norm", "")).strip()
-    lf_norm = str(row.get("Low_Field_Norm", "")).strip()
-    fs_type = str(row.get("Field_Strength_Type", "")).strip().lower()
+    """Classify only cross-field evidence supported by numeric field strengths."""
+    raw = row.get("Field_Strength_Type", "")
+    categories = reported_field_categories(raw)
+    strengths = set(reported_field_strengths_tesla(raw))
+    low = "Low-field (0.05-0.5 T)" in categories
+    outside_low = bool(categories - {"Low-field (0.05-0.5 T)"})
 
-    # True cross-field: low-field-involved papers
-    if fs_norm == "Low-field":
+    if low and outside_low:
         return "True cross-field"
-    if fs_norm == "Mixed" and lf_norm == "Yes":
-        return "True cross-field"
-
-    # Multi-scanner standard: standard-field with multiple strengths in raw text
-    if fs_norm == "Standard-field":
-        if any(kw in fs_type for kw in ["and", "vs", "+"]):
-            return "Multi-scanner standard"
+    if (
+        len(strengths) >= 2
+        and categories == {"Standard-field (1.5-3 T)"}
+    ):
+        return "Multi-scanner standard"
 
     return "Single field strength"
 

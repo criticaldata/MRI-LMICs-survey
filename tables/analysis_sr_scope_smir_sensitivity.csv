@@ -1,0 +1,9 @@
+Measure,Test,p_value,Strict_SR_N,Strict_SR_Value,Strict_SR_Median,Strict_SR_Percent,Other_N,Other_Value,Other_Median,Other_Percent,All_N,All_Value,All_Median,All_Percent
+LMIC_Score,"Mann-Whitney U (two-sided, tie-corrected asymptotic)",0.20457281280993767,23,3.9565217391304346,4.0,,22,4.2727272727272725,5.0,,45,4.111111111111111,5.0,
+TR_Score,"Mann-Whitney U (two-sided, tie-corrected asymptotic)",0.7903507885303054,23,1.1304347826086956,1.0,,22,1.2727272727272727,1.0,,45,1.2,1.0,
+LMIC_Level_4_or_5,Fisher exact (two-sided),0.336772393493891,23,14.0,1.0,60.86956521739131,22,17.0,1.0,77.27272727272727,45,31.0,1.0,68.88888888888889
+TR_LowFieldDomain,Fisher exact (two-sided),0.6077519379844962,23,1.0,0.0,4.3478260869565215,22,2.0,0.0,9.090909090909092,45,3.0,0.0,6.666666666666667
+TR_OpenScience,Fisher exact (two-sided),1.0,23,2.0,0.0,8.695652173913043,22,2.0,0.0,9.090909090909092,45,4.0,0.0,8.88888888888889
+TR_ClinicalEvaluation,Fisher exact (two-sided),0.13616609851854536,23,7.0,0.0,30.434782608695656,22,12.0,1.0,54.54545454545454,45,19.0,0.0,42.22222222222222
+TR_HardwareAwareness,Fisher exact (two-sided),1.0,23,0.0,0.0,0.0,22,0.0,0.0,0.0,45,0.0,0.0,0.0
+TR_DataDiversity,Fisher exact (two-sided),0.3651179757865387,23,16.0,1.0,69.56521739130434,22,12.0,1.0,54.54545454545454,45,28.0,1.0,62.22222222222222

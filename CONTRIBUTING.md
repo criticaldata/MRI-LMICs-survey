@@ -155,13 +155,13 @@ ls -lh tables/            # Should contain 9 CSV files
 
 ## Data Pipeline
 
-All data normalization happens in `mapper.py` via centralized mapping dictionaries:
+Study-level field-strength normalization is centralized in `scripts/field_taxonomy.py` and imported by the analysis, figure, and statistical modules. Other categorical normalization and data loading happen in `mapper.py`:
 
 ```
 Raw CSV → load_data() → Normalize categories → Parse metrics → Clean DataFrame
                            ├── APPLICATION_MAP     (10 canonical areas)
                            ├── ARCHITECTURE_MAP     (8 canonical types)
-                           ├── FIELD_STRENGTH_MAP   (5 canonical types)
+                           ├── shared field taxonomy (numeric ranges; unquantified labels stay separate)
                            ├── PRIMARY_FOCUS_MAP    (8 canonical types)
                            ├── LMIC_SCORE_MAP       (text → numeric 1-5)
                            ├── YES_NO_MAP           (normalize Yes/No variants)
@@ -169,6 +169,8 @@ Raw CSV → load_data() → Normalize categories → Parse metrics → Clean Dat
 ```
 
 The CSV is **never modified**. All transformations happen at load time.
+
+The general descriptive field bins are: ultra-low `<0.05 T`; low-field `0.05-0.5 T`; intermediate `>0.5-<1.5 T`; standard `1.5-3 T`; and high-field `>3 T`. A generic label without a numeric strength is retained as a separate unquantified category. This descriptive taxonomy is distinct from the translational-readiness low-field criterion (`<=64 mT`); input and target field strengths are separately represented in the dataset evidence table.
 
 ## Troubleshooting
 
